@@ -36,6 +36,7 @@ Function Get-EdgeApi {
     param(
         [string]$Org,
         [string]$Name,
+        [string]$Revision,
         [Hashtable]$Params
     )
     
@@ -53,8 +54,15 @@ Function Get-EdgeApi {
     if ($PSBoundParameters['Params']) {
         $Options.Add( 'Params', $Params )
     }
+    
     if ($PSBoundParameters['Name']) {
+      if ($PSBoundParameters['Revision']) {
+        $Path = Join-Parts -Separator "/" -Parts $Name, 'revisions', $Revision
+        $Options.Add( 'Name', $Path )
+      }
+      else {
         $Options.Add( 'Name', $Name )
+      }
     }
 
     Write-Debug ( "Options @Options`n" )

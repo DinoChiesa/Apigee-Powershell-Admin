@@ -54,20 +54,19 @@ Function Get-EdgeObject {
       }
     }
 
-      if( ! $MyInvocation.MyCommand.Module.PrivateData['MgmtUri']) {
-        throw [System.ArgumentNullException] "use Set-EdgeConnection to specify the Edge connection information."
-      }
-      else {
-        $MgmtUri = $MyInvocation.MyCommand.Module.PrivateData['MgmtUri']
-      }
+    if( ! $MyInvocation.MyCommand.Module.PrivateData['MgmtUri']) {
+      throw [System.ArgumentNullException] "use Set-EdgeConnection to specify the Edge connection information."
+    }
+    else {
+      $MgmtUri = $MyInvocation.MyCommand.Module.PrivateData['MgmtUri']
+    }
 
-      if( ! $MyInvocation.MyCommand.Module.PrivateData['AuthToken']) {
-        throw [System.ArgumentNullException] "use Set-EdgeConnection to specify the Edge connection information."
-      }
-      else {
-        $AuthToken = $MyInvocation.MyCommand.Module.PrivateData['AuthToken']
-      }
-
+    if( ! $MyInvocation.MyCommand.Module.PrivateData['AuthToken']) {
+      throw [System.ArgumentNullException] "use Set-EdgeConnection to specify the Edge connection information."
+    }
+    else {
+      $AuthToken = $MyInvocation.MyCommand.Module.PrivateData['AuthToken']
+    }
 
     if($PSBoundParameters.ContainsKey('Name')) {
       $BaseUri = Join-Parts -Separator "/" -Parts $MgmtUri, '/v1/o', $Org, $($Collection.ToLower()), $Name
