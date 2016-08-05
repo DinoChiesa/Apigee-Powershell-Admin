@@ -61,20 +61,24 @@ Function Get-EdgeObject {
         Uri = $BaseUri
         Method = 'Get'
     }
+    $Headers = @{
+        Accept = 'application/json'
+    }
 
     $pair = "${User}:${Pass}"
     $bytes = [System.Text.Encoding]::UTF8.GetBytes($pair)
     $base64 = [System.Convert]::ToBase64String($bytes)
-    $IRMParams.Add( 'Headers', @{ Authorization = "Basic $base64" } )
-
+    $Headers.Add( 'Authorization', "Basic $base64" )
+    
     if($PSBoundParameters.ContainsKey('Params'))
     {
         $IRMParams.Add( 'Body', $Params )
     }
 
+    $IRMParams.Add( 'Headers', $Headers )
+
     Write-Debug ( "Running $($MyInvocation.MyCommand).`n" +
-                "PSBoundParameters:$( $PSBoundParameters | Format-List | Out-String)" +
-                "Invoke-RestMethod parameters:`n$($IRMParams | Format-List | Out-String)" )
+                 "Invoke-RestMethod parameters:`n$($IRMParams | Format-List | Out-String)" )
 
     Try
     {
