@@ -7,9 +7,12 @@ Function Get-EdgeObject {
         Get one or more objects from Apigee Edge, such as developers, apis, apiproducts
 
     .PARAMETER Collection
-        Type of object to query for. Accepts multiple parts.
+        Type of object to query for. 
 
         Example: 'developers', 'apis', or 'apiproducts'
+
+    .PARAMETER Name
+        Name of the object to retrieve.
 
     .PARAMETER Org
         The Apigee Edge organization. 
@@ -17,20 +20,13 @@ Function Get-EdgeObject {
     .PARAMETER Params
         Hash table with query options for the specific collection type
 
-        Example for getting all details of developers:
-            -Params @{
-                expand  = 'true'
-            }
-
     .EXAMPLE
         Get-EdgeObject -Collection developers -Org cap500
 
         # List developers on Edge organization 'cap500'
 
     .EXAMPLE
-        Get-EdgeObject -Collection developers -Org cap500 -Params @{
-            expand='true'
-        }
+        Get-EdgeObject -Collection developers -Org cap500 -Params @{ expand='true' }
 
     .FUNCTIONALITY
         ApigeeEdge
@@ -41,9 +37,7 @@ Function Get-EdgeObject {
     param(
         [string]$Collection,
         [string]$Org,
-        #[string]$User,
-        #[string]$Pass,
-        #[string]$MgmtUri = 'https://api.enterprise.apigee.com',
+        [string]$Name,
         [Hashtable]$Params
     )
     
@@ -75,12 +69,16 @@ Function Get-EdgeObject {
       }
 
 
-    $BaseUri = Join-Parts -Separator "/" -Parts $MgmtUri, '/v1/o', $Org, $($Collection.ToLower())
+    if( ! $PSBoundParameters.ContainsKey('Name')) {
+      $BaseUri = Join-Parts -Separator "/" -Parts $MgmtUri, '/v1/o', $Org, $($Collection.ToLower()), $Name
+    }
+    else {
+      $BaseUri = Join-Parts -Separator "/" -Parts $MgmtUri, '/v1/o', $Org, $($Collection.ToLower())
+    }
 
     $decrypted = [System.Runtime.InteropServices.marshal]::PtrToStringAuto([System.Runtime.InteropServices.marshal]::SecureStringToBSTR($AuthToken))
     
     Write-Debug ( "Uri $BaseUri`n" )
-    Write-Debug ( "base64 $decrypted`n" )
 
     $IRMParams = @{
         Uri = $BaseUri
@@ -109,7 +107,7 @@ Function Get-EdgeObject {
         Throw $_
     }
     Finally {
-        Remove-Variable IRMParams    
+        Remove-Variable IRMParams
     }
 
    $TempResult

@@ -6,6 +6,10 @@ Function Get-EdgeDeveloper {
     .DESCRIPTION
         Get one or more developers from Apigee Edge
 
+    .PARAMETER Name
+        The name of the developer to retrieve.
+        The default is to list all developers.
+
     .PARAMETER Org
         The Apigee Edge organization. The default is to use the value from Set-EdgeConnection.
 
@@ -43,6 +47,9 @@ Function Get-EdgeDeveloper {
     }
     if ($PSBoundParameters['Params']) {
         $Options.Add( 'Params', $Params )
+    }
+    if ($PSBoundParameters['Name']) {
+        $Options.Add( 'Name', $Name )
     }
 
     Get-EdgeObject @Options
