@@ -7,7 +7,7 @@ Function Get-EdgeDeveloper {
         Get one or more developers from Apigee Edge
 
     .PARAMETER Org
-        The Apigee Edge organization. 
+        The Apigee Edge organization. The default is to use the value from Set-EdgeConnection.
 
     .PARAMETER Params
         Hash table with query options for the specific collection type
@@ -45,5 +45,5 @@ Function Get-EdgeDeveloper {
         $Options.Add( 'Params', $Params )
     }
 
-    Get-EdgeObject $Options
+    Get-EdgeObject @Options
 }
