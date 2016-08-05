@@ -69,7 +69,7 @@ Function Get-EdgeObject {
       }
 
 
-    if( ! $PSBoundParameters.ContainsKey('Name')) {
+    if($PSBoundParameters.ContainsKey('Name')) {
       $BaseUri = Join-Parts -Separator "/" -Parts $MgmtUri, '/v1/o', $Org, $($Collection.ToLower()), $Name
     }
     else {

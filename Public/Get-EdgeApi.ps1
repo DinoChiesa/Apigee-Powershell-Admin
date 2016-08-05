@@ -39,6 +39,10 @@ Function Get-EdgeApi {
         [Hashtable]$Params
     )
     
+    if ($PSBoundParameters['Debug']) {
+        $DebugPreference = 'Continue'
+    }
+    
     $Options = @{
         Collection = 'apis'
     }
@@ -52,6 +56,8 @@ Function Get-EdgeApi {
     if ($PSBoundParameters['Name']) {
         $Options.Add( 'Name', $Name )
     }
+
+    Write-Debug ( "Options @Options`n" )
 
     Get-EdgeObject @Options
 }
