@@ -87,7 +87,7 @@ Function UnDeploy-EdgeApi {
         # these will transform into query params?  postbody? 
         Body = @{
           action = 'undeploy'
-          env = $Environment
+          env = $Env
           override = 'true'
           delay = 30
         }

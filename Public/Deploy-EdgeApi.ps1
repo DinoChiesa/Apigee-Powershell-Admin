@@ -100,7 +100,7 @@ Function Deploy-EdgeApi {
         # these will transform into query params?  postbody? 
         Body = @{
           action = 'deploy'
-          env = $Environment
+          env = $Env
           override = 'true'
           delay = 30
         }
