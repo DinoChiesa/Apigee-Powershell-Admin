@@ -35,6 +35,7 @@ Function Get-EdgeApi {
     [cmdletbinding()]
     param(
         [string]$Org,
+        [string]$Name,
         [Hashtable]$Params
     )
     

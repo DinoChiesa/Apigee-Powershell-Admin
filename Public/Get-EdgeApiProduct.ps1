@@ -35,6 +35,7 @@ Function Get-EdgeApiProduct {
     [cmdletbinding()]
     param(
         [string]$Org,
+        [string]$Name,
         [Hashtable]$Params
     )
     
