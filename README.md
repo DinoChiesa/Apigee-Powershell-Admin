@@ -136,7 +136,7 @@ PS C:\dev\ps>
 ### List API Products Verbosely
 
 ```
-PS C:\dev\ps> (Get-EdgeObject -Collection apiproducts -Params @{ expand = 'true' }).apiProduct | Format-List
+PS C:\dev\ps> (Get-EdgeApiProduct -Params @{ expand = 'true' }).apiProduct | Format-List
 
 apiResources   : {}
 approvalType   : auto
@@ -155,6 +155,23 @@ scopes         : {read, write, delete}
   ...
 
 ```
+
+### Get Deployment status of an API
+
+```
+PS C:\dev\ps> Get-EdgeApiDeployment -Name oauth2-pwd-cc
+
+name revision
+---- --------
+test {@{configuration=; name=8; server=System.Object[]; state=deployed}}
+
+PS C:\dev\ps> Get-EdgeApiDeployment -Name oauth2-pwd-cc | Format-List
+
+name     : test
+revision : {@{configuration=; name=8; server=System.Object[]; state=deployed}}
+
+```
+
 
 
 ## License
