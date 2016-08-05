@@ -46,7 +46,10 @@ Function Get-EdgeObject {
         #[string]$MgmtUri = 'https://api.enterprise.apigee.com',
         [Hashtable]$Params
     )
-
+    
+    if ($PSBoundParameters['Debug']) {
+        $DebugPreference = 'Continue'
+    }
 
     if( ! $PSBoundParameters.ContainsKey('Org')) {
       if( ! $MyInvocation.MyCommand.Module.PrivateData['Org']) {
@@ -79,20 +82,16 @@ Function Get-EdgeObject {
     Write-Debug ( "Uri $BaseUri`n" )
     Write-Debug ( "base64 $decrypted`n" )
 
-
-    $Pass = $MyInvocation.MyCommand.Module.PrivateData['Pass']
-    $decryptedPass = [System.Runtime.InteropServices.marshal]::PtrToStringAuto([System.Runtime.InteropServices.marshal]::SecureStringToBSTR($Pass))
-
-    Write-Debug ( "Pass $decryptedPass`n" )
-
     $IRMParams = @{
         Uri = $BaseUri
         Method = 'Get'
         Headers = @{
             Accept = 'application/json'
-            Authorization = 'Basic $decrypted'
+            Authorization = "Basic $decrypted"
         }
     }
+    
+    Remove-Variable decrypted
 
     if($PSBoundParameters.ContainsKey('Params')) {
         $IRMParams.Add( 'Body', $Params )
@@ -110,7 +109,7 @@ Function Get-EdgeObject {
         Throw $_
     }
     Finally {
-        Remove-Variable decrypted
+        Remove-Variable IRMParams    
     }
 
    $TempResult
