@@ -23,6 +23,12 @@ Not in scope:
 - OPDK-specific things.  Like starting, stopping services, etc.
 
 
+## Status
+
+This project is still in the "dream" stage.
+Only one method has been created, as yet. 
+
+
 ## License
 
 This is licensed under [the Apache 2.0 source license](LICENSE).
