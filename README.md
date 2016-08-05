@@ -172,7 +172,41 @@ revision : {@{configuration=; name=8; server=System.Object[]; state=deployed}}
 
 ```
 
+### Deploy an API Proxy
 
+```
+PS C:\dev\ps> Deploy-EdgeApi -Name oauth2-pwd-cc -Env test -Revision 8
+
+aPIProxy      : oauth2-pwd-cc
+configuration : @{basePath=/; steps=System.Object[]}
+environment   : test
+name          : 8
+organization  : cap500
+revision      : 8
+server        : {@{status=deployed; type=System.Object[]; uUID=a4850e3b-6ce9-482a-9521-d9869be8482e}, @{status=deployed; type=System.Object[];
+                uUID=647de67b-1142-4c07-8b22-c5d6f85616a4}, @{status=deployed; type=System.Object[]; uUID=6b4a729b-16e2-45c0-8560-51eb37f50ece},
+                @{status=deployed; type=System.Object[]; uUID=589aa4f0-0a1b-492c-be1a-da3e295cf44d}...}
+state         : deployed
+```
+
+### Undeploy an API Proxy
+
+```
+PS C:\dev\ps> UnDeploy-EdgeApi -Name oauth2-pwd-cc -Env test -Revision 8
+
+
+aPIProxy      : oauth2-pwd-cc
+configuration : @{basePath=/; steps=System.Object[]}
+environment   : test
+name          : 8
+organization  : cap500
+revision      : 8
+server        : {@{status=undeployed; type=System.Object[]; uUID=a4850e3b-6ce9-482a-9521-d9869be8482e}, @{status=undeployed; type=System.Object[];
+                uUID=647de67b-1142-4c07-8b22-c5d6f85616a4}, @{status=undeployed; type=System.Object[]; uUID=6b4a729b-16e2-45c0-8560-51eb37f50ece},
+                @{status=undeployed; type=System.Object[]; uUID=589aa4f0-0a1b-492c-be1a-da3e295cf44d}...}
+state         : undeployed
+
+```
 
 ## License
 
