@@ -44,9 +44,13 @@ PS C:\Users\Dino> Import-Module c:/random-path/PSApigeeEdge
 ### List Developers
 
 ```
-C:\Users\Dino> powershell
-PS C:\Users\Dino> Import-Module c:/random-path/PSApigeeEdge
-PS C:\Users\Dino> Get-EdgeObject -Collection developers -Org cap500 -User dino@apigee.com -Pass Secret123
+C:\dev\ps>powershell
+Windows PowerShell
+Copyright (C) 2015 Microsoft Corporation. All rights reserved.
+
+PS C:\dev\ps> Import-Module ./PSApigeeEdge
+PS C:\dev\ps> Set-EdgeConnection -Org cap500 -User dino@apigee.com -Pass 'Secret1XYZ'
+PS C:\dev\ps> Get-EdgeObject -Collection developers
 mpalmgre@seattlecca.org
 dchiesa@example.org
 dchiesa+workshop1@apigee.com
@@ -55,8 +59,89 @@ Lois@example.com
 akshays@slalom.com
 ecerruti@gmail.com
 justinmadalone@gmail.com
-PS C:\Users\Dino>
+PS C:\dev\ps>
 ```
+
+### List Developers Verbosely
+
+```
+PS C:\dev\ps> (Get-EdgeObject -Collection developers -Params @{ expand = 'true' }).developer | Format-List
+
+apps             : {my-hospitality-app-oauth, my-hospitality-app}
+companies        : {}
+email            : mpalmgre@seattlecca.org
+developerId      : 0wYm1ALhbLl3er5G
+firstName        : Matt
+lastName         : Palmgren
+userName         : mpalmgre
+organizationName : cap500
+status           : active
+attributes       : {}
+createdAt        : 1470173119147
+createdBy        : dchiesa+devportal@apigee.com
+lastModifiedAt   : 1470174224727
+lastModifiedBy   : dchiesa+devportal@apigee.com
+
+apps             : {dpc1, dpc2, dpc3, DPC4...}
+companies        : {}
+email            : dchiesa@example.org
+developerId      : IiwTHAerQeO1OAqG
+firstName        : Dino
+lastName         : Chiesa
+userName         : DC
+organizationName : cap500
+status           : active
+attributes       : {}
+createdAt        : 1469831492534
+createdBy        : dchiesa+devportal@apigee.com
+lastModifiedAt   : 1469831492534
+lastModifiedBy   : dchiesa+devportal@apigee.com
+
+apps             : {}
+companies        : {}
+email            : dchiesa+workshop1@apigee.com
+developerId      : EtJU7DohbyplLvlt
+firstName        : DC
+lastName         : Admin
+userName         : DChiesa
+organizationName : cap500
+status           : active
+attributes       : {}
+createdAt        : 1469822301248
+createdBy        : dchiesa+devportal@apigee.com
+lastModifiedAt   : 1469822301248
+lastModifiedBy   : dchiesa+devportal@apigee.com
+
+ ...
+
+PS C:\dev\ps>
+```
+
+
+### List API Products Verbosely
+
+```
+PS C:\dev\ps> (Get-EdgeObject -Collection apiproducts -Params @{ expand = 'true' }).apiProduct | Format-List
+
+apiResources   : {}
+approvalType   : auto
+attributes     : {@{name=access; value=public}}
+createdAt      : 1469813885881
+createdBy      : DChiesa@apigee.com
+description    : API Bundle for a basic Hospitality App.
+displayName    : DPC Hospitality Basic Product
+environments   : {test}
+lastModifiedAt : 1470151304300
+lastModifiedBy : DChiesa@apigee.com
+name           : DPC Hospitality Basic Product
+proxies        : {dpc_hotels, dpc_hotels_oauth, oauth2-pwd-cc}
+scopes         : {read, write, delete}
+
+  ...
+
+```
+
+
 
 
 ## License
