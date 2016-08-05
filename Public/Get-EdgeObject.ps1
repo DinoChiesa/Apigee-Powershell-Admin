@@ -14,11 +14,6 @@ Function Get-EdgeObject {
     .PARAMETER Org
         The Apigee Edge organization. 
 
-    .PARAMETER MgmtUri
-        The base Uri for the Edge API Management server.
-
-        Default: https://api.enterprise.apigee.com
-
     .PARAMETER Params
         Hash table with query options for the specific collection type
 
@@ -46,36 +41,56 @@ Function Get-EdgeObject {
     param(
         [string]$Collection,
         [string]$Org,
-        [string]$User,
-        [string]$Pass,
-        [string]$MgmtUri = 'https://api.enterprise.apigee.com',
+        #[string]$User,
+        #[string]$Pass,
+        #[string]$MgmtUri = 'https://api.enterprise.apigee.com',
         [Hashtable]$Params
     )
 
 
-    #Build up URI
+    if( ! $PSBoundParameters.ContainsKey('Org')) {
+      if( ! $MyInvocation.MyCommand.Module.PrivateData['Org']) {
+        throw [System.ArgumentNullException] "use the -Org parameter to specify the organization."
+      }
+      else {
+        $Org = $MyInvocation.MyCommand.Module.PrivateData['Org']
+      }
+    }
+
+      if( ! $MyInvocation.MyCommand.Module.PrivateData['MgmtUri']) {
+        throw [System.ArgumentNullException] "use Set-EdgeConnection to specify the Edge connection information."
+      }
+      else {
+        $MgmtUri = $MyInvocation.MyCommand.Module.PrivateData['MgmtUri']
+      }
+
+      if( ! $MyInvocation.MyCommand.Module.PrivateData['AuthToken']) {
+        throw [System.ArgumentNullException] "use Set-EdgeConnection to specify the Edge connection information."
+      }
+      else {
+        $AuthToken = $MyInvocation.MyCommand.Module.PrivateData['AuthToken']
+      }
+
+
     $BaseUri = Join-Parts -Separator "/" -Parts $MgmtUri, '/v1/o', $Org, $($Collection.ToLower())
 
-    #Build up Invoke-RestMethod and Get-SEData parameters for splatting
+    $decrypted = [System.Runtime.InteropServices.marshal]::PtrToStringAuto([System.Runtime.InteropServices.marshal]::SecureStringToBSTR($AuthToken))
+
     $IRMParams = @{
         Uri = $BaseUri
         Method = 'Get'
-    }
-    $Headers = @{
-        Accept = 'application/json'
+        Headers = @{
+            Accept = 'application/json'
+            Authorization = 'Basic $decrypted'
+        }
     }
 
-    $pair = "${User}:${Pass}"
-    $bytes = [System.Text.Encoding]::UTF8.GetBytes($pair)
-    $base64 = [System.Convert]::ToBase64String($bytes)
-    $Headers.Add( 'Authorization', "Basic $base64" )
+    Remove-Variable $decrypted
     
     if($PSBoundParameters.ContainsKey('Params'))
     {
         $IRMParams.Add( 'Body', $Params )
     }
-
-    $IRMParams.Add( 'Headers', $Headers )
 
     Write-Debug ( "Running $($MyInvocation.MyCommand).`n" +
                  "Invoke-RestMethod parameters:`n$($IRMParams | Format-List | Out-String)" )
