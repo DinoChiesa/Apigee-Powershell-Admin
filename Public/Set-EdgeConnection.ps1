@@ -40,10 +40,9 @@ Function Set-EdgeConnection {
       $MyInvocation.MyCommand.Module.PrivateData['Org'] = $Org
     }
     
-    if( ! $PSBoundParameters.ContainsKey('MgmtUri') -or
-      ! $PSBoundParameters.ContainsKey('User') -or 
+    if(! $PSBoundParameters.ContainsKey('User') -or 
       ! $PSBoundParameters.ContainsKey('Pass')) {
-        throw [System.ArgumentNullException] "provide -User, -Pass, and -MgmtUri."
+        throw [System.ArgumentNullException] "provide -User and -Pass."
     }
     
     $MyInvocation.MyCommand.Module.PrivateData['MgmtUri'] = $MgmtUri
