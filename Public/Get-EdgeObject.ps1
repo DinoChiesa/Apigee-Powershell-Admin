@@ -92,4 +92,5 @@ Function Get-EdgeObject {
         Throw $_
    }
 
+   $TempResult
 }
