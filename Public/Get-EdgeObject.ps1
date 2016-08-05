@@ -46,39 +46,46 @@ Function Get-EdgeObject {
     param(
         [string]$Collection,
         [string]$Org,
+        [string]$User,
+        [string]$Pass,
         [string]$MgmtUri = 'https://api.enterprise.apigee.com',
         [Hashtable]$Params
     )
 
 
     #Build up URI
-        $BaseUri = Join-Parts -Separator "/" -Parts $MgmtUri, '/v1/o', $Org, $($Collection.ToLower())
+    $BaseUri = Join-Parts -Separator "/" -Parts $MgmtUri, '/v1/o', $Org, $($Collection.ToLower())
 
     #Build up Invoke-RestMethod and Get-SEData parameters for splatting
-        $IRMParams = @{
-            Uri = $BaseUri
-            Method = 'Get'
-        }
+    $IRMParams = @{
+        Uri = $BaseUri
+        Method = 'Get'
+    }
 
-        if($PSBoundParameters.ContainsKey('Params'))
-        {
-            $IRMParams.Add( 'Body', $Params )
-        }
+    $pair = "${User}:${Pass}"
+    $bytes = [System.Text.Encoding]::UTF8.GetBytes($pair)
+    $base64 = [System.Convert]::ToBase64String($bytes)
+    $IRMParams.Add( 'Headers', @{ Authorization = "Basic $base64" } )
 
-        Write-Debug ( "Running $($MyInvocation.MyCommand).`n" +
-                    "PSBoundParameters:$( $PSBoundParameters | Format-List | Out-String)" +
-                    "Invoke-RestMethod parameters:`n$($IRMParams | Format-List | Out-String)" )
+    if($PSBoundParameters.ContainsKey('Params'))
+    {
+        $IRMParams.Add( 'Body', $Params )
+    }
 
-        Try
-        {
-            #We might want to track the HTTP status code to verify success for non-gets...
-            $TempResult = Invoke-RestMethod @IRMParams
+    Write-Debug ( "Running $($MyInvocation.MyCommand).`n" +
+                "PSBoundParameters:$( $PSBoundParameters | Format-List | Out-String)" +
+                "Invoke-RestMethod parameters:`n$($IRMParams | Format-List | Out-String)" )
 
-            Write-Debug "Raw:`n$($TempResult | Out-String)"
-        }
-        Catch
-        {
-            Throw $_
-       }
+    Try
+    {
+        #We might want to track the HTTP status code to verify success for non-gets...
+        $TempResult = Invoke-RestMethod @IRMParams
+
+        Write-Debug "Raw:`n$($TempResult | Out-String)"
+    }
+    Catch
+    {
+        Throw $_
+   }
 
 }
