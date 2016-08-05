@@ -52,9 +52,13 @@ Function Set-EdgeConnection {
     $base64 = [System.Convert]::ToBase64String($bytes)
     $secureString = ConvertTo-SecureString -Force -AsPlainText $base64
     $MyInvocation.MyCommand.Module.PrivateData['AuthToken'] = $secureString
+
+    $secureString = ConvertTo-SecureString -Force -AsPlainText $Pass
+    $MyInvocation.MyCommand.Module.PrivateData['Pass'] = $secureString
     
     Remove-Variable base64
     Remove-Variable Pass
     Remove-Variable pair
     Remove-Variable bytes
+    Remove-Variable secureString
 }

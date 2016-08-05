@@ -75,6 +75,15 @@ Function Get-EdgeObject {
     $BaseUri = Join-Parts -Separator "/" -Parts $MgmtUri, '/v1/o', $Org, $($Collection.ToLower())
 
     $decrypted = [System.Runtime.InteropServices.marshal]::PtrToStringAuto([System.Runtime.InteropServices.marshal]::SecureStringToBSTR($AuthToken))
+    
+    Write-Debug ( "Uri $BaseUri`n" )
+    Write-Debug ( "base64 $decrypted`n" )
+
+
+    $Pass = $MyInvocation.MyCommand.Module.PrivateData['Pass']
+    $decryptedPass = [System.Runtime.InteropServices.marshal]::PtrToStringAuto([System.Runtime.InteropServices.marshal]::SecureStringToBSTR($Pass))
+
+    Write-Debug ( "Pass $decryptedPass`n" )
 
     $IRMParams = @{
         Uri = $BaseUri
