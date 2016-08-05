@@ -85,7 +85,7 @@ Function Get-EdgeObject {
         }
     }
 
-    Remove-Variable $decrypted
+    Remove-Variable decrypted
     
     if($PSBoundParameters.ContainsKey('Params'))
     {
