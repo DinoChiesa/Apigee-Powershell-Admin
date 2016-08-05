@@ -1,0 +1,15 @@
+PSTOPIC
+    about_PSApigeeEdge
+
+SHORT DESCRIPTION
+    PSApigeeEdge allows you to work with the Apigee Edge Administrative API through PowerShell functions
+
+LONG DESCRIPTION
+    PSApigeeEdge allows you to work with the Apigee Edge Administrative API through PowerShell functions
+
+    You can find documentation of the Administrative API here:
+        http://docs.apigee.com/management/apis
+
+DETAILED DESCRIPTION
+    This is a basic module that allows querying and modifying things in Apigee Edge, administratively.
+
