@@ -12,6 +12,9 @@ Function UnDeploy-EdgeApi {
     .PARAMETER Env
         The name of the environment from which to undeploy the api proxy.
 
+    .PARAMETER Revision
+        The revision of the apiproxy. 
+
     .PARAMETER Org
         The Apigee Edge organization. The default is to use the value from Set-EdgeConnection.
 
@@ -27,6 +30,7 @@ Function UnDeploy-EdgeApi {
     param(
         [string]$Name,
         [string]$Env,
+        [string]$Revision,
         [string]$Org,
         [Hashtable]$Params
     )
@@ -40,6 +44,10 @@ Function UnDeploy-EdgeApi {
     }
     if (!$PSBoundParameters['Env']) {
       throw [System.ArgumentNullException] "You must specify the -Env option."
+    }
+
+    if (!$PSBoundParameters['Revision']) {
+      throw [System.ArgumentNullException] "You must specify the -Revision option."
     }
 
     if( ! $PSBoundParameters.ContainsKey('Org')) {
@@ -64,7 +72,7 @@ Function UnDeploy-EdgeApi {
       $AuthToken = $MyInvocation.MyCommand.Module.PrivateData['AuthToken']
     }
 
-    $BaseUri = Join-Parts -Separator '/' -Parts $MgmtUri, '/v1/o', $Org, 'apis', $Name, 'deployments'
+    $BaseUri = Join-Parts -Separator '/' -Parts $MgmtUri, '/v1/o', $Org, 'apis', $Name, 'revisions', $Revision, 'deployments'
 
     $decrypted = [System.Runtime.InteropServices.marshal]::PtrToStringAuto([System.Runtime.InteropServices.marshal]::SecureStringToBSTR($AuthToken))
 
