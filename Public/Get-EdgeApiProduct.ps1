@@ -1,10 +1,10 @@
-Function Get-EdgeDeveloper {
+Function Get-EdgeApiProduct {
     <#
     .SYNOPSIS
-        Get one or more developers from Apigee Edge
+        Get one or more api products from Apigee Edge
 
     .DESCRIPTION
-        Get one or more developers from Apigee Edge
+        Get one or more api products from Apigee Edge
 
     .PARAMETER Org
         The Apigee Edge organization. The default is to use the value from Set-EdgeConnection.
@@ -12,16 +12,16 @@ Function Get-EdgeDeveloper {
     .PARAMETER Params
         Hash table with query options for the specific collection type
 
-        Example for getting all details of developers:
+        Example for getting all details of apiproducts:
             -Params @{
                 expand  = 'true'
             }
 
     .EXAMPLE
-        Get-EdgeDeveloper -Org cap500
+        Get-EdgeApiProduct -Org cap500
 
     .EXAMPLE
-        Get-EdgeDeveloper -Params @{ expand = 'true' }
+        Get-EdgeApiProduct -Params @{ expand = 'true' }
 
     .FUNCTIONALITY
         ApigeeEdge
@@ -35,7 +35,7 @@ Function Get-EdgeDeveloper {
     )
     
     $Options = @{
-        Collection = 'developers'
+        Collection = 'apiproducts'
     }
     
     if ($PSBoundParameters['Debug']) {

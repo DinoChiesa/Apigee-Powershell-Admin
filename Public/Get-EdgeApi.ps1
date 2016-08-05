@@ -1,10 +1,10 @@
-Function Get-EdgeDeveloper {
+Function Get-EdgeApi {
     <#
     .SYNOPSIS
-        Get one or more developers from Apigee Edge
+        Get one or more apiproxies from Apigee Edge
 
     .DESCRIPTION
-        Get one or more developers from Apigee Edge
+        Get one or more apiproxies from Apigee Edge
 
     .PARAMETER Org
         The Apigee Edge organization. The default is to use the value from Set-EdgeConnection.
@@ -18,10 +18,10 @@ Function Get-EdgeDeveloper {
             }
 
     .EXAMPLE
-        Get-EdgeDeveloper -Org cap500
+        Get-EdgeApi -Org cap500
 
     .EXAMPLE
-        Get-EdgeDeveloper -Params @{ expand = 'true' }
+        Get-EdgeApi -Params @{ expand = 'true' }
 
     .FUNCTIONALITY
         ApigeeEdge
@@ -35,7 +35,7 @@ Function Get-EdgeDeveloper {
     )
     
     $Options = @{
-        Collection = 'developers'
+        Collection = 'apis'
     }
     
     if ($PSBoundParameters['Debug']) {
