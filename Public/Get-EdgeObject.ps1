@@ -94,27 +94,24 @@ Function Get-EdgeObject {
         }
     }
 
-    Remove-Variable decrypted
-    
-    if($PSBoundParameters.ContainsKey('Params'))
-    {
+    if($PSBoundParameters.ContainsKey('Params')) {
         $IRMParams.Add( 'Body', $Params )
     }
 
     Write-Debug ( "Running $($MyInvocation.MyCommand).`n" +
                  "Invoke-RestMethod parameters:`n$($IRMParams | Format-List | Out-String)" )
 
-    Try
-    {
-        #We might want to track the HTTP status code to verify success for non-gets...
+    Try {
         $TempResult = Invoke-RestMethod @IRMParams
 
         Write-Debug "Raw:`n$($TempResult | Out-String)"
     }
-    Catch
-    {
+    Catch {
         Throw $_
-   }
+    }
+    Finally {
+        Remove-Variable decrypted
+    }
 
    $TempResult
 }
