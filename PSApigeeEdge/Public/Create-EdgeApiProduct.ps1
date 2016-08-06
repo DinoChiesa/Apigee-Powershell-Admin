@@ -91,6 +91,9 @@ Function Create-EdgeApiProduct {
     if ($PSBoundParameters['DisplayName']) {
       $Payload.Add('displayName', $DisplayName )
     }
+    else {
+      $Payload.Add('displayName', $Name )
+    }
     if ($PSBoundParameters['Description']) {
       $Payload.Add('description', $Description )
     }
