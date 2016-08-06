@@ -33,8 +33,8 @@ then you have Powershell 5.0.
 
 This project is a work-in-progress.
 
-| entity type   | implemented actions             | Not implemented actions
-| :------------ | :------------------------------ | :-------------
+| entity type   | implemented              | Not implemented yet
+| :------------ | :----------------------- | :-------------
 | apis          | list, query, import or export, create, delete, delete revision, deploy or undeploy
 | apiproducts   | list/query | create, delete, change quota, add or remove proxy, add or remove custom attrs
 | developers    | list/query | create, delete, make active or inactive, add or remove custom attrs
@@ -42,13 +42,16 @@ This project is a work-in-progress.
 | credential    |  | list/query, create, delete, revoke
 | kvm           |  | list, add entry, remove entry
 | cache         |  | create, clear, remove
-| environment   |  | list, query
+| environment   |  list, query |
 
+Pull requests are welcomed.
 
 
 ## Examples
 
-### Importing the Module
+### Import the Module
+
+Do this first, before trying anything else.
 
 ```
 C:\Users\Dino> powershell
@@ -59,9 +62,6 @@ PS C:\Users\Dino> Import-Module c:/random-path/PSApigeeEdge
 
 ```
 C:\dev\ps>powershell
-Windows PowerShell
-Copyright (C) 2015 Microsoft Corporation. All rights reserved.
-
 PS C:\dev\ps> Import-Module ./PSApigeeEdge
 PS C:\dev\ps> Set-EdgeConnection -Org cap500 -User dino@apigee.com -Pass 'Secret1XYZ'
 PS C:\dev\ps> Get-EdgeDeveloper
@@ -105,10 +105,8 @@ type                 : Application
 
 ### List Developers Verbosely
 
-This example uses the lower-level Get-EdgeObject function. 
-
 ```
-PS C:\dev\ps> (Get-EdgeObject -Collection developers -Params @{ expand = 'true' }).developer | Format-List
+PS C:\dev\ps> (Get-EdgeDeveloper -Params @{ expand = 'true' }).developer | Format-List
 
 apps             : {my-hospitality-app-oauth, my-hospitality-app}
 companies        : {}
@@ -142,7 +140,6 @@ lastModifiedBy   : dchiesa+devportal@apigee.com
 
  ...
 
-PS C:\dev\ps>
 ```
 
 
@@ -304,6 +301,28 @@ type                 : Application
 
 ```
 
+### List Environments
+
+```
+PS C:\dev\ps> get-EdgeEnvironment
+test
+prod
+```
+
+### Query a particular Environment by Name
+
+```
+PS C:\dev\ps> get-EdgeEnvironment -name test
+
+
+createdAt      : 1408425529572
+createdBy      : lyeo@apigee.com
+lastModifiedAt : 1464341439395
+lastModifiedBy : sanjoy@apigee.com
+name           : test
+properties     : @{property=System.Object[]}
+
+```
 
 ## License
 

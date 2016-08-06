@@ -42,6 +42,9 @@ Function Get-EdgeEnvironment {
     if ($PSBoundParameters['Debug']) {
         $Options.Add( 'Debug', $Debug )
     }
+    if ($PSBoundParameters['Org']) {
+        $Options.Add( 'Org', $Org )
+    }
     
     if ($PSBoundParameters['Name']) {
         $Options.Add( 'Name', $Name )
