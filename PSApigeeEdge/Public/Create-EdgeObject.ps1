@@ -40,8 +40,8 @@ Function Create-EdgeObject {
         $DebugPreference = 'Continue'
     }
 
-    if (!$PSBoundParameters['Name']) {
-      throw [System.ArgumentNullException] "You must specify the -Name option."
+    if (!$PSBoundParameters['Payload']) {
+      throw [System.ArgumentNullException] "You must specify the -Payload option."
     }
     if( ! $PSBoundParameters.ContainsKey('Org')) {
       if( ! $MyInvocation.MyCommand.Module.PrivateData['Org']) {

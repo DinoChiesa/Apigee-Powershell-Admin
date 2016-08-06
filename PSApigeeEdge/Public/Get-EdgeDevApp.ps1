@@ -9,6 +9,11 @@ Function Get-EdgeDevApp {
     .PARAMETER Id
         The id of the developer app to retrieve.
         The default is to list all developer app IDs.
+        Do not specify this if specifying -Name.
+
+    .PARAMETER Name
+        The name of the developer app to retrieve. You must specify -Developer when
+        using this option. 
 
     .PARAMETER Developer
         The id or email of the developer for which to retrieve apps.
@@ -31,6 +36,7 @@ Function Get-EdgeDevApp {
     [cmdletbinding()]
     param(
         [string]$Id,
+        [string]$Name,
         [string]$Developer,
         [string]$Org,
         [Hashtable]$Params
@@ -49,6 +55,9 @@ Function Get-EdgeDevApp {
         $Options.Add( 'Collection', 'developers')
         if ($PSBoundParameters['Id']) {
             $NameToUse = Join-Parts -Separator '/' -Parts $Developer, 'apps', $Id 
+        }
+        else if ($PSBoundParameters['Name']) {
+            $NameToUse = Join-Parts -Separator '/' -Parts $Developer, 'apps', $Name 
         }
         else {
             $NameToUse = Join-Parts -Separator '/' -Parts $Developer, 'apps' 
