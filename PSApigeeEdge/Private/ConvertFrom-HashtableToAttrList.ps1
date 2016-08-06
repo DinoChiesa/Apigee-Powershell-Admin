@@ -28,7 +28,7 @@ function ConvertFrom-HashtableToAttrList {
   PARAM(
      [Hashtable] $Values,
      [String] $NameProp = 'name',  
-     [String] $ValueProp = 'value',
+     [String] $ValueProp = 'value'
   )
   PROCESS {
       $Result = @()
