@@ -7,7 +7,7 @@ Function Get-EdgeApiDeployment {
         Get the deployment status for an apiproxy in Apigee Edge
 
     .PARAMETER Name
-        The name of the apiproxy to retrieve.
+        The name of the apiproxy to inquire.
 
     .PARAMETER Org
         The Apigee Edge organization. The default is to use the value from Set-EdgeConnection.

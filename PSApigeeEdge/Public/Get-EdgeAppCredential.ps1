@@ -6,7 +6,7 @@ Function Get-EdgeAppCredential {
     .DESCRIPTION
         Get the list of credentials for a developer app.
 
-    .PARAMETER Id
+    .PARAMETER AppId
         The id of the developer app to retrieve.
 
     .PARAMETER Org
@@ -22,7 +22,7 @@ Function Get-EdgeAppCredential {
 
     [cmdletbinding()]
     param(
-        [string]$Id,
+        [string]$AppId,
         [string]$Org,
         [Hashtable]$Params
     )
@@ -35,12 +35,12 @@ Function Get-EdgeAppCredential {
     if ($PSBoundParameters['Params']) {
         $Options.Add( 'Params', $Params )
     }
-    if (! $PSBoundParameters['Id']) {
-      throw [System.ArgumentNullException] 'missing required parameter -Id'
+    if (! $PSBoundParameters['AppId']) {
+      throw [System.ArgumentNullException] 'missing required parameter -AppId'
     }
 
     $Options.Add( 'Collection', 'apps')
-    $Options.Add( 'Name', $Id )
+    $Options.Add( 'Name', $AppId )
 
     $TempResult = Get-EdgeObject @Options
     if ($TempResult.credentials) {

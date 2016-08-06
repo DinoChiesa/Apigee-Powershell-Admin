@@ -27,7 +27,7 @@ Not in scope:
 ## Pre-Requisites
 
 You need Windows, and Powershell v3.0 or later. If you're running Windows 10,
-then you have Powershell 5.0. 
+then you have Powershell 5.0, so you're good.
 
 ## Status
 
@@ -36,10 +36,10 @@ This project is a work-in-progress.
 | entity type   | implemented              | Not implemented yet
 | :------------ | :----------------------- | :-------------
 | apis          | list, query, import or export, create, delete, delete revision, deploy or undeploy
-| apiproducts   | list/query | create, delete, change quota, add or remove proxy, add or remove custom attrs
-| developers    | list/query | create, delete, make active or inactive, add or remove custom attrs
+| apiproducts   | list, query | create, delete, change quota, add or remove proxy, add or remove custom attrs
+| developers    | list, query | create, delete, make active or inactive, add or remove custom attrs
 | developer app | list, query | create, delete, revoke, add or remove credential, add or remove custom attrs
-| credential    |  | list/query, create, delete, revoke
+| credential    | list | query, create, delete, revoke
 | kvm           |  | list, add entry, remove entry
 | cache         | list, query | create, clear, remove
 | environment   | list, query |
@@ -58,12 +58,45 @@ C:\Users\Dino> powershell
 PS C:\Users\Dino> Import-Module c:/random-path/PSApigeeEdge
 ```
 
+### List commands provided by the module
+
+```
+PS C:\dev\ps\PSApigeeEdge> Get-Command -Module PSApigeeEdge
+
+CommandType     Name                                               Version    Source
+-----------     ----                                               -------    ------
+Function        Delete-EdgeApi                                     0.0.1      PSApigeeEdge
+Function        Delete-EdgeObject                                  0.0.1      PSApigeeEdge
+Function        Deploy-EdgeApi                                     0.0.1      PSApigeeEdge
+Function        Export-EdgeApi                                     0.0.1      PSApigeeEdge
+Function        Get-EdgeApi                                        0.0.1      PSApigeeEdge
+Function        Get-EdgeApiDeployment                              0.0.1      PSApigeeEdge
+Function        Get-EdgeApiProduct                                 0.0.1      PSApigeeEdge
+Function        Get-EdgeAppCredential                              0.0.1      PSApigeeEdge
+Function        Get-EdgeCache                                      0.0.1      PSApigeeEdge
+Function        Get-EdgeDevApp                                     0.0.1      PSApigeeEdge
+Function        Get-EdgeDeveloper                                  0.0.1      PSApigeeEdge
+Function        Get-EdgeEnvironment                                0.0.1      PSApigeeEdge
+Function        Get-EdgeObject                                     0.0.1      PSApigeeEdge
+Function        Import-EdgeApi                                     0.0.1      PSApigeeEdge
+Function        Set-EdgeConnection                                 0.0.1      PSApigeeEdge
+Function        UnDeploy-EdgeApi                                   0.0.1      PSApigeeEdge
+```
+
+### Set Connection information
+
+```
+PS C:\dev\ps> Import-Module ./PSApigeeEdge
+PS C:\dev\ps> Set-EdgeConnection -Org cap500 -User dino@apigee.com -Pass 'Secret1XYZ'
+```
+
+All commands that interact with Apigee Edge rely on this connection information.
+You need to do this only once during a Powershell session.
+
+
 ### List Developers
 
 ```
-C:\dev\ps>powershell
-PS C:\dev\ps> Import-Module ./PSApigeeEdge
-PS C:\dev\ps> Set-EdgeConnection -Org cap500 -User dino@apigee.com -Pass 'Secret1XYZ'
 PS C:\dev\ps> Get-EdgeDeveloper
 mpalmgre@example.org
 dchiesa@example.org
@@ -76,31 +109,6 @@ justinmadalone@gmail.com
 PS C:\dev\ps>
 ```
 
-
-### Get Details of API Proxy Revision
-
-```
-PS C:\dev\ps> Get-EdgeApi -Name oauth2-pwd-cc -Revision 2
-
-configurationVersion : @{majorVersion=4; minorVersion=0}
-contextInfo          : Revision 2 of application oauth2-pwd-cc, in organization cap500
-createdAt            : 1470082739958
-createdBy            : DChiesa@apigee.com
-description          : Dispense OAuth v2.0 Bearer tokens for password and client_credentials grant_types. In this proxy, the user authentication is
-                       handled by a mock service.
-displayName          : oauth2-pwd-cc
-lastModifiedAt       : 1470082739958
-lastModifiedBy       : DChiesa@apigee.com
-name                 : oauth2-pwd-cc
-policies             : {AE-ConsumerKey, AM-CleanResponseHeaders, AM-NoContent, BasicAuth-1...}
-proxyEndpoints       : {oauth-dispensary, resource}
-resourceFiles        : @{resourceFile=System.Object[]}
-resources            : {jsc://dateFormat.js, jsc://groomTokenResponse.js, jsc://mapRolesToScopes.js, jsc://maybeFormatFault.js...}
-revision             : 2
-targetEndpoints      : {}
-targetServers        : {}
-type                 : Application
-```
 
 
 ### List Developers Verbosely
@@ -166,6 +174,49 @@ scopes         : {read, write, delete}
 
 ```
 
+### List API Proxies
+
+```
+PS C:\dev\ps> Get-EdgeApi
+mcp_hotels_oauth
+JTM_OpenAPI-Specification-for-Hotels-1_oauth
+rqa-perf
+jsprop
+JTM_OpenAPI-Specification-for-Hotels
+oauth
+oauth2-pwd-cc
+MM_hotels
+dino-test
+virtualearth-passthru
+```
+
+
+### Get Details of an API Proxy Revision
+
+```
+PS C:\dev\ps> Get-EdgeApi -Name oauth2-pwd-cc -Revision 2
+
+configurationVersion : @{majorVersion=4; minorVersion=0}
+contextInfo          : Revision 2 of application oauth2-pwd-cc, in organization cap500
+createdAt            : 1470082739958
+createdBy            : DChiesa@apigee.com
+description          : Dispense OAuth v2.0 Bearer tokens for password and client_credentials grant_types. In this proxy, the user authentication is
+                       handled by a mock service.
+displayName          : oauth2-pwd-cc
+lastModifiedAt       : 1470082739958
+lastModifiedBy       : DChiesa@apigee.com
+name                 : oauth2-pwd-cc
+policies             : {AE-ConsumerKey, AM-CleanResponseHeaders, AM-NoContent, BasicAuth-1...}
+proxyEndpoints       : {oauth-dispensary, resource}
+resourceFiles        : @{resourceFile=System.Object[]}
+resources            : {jsc://dateFormat.js, jsc://groomTokenResponse.js, jsc://mapRolesToScopes.js, jsc://maybeFormatFault.js...}
+revision             : 2
+targetEndpoints      : {}
+targetServers        : {}
+type                 : Application
+```
+
+
 ### Get Deployment status of an API
 
 ```
@@ -220,6 +271,8 @@ state         : undeployed
 
 
 ### Export an API Proxy
+
+This creates a zip file.
 
 ```
 PS C:\dev\ps> Export-EdgeApi -Name oauth2-pwd-cc -Revision 8
@@ -309,7 +362,7 @@ test
 prod
 ```
 
-### Query a particular Environment by Name
+### Query an Environment by Name
 
 ```
 PS C:\dev\ps> get-EdgeEnvironment -name test
@@ -368,4 +421,10 @@ status         : approved
 ## License
 
 This is licensed under [the Apache 2.0 source license](LICENSE).
+
+## Bugs
+
+* There are no tests for this module.
+* The module is not published to the Powershell Module Gallery
+
 

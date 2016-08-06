@@ -11,5 +11,5 @@ LONG DESCRIPTION
         http://docs.apigee.com/management/apis
 
 DETAILED DESCRIPTION
-    This is a basic module that allows querying and modifying things in Apigee Edge, administratively.
+    This module that allows querying and modifying things in Apigee Edge, administratively.
 
