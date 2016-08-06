@@ -91,6 +91,11 @@ Function Import-EdgeApi {
     Finally {
         Remove-Variable IRMParams
     }
+    if ($TempResult.StatusCode == 201) {
+      ConvertFrom-Json $TempResult.Content
+    }
+    else {
+      $TempResult
+    }
 
-    $TempResult
 }
