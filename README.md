@@ -11,15 +11,17 @@ The goal is to allow Powershell scripts to do these things:
 | developers    | list, query, create, delete, make active or inactive, modify custom attrs
 | developer app | list, query, create, delete, revoke, approve, add new credential, remove credential, modify custom attrs
 | credential    | list, revoke, approve, add apiproduct, remove apiproduct
-| kvm           | list, add entry, remove entry
+| kvm           | list, create, delete, get all entries, get entry, add entry, modify entry, remove entry
 | cache         | list, query, create, delete, clear
 | environment   | list, query
 
 
 Not in scope:
 
+- OAuth2.0 tokens - Listing, Querying, Approving, Revoking, Deleting, or Updating 
 - TargetServers: list, create, edit, etc
 - keystores, truststores: adding certs, listing certs
+- data masks
 - apimodels
 - shared flows or flow hooks (for now; we will deliver this when shared flows are final)
 - analytics or custom reports
@@ -43,7 +45,7 @@ This project is a work-in-progress. Here's the status:
 | developers    | list, query, make active or inactive, create, delete, modify custom attrs | 
 | developer app | list, query, create, delete, revoke, approve, add new credential, remove credential | modify custom attrs
 | credential    | list, revoke, approve, add apiproduct, remove apiproduct |
-| kvm           |  | list, add entry, remove entry
+| kvm           | | list, create, delete, get all entries, get entry, add entry, modify entry, remove entry
 | cache         | list, query, create, delete, clear | 
 | environment   | list, query |
 
