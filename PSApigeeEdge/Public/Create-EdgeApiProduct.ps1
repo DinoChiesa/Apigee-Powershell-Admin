@@ -28,16 +28,15 @@ Function Create-EdgeApiProduct {
     .PARAMETER Description
         Optional. The description.
             
+    .PARAMETER Description
+        Optional. An array of strings, each one a valid scope for this product.
+            
     .PARAMETER Org
         The Apigee Edge organization. The default is to use the value from Set-EdgeConnection.
 
     .EXAMPLE
-        Create-EdgeApiProduct @{
-             Name='Product-7'
-             Enviroments=@('test')
-             Proxies=@('oauth2-pwd-cc')
-             Attributes=@{ CreatedBy = 'dino' }
-        }
+        Create-EdgeApiProduct -Name 'Product-7' -Environments @('test') -Proxies @('oauth2-pwd-cc') -Attributes @{ CreatedBy = 'dino' }
+
 
     .FUNCTIONALITY
         ApigeeEdge
@@ -53,6 +52,7 @@ Function Create-EdgeApiProduct {
         [hashtable]$Attributes,
         [string]$DisplayName,
         [string]$Description,
+        [string[]]$Scopes,
         [string]$Org
     )
     
@@ -85,7 +85,7 @@ Function Create-EdgeApiProduct {
     }
 
     if ($PSBoundParameters['Attributes']) {
-      $a = ConvertFrom-HashtableToAttrList -Values $Attributes
+      $a = @(ConvertFrom-HashtableToAttrList -Values $Attributes)
       $Payload.Add('attributes', $a )
     }
     if ($PSBoundParameters['DisplayName']) {
@@ -96,6 +96,9 @@ Function Create-EdgeApiProduct {
     }
     if ($PSBoundParameters['Description']) {
       $Payload.Add('description', $Description )
+    }
+    if ($PSBoundParameters['Scopes']) {
+      $Payload.Add('scopes', $Scopes )
     }
     $Options.Add( 'Payload', $Payload )
 

@@ -40,6 +40,7 @@ function ConvertFrom-HashtableToAttrList {
             $Result += $hash
         }
       }
+      # Return an ARRAY of objects like { name = something; value = somethingelse }
       $Result
   }
 
