@@ -9,19 +9,20 @@ Function Update-EdgeDeveloper {
         may also specify attributes. 
 
     .PARAMETER Name
-        The name to give to this new Developer. It must be unique in the organization.
+        The user name of the Developer. 
 
     .PARAMETER Email
-        The Email address of the developer to create.
+        The Email address of the developer to update.
 
     .PARAMETER First
-        The first (given) name of the developer to create.
+        The first (given) name of the developer to update.
         
     .PARAMETER Last
-        The last (sur-) name of the developer to create.
+        The last (sur-) name of the developer to update.
 
     .PARAMETER Attributes
         Optional. Hashtable specifying custom attributes for the developer.
+        These will overwrite the existing attributes.
 
     .PARAMETER Org
         The Apigee Edge organization. The default is to use the value from Set-EdgeConnection.
@@ -66,7 +67,7 @@ Function Update-EdgeDeveloper {
       throw [System.ArgumentNullException] "You must specify the -Name option."
     }
 
-    $Options.Add( 'Name', $Name )
+    $Options.Add( 'Name', $Email )
 
     $Payload = @{
       email = $Email
