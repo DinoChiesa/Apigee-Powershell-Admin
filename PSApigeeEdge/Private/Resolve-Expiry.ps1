@@ -7,10 +7,11 @@ function Resolve-Expiry
     .DESCRIPTION
         Edge accepts expiry in terms of milliseconds-from-now.
         This function resolves strings like '120d' and '2016-12-10' into
-        the correct number of milliseconds.
+        the correct number of milliseconds. Or, if you pass a bare number, it
+        will interpret it as seconds, and return the equivalent milliseconds value. 
 
     .PARAMETER Value
-        The string to convert from 
+        The string to convert.
 
     .EXAMPLE
         Resolve-Expiry 120d
@@ -22,7 +23,8 @@ function Resolve-Expiry
     )
 
     $result = -1
-    $regex1 = New-Object System.Text.RegularExpressions.Regex ('^([1-9][0-9]+)(smhdwy)$')
+    $regex1 = New-Object System.Text.RegularExpressions.Regex ('^([1-9][0-9]*)(smhdwy)$')
+    $regex2 = New-Object System.Text.RegularExpressions.Regex ('^([1-9][0-9]*)$')
     $match = $regex1.Match($Value) 
     if ($match.Success) {
         $multipliers = @{
@@ -34,6 +36,10 @@ function Resolve-Expiry
           y = 60 * 60 * 24 * 365
         }
       $result = $match.Captures[1].value * $multipliers[ $match.Captures[2].value ] * 1000
+    }
+    elseif ($($regex1.Match($Value)).Success) {
+      ## just a bare number - evaluate it as seconds
+      $result = (0 + $match.Captures[1].value) * 1000;
     }
     else {
       # variable to hold parsed date
