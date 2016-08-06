@@ -36,7 +36,7 @@ Function Approve-EdgeDevApp {
     )
     
     $Options = @{
-       QParams = @{ action = 'approve' }
+       QParams = $( ConvertFrom-Hashtable @{ action = 'approve' } )
     }
     
     if ($PSBoundParameters['Debug']) {

@@ -78,17 +78,15 @@ Function Send-EdgeRequest {
     else {
       $BaseUri = Join-Parts -Separator "/" -Parts $MgmtUri, '/v1/o', $Org, $Collection
     }
-    Write-Debug ( "Uri $BaseUri`n" )
 
     $decrypted = [System.Runtime.InteropServices.marshal]::PtrToStringAuto([System.Runtime.InteropServices.marshal]::SecureStringToBSTR($AuthToken))
 
     if ($PSBoundParameters['QParams']) {
          Write-Debug ( "QParams: $QParams`n" )
-         $qstring = ConvertFrom-Hashtable -Values $QParams
-         $BaseUri = "${BaseUri}?${qstring}"
+         $BaseUri = "${BaseUri}?${QParams}"
     }
+    Write-Debug ( "Uri $BaseUri`n" )
     
-
     $IRMParams = @{
         Uri = $BaseUri
         Method = 'POST'
