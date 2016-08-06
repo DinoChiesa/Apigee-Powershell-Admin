@@ -37,7 +37,7 @@ This project is a work-in-progress.
 | :------------ | :----------------------- | :-------------
 | apis          | list, query, import or export, create, delete, delete revision, deploy or undeploy
 | apiproducts   | list, query | create, delete, change quota, add or remove proxy, add or remove custom attrs
-| developers    | list, query | create, delete, make active or inactive, add or remove custom attrs
+| developers    | list, query, make active or inactive,  | create, delete, add or remove custom attrs
 | developer app | list, query, create, revoke, approve | delete, add or remove credential, add or remove custom attrs
 | credential    | list | query, create, delete, revoke
 | kvm           |  | list, add entry, remove entry
