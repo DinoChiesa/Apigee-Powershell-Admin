@@ -7,9 +7,9 @@ The goal is to allow Powershell scripts to do these things:
 | entity type   | actions             |
 | :------------ | :------------------ |
 | apis          | list, query, import, export, delete, delete revision, deploy, undeploy
-| apiproducts   | list, query, create, delete, change quota, modify public/private, modify description, modify approvalType, modify scopes, add or remove proxy, add or remove custom attrs
-| developers    | list, query, create, delete, make active or inactive, add or remove custom attrs
-| developer app | list, query, create, delete, revoke, approve, add or remove credential, add or remove custom attrs
+| apiproducts   | list, query, create, delete, change quota, modify public/private, modify description, modify approvalType, modify scopes, add or remove proxy, modify custom attrs
+| developers    | list, query, create, delete, make active or inactive, modify custom attrs
+| developer app | list, query, create, delete, revoke, approve, add or remove credential, modify custom attrs
 | credential    | list, revoke, approve, add apiproduct, remove apiproduct
 | kvm           | list, add entry, remove entry
 | cache         | list, query, create, clear, remove
@@ -21,11 +21,11 @@ Not in scope:
 - TargetServers: list, create, edit, etc
 - keystores, truststores: adding certs, listing certs
 - apimodels
-- shared flows or flow hooks
+- shared flows or flow hooks (for now; we will deliver this when shared flows are final)
 - analytics or custom reports
 - DebugSessions (trace)
 - anything in BaaS
-- OPDK-specific things.  Like starting, stopping services, manipulating pods, etc.
+- OPDK-specific things.  Like starting or stopping services, manipulating pods, adding servers into environments, etc.
 
 ## Pre-Requisites
 
@@ -40,8 +40,8 @@ This project is a work-in-progress. Here's the status:
 | :------------ | :----------------------- | :--------------------
 | apis          | list, query, import, export, delete, delete revision, deploy, undeploy
 | apiproducts   | list, query, create, delete, modify description, modify approvalType, modify scopes, add or remove proxy, add or remove custom attrs, modify public/private, change quota | 
-| developers    | list, query, make active or inactive, create, delete | add or remove custom attrs
-| developer app | list, query, create, delete, revoke, approve, add or remove credential | add or remove custom attrs
+| developers    | list, query, make active or inactive, create, delete, modify custom attrs | 
+| developer app | list, query, create, delete, revoke, approve, add or remove credential | modify custom attrs
 | credential    | list, revoke, approve, add apiproduct, remove apiproduct |
 | kvm           |  | list, add entry, remove entry
 | cache         | list, query | create, clear, remove

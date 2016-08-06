@@ -1,10 +1,12 @@
-Function Create-EdgeDeveloper {
+Function Update-EdgeDeveloper {
     <#
     .SYNOPSIS
-        Create a developer in Apigee Edge.
+        Update a developer in Apigee Edge.
 
     .DESCRIPTION
-        Create a developer in Apigee Edge.
+        Update a Developer in Apigee Edge. When invoking this cmdlet you need
+        to specify the firstname, last name, email, and username, at a minimum.  You
+        may also specify attributes. 
 
     .PARAMETER Name
         The name to give to this new Developer. It must be unique in the organization.
@@ -25,7 +27,7 @@ Function Create-EdgeDeveloper {
         The Apigee Edge organization. The default is to use the value from Set-EdgeConnection.
 
     .EXAMPLE
-        Create-EdgeDeveloper -Name Elaine1 -Email Elaine@example.org -First Elaine -Last Benes
+        Update-EdgeDeveloper -Name 'DC' -First Dino -Last Chiesa -Email dchiesa@example.org -Attributes @{ 'shoesize' = 9 }
 
     .FUNCTIONALITY
         ApigeeEdge
@@ -42,12 +44,15 @@ Function Create-EdgeDeveloper {
         [string]$Org
     )
     
-    $Options = @{ }
+    $Options = @{ Collection = 'developers' }
     
     if ($PSBoundParameters['Debug']) {
         $Options.Add( 'Debug', $Debug )
     }
-    
+    if ($PSBoundParameters['Org']) {
+        $Options.Add( 'Org', $Org )
+    }
+
     if (!$PSBoundParameters['Email']) {
       throw [System.ArgumentNullException] "You must specify the -Email option."
     }
@@ -61,17 +66,13 @@ Function Create-EdgeDeveloper {
       throw [System.ArgumentNullException] "You must specify the -Name option."
     }
 
-    $Options.Add( 'Collection', 'developers' )
-    if ($PSBoundParameters['Org']) {
-        $Options.Add( 'Org', $Org )
-    }
+    $Options.Add( 'Name', $Name )
 
     $Payload = @{
       email = $Email
       userName = $Name
       firstName = $First
       lastName = $Last
-      status = 'active'
     }
 
     if ($PSBoundParameters['Attributes']) {
