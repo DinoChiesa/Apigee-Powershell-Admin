@@ -38,7 +38,7 @@ function Resolve-Expiry
           w = 60 * 60 * 24 * 7 
           y = 60 * 60 * 24 * 365
         }
-      $result = $match.Groups[1].Value * $multipliers[ $match.Groups[2].Value ] * 1000
+      $result = ($match.Groups[1].Value -as [int]) * ($multipliers[ $match.Groups[2].Value ]) * 1000
       Write-Debug ( "Resolve-Expiry, case1. Input($Value), result: $result`n" )      
     }
     elseif ($Value -match $regex2) {
