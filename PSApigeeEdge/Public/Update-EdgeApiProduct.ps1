@@ -9,7 +9,7 @@ Function Update-EdgeApiProduct {
         not specifying a Description means you will remove any previous Description
         attached to the product. Only the custom attributes you specify here will
         be retained. Not specifying an attribute of 'access' will result in the
-        API Product having no access setting. SImilarly, with Scopes.
+        API Product having no access setting. Similarly, with Scopes.
 
     .PARAMETER Name
         The name of the product. It must exist.
