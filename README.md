@@ -69,19 +69,11 @@ Function        Delete-EdgeApi                                     0.0.1      PS
 Function        Delete-EdgeObject                                  0.0.1      PSApigeeEdge
 Function        Deploy-EdgeApi                                     0.0.1      PSApigeeEdge
 Function        Export-EdgeApi                                     0.0.1      PSApigeeEdge
-Function        Get-EdgeApi                                        0.0.1      PSApigeeEdge
-Function        Get-EdgeApiDeployment                              0.0.1      PSApigeeEdge
-Function        Get-EdgeApiProduct                                 0.0.1      PSApigeeEdge
-Function        Get-EdgeAppCredential                              0.0.1      PSApigeeEdge
-Function        Get-EdgeCache                                      0.0.1      PSApigeeEdge
-Function        Get-EdgeDevApp                                     0.0.1      PSApigeeEdge
-Function        Get-EdgeDeveloper                                  0.0.1      PSApigeeEdge
-Function        Get-EdgeEnvironment                                0.0.1      PSApigeeEdge
-Function        Get-EdgeObject                                     0.0.1      PSApigeeEdge
-Function        Import-EdgeApi                                     0.0.1      PSApigeeEdge
-Function        Set-EdgeConnection                                 0.0.1      PSApigeeEdge
-Function        UnDeploy-EdgeApi                                   0.0.1      PSApigeeEdge
+....
 ```
+
+NB: The above list is not complete.
+
 
 ### Set Connection information
 
