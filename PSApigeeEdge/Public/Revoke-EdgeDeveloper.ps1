@@ -35,6 +35,7 @@ Function Revoke-EdgeDeveloper {
        Collection = 'developers' 
        Name = $Name
        NoAccept = 'true'
+       ContentType = 'application/octet-stream'
        QParams = $( ConvertFrom-Hashtable @{ action = 'inactive' } )
     }
     

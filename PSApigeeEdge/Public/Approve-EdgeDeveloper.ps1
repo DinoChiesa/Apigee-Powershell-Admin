@@ -34,6 +34,8 @@ Function Approve-EdgeDeveloper {
     $Options = @{
        Collection = 'developers' 
        Name = $Name
+       NoAccept = 'true'
+       ContentType = 'application/octet-stream'
        QParams = $( ConvertFrom-Hashtable @{ action = 'active' } )
     }
     
