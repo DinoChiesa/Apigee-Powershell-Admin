@@ -1,10 +1,10 @@
 Function Create-EdgeDevApp {
     <#
     .SYNOPSIS
-        Get one or more developer apps from Apigee Edge
+        Create a developer app in Apigee Edge.
 
     .DESCRIPTION
-        Get one or more developer apps from Apigee Edge
+        Create a developer app in Apigee Edge.
 
     .PARAMETER Name
         The name of the app. It must be unique for this developer. 
@@ -36,8 +36,7 @@ Function Create-EdgeDevApp {
         [Parameter(Mandatory=$True)][string]$Developer,
         [Parameter(Mandatory=$True)][string[]]$ApiProducts,
         [string]$Expiry,
-        [string]$Org,
-        [Hashtable]$Params
+        [string]$Org
     )
     
     $Options = @{ }
