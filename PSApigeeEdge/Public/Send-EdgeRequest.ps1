@@ -83,7 +83,8 @@ Function Send-EdgeRequest {
     $decrypted = [System.Runtime.InteropServices.marshal]::PtrToStringAuto([System.Runtime.InteropServices.marshal]::SecureStringToBSTR($AuthToken))
 
     if ($PSBoundParameters['QParams']) {
-         $qstring = ConvertFrom-Hashtable @QParams
+         Write-Debug ( "QParams: $QParams`n" )
+         $qstring = ConvertFrom-Hashtable -Values $QParams
          $BaseUri = "${BaseUri}?${qstring}"
     }
     

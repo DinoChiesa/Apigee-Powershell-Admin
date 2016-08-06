@@ -29,10 +29,9 @@ function ConvertFrom-Hashtable {
     #>
 
 PARAM(
-   [Parameter(ValueFromPipeline=$true, Position=0, Mandatory=$true)]
    [Hashtable] $Values,
-   [Parameter(Position=1)] [String] $pairSeparator = '&',  
-   [Parameter(Position=2)] [String]   $KeyValueSeparator = '=',
+   [String] $pairSeparator = '&',  
+   [String] $KeyValueSeparator = '=',
    [string[]]$Sort
 )
 PROCESS {
