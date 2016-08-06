@@ -1,17 +1,17 @@
-Function Delete-EdgeApi {
+Function Delete-EdgeCache {
     <#
     .SYNOPSIS
-        Delete an apiproxy from Apigee Edge.
+        Delete a named cache from Apigee Edge.
 
     .DESCRIPTION
-        Delete an apiproxy from Apigee Edge.
+        Delete a named cache from Apigee Edge.
 
     .PARAMETER Name
-        The name of the apiproxy to delete.
+        The name of the cache to delete.
         
-    .PARAMETER Revision
-        Optional. The revision to delete. If not specified, all revisions will be deleted.
-
+    .PARAMETER Environment
+        The name of the cache to delete.
+        
     .PARAMETER Org
         The Apigee Edge organization. The default is to use the value from Set-EdgeConnection.
 
@@ -26,12 +26,11 @@ Function Delete-EdgeApi {
     [cmdletbinding()]
     PARAM(
         [Parameter(Mandatory=$True)][string]$Name,
-        [string]$Revision,
+        [Parameter(Mandatory=$True)][string]$Environment,
         [string]$Org
     )
     
     $Options = @{ }
-    
     if ($PSBoundParameters['Debug']) {
         $DebugPreference = 'Continue'
         $Options.Add( 'Debug', $Debug )
@@ -40,16 +39,14 @@ Function Delete-EdgeApi {
     if (!$PSBoundParameters['Name']) {
         throw [System.ArgumentNullException] "The -Name parameter is required."
     }
+    if (!$PSBoundParameters['Environment']) {
+        throw [System.ArgumentNullException] "The -Environment parameter is required."
+    }
     
-    if ($PSBoundParameters['Revision']) {
-        $Options['Collection'] = $(Join-Parts -Separator "/" -Parts 'apis', $Name, 'revisions' )
-        $Options.Add( 'Name', $Revision )
-    }
-    else {
-        $Options['Collection'] = 'apis'
-        $Options.Add( 'Name', $Name )
-    }
+    $Options['Collection'] = $(Join-Parts -Separator "/" -Parts 'e', $Environment, 'caches' )
+    $Options.Add( 'Name', $Name )
 
     Write-Debug ( "Options @Options`n" )
+
     Delete-EdgeObject @Options
 }

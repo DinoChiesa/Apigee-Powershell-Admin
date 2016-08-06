@@ -22,9 +22,6 @@ function Resolve-Expiry
       [Parameter(Mandatory=$True)][string]$Value
     )
     
-    if ($PSBoundParameters['Debug']) {
-        $DebugPreference = 'Continue'
-    }
     $result = -1
     $regex1 = New-Object System.Text.RegularExpressions.Regex ('^([1-9][0-9]*)([smhdwy])$')
     $regex2 = New-Object System.Text.RegularExpressions.Regex ('^([1-9][0-9]*)$')
@@ -39,12 +36,10 @@ function Resolve-Expiry
           y = 60 * 60 * 24 * 365
         }
       $result = ($match.Groups[1].Value -as [int]) * ($multipliers[ $match.Groups[2].Value ]) * 1000
-      Write-Debug ( "Resolve-Expiry, case1. Input($Value), result: $result`n" )      
     }
     elseif ($Value -match $regex2) {
       ## just a bare number - evaluate it as seconds
-      $result = (0 + $Value) * 1000;
-      Write-Debug ( "Resolve-Expiry, case2. Input($Value), result: $result`n" )      
+      $result = ($Value -as [int]) * 1000;
     }
     else {
       # variable to hold parsed date
@@ -61,7 +56,6 @@ function Resolve-Expiry
         }
         }
       }
-      Write-Debug ( "Resolve-Expiry, case3. Input($Value), result: $result`n" )      
     }
     $result
 }
