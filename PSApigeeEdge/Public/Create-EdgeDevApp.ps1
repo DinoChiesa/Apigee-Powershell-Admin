@@ -4,7 +4,8 @@ Function Create-EdgeDevApp {
         Create a developer app in Apigee Edge.
 
     .DESCRIPTION
-        Create a developer app in Apigee Edge.
+        Create a developer app in Apigee Edge. This will generate a single
+        credential for the app, with a list of api Products and optionally an expiry. 
 
     .PARAMETER Name
         The name of the app. It must be unique for this developer. 
@@ -13,11 +14,12 @@ Function Create-EdgeDevApp {
         The id or email of the developer for which to create the app.
 
     .PARAMETER ApiProducts
-        An array of strings, the names of API Products that should be enabled for this app.
+        An array of strings, the names of API Products that should be enabled for the
+        first credential created for this app.
 
     .PARAMETER Expiry
-        Optional. The expiry for the key. This can be a string like '90d' or '120m',
-        or like '2016-12-10'.
+        Optional. The expiry for the first credential that will be created for this app.
+        This can be a string like '90d' or '120m', or like '2016-12-10'.
         The default is no expiry.
 
     .PARAMETER CallbackUrl

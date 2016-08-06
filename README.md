@@ -10,7 +10,7 @@ The goal is to allow Powershell scripts to do these things:
 | apiproducts   | list, query, create, delete, change quota, modify public/private, modify description, modify approvalType, modify scopes, add or remove proxy, add or remove custom attrs
 | developers    | list, query, create, delete, make active or inactive, add or remove custom attrs
 | developer app | list, query, create, delete, revoke, approve, add or remove credential, add or remove custom attrs
-| credential    | list, query, create, delete, revoke, approve, add apiproduct, remove apiproduct
+| credential    | list, query, revoke, approve, add apiproduct, remove apiproduct
 | kvm           | list, add entry, remove entry
 | cache         | list, query, create, clear, remove
 | environment   | list, query
@@ -42,7 +42,7 @@ This project is a work-in-progress. Here's the status:
 | apiproducts   | list, query, create, delete, modify description, modify approvalType, modify scopes, add or remove proxy, add or remove custom attrs, modify public/private, change quota | 
 | developers    | list, query, make active or inactive, create, delete | add or remove custom attrs
 | developer app | list, query, create, delete, revoke, approve | add or remove credential, add or remove custom attrs
-| credential    | list, revoke, approve | query, create, delete, add apiproduct, remove apiproduct
+| credential    | list, revoke, approve | query, add apiproduct, remove apiproduct
 | kvm           |  | list, add entry, remove entry
 | cache         | list, query | create, clear, remove
 | environment   | list, query |
