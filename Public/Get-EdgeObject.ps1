@@ -17,6 +17,9 @@ Function Get-EdgeObject {
     .PARAMETER Org
         The Apigee Edge organization. 
 
+    .PARAMETER Env
+        The Apigee Edge environment. This parameter does not apply to all object types.
+
     .PARAMETER Params
         Hash table with query options for the specific collection type
 
@@ -36,8 +39,9 @@ Function Get-EdgeObject {
     [cmdletbinding()]
     param(
         [string]$Collection,
-        [string]$Org,
         [string]$Name,
+        [string]$Env,
+        [string]$Org,
         [Hashtable]$Params
     )
     
@@ -68,11 +72,18 @@ Function Get-EdgeObject {
       $AuthToken = $MyInvocation.MyCommand.Module.PrivateData['AuthToken']
     }
 
-    if($PSBoundParameters.ContainsKey('Name')) {
-      $BaseUri = Join-Parts -Separator "/" -Parts $MgmtUri, '/v1/o', $Org, $($Collection.ToLower()), $Name
+    if($PSBoundParameters.ContainsKey('Env')) {
+         $PartialPath = Join-Parts -Separator '/' -Parts '/v1/o', $Org, 'e', $Env
     }
     else {
-      $BaseUri = Join-Parts -Separator "/" -Parts $MgmtUri, '/v1/o', $Org, $($Collection.ToLower())
+         $PartialPath = Join-Parts -Separator '/' -Parts '/v1/o', $Org
+    }
+    
+    if($PSBoundParameters.ContainsKey('Name')) {
+      $BaseUri = Join-Parts -Separator '/' -Parts $MgmtUri, $PartialPath, $($Collection.ToLower()), $Name
+    }
+    else {
+      $BaseUri = Join-Parts -Separator '/' -Parts $MgmtUri, $PartialPath, $($Collection.ToLower())
     }
 
     $decrypted = [System.Runtime.InteropServices.marshal]::PtrToStringAuto([System.Runtime.InteropServices.marshal]::SecureStringToBSTR($AuthToken))
@@ -103,11 +114,26 @@ Function Get-EdgeObject {
         Write-Debug "Raw:`n$($TempResult | Out-String)"
     }
     Catch {
+      # Dig into the exception to get the Response details.
+      # Note that value__ is not a typo.
+      if ($Throw) {
         Throw $_
+      }
+      else {
+           $Exception = @{
+              status = $_.Exception.Response.StatusCode.value__
+              description = $_.Exception.Response.StatusDescription
+           }
+      }
     }
     Finally {
         Remove-Variable IRMParams
     }
 
-   $TempResult
+    if ($Exception) {
+         @Exception
+    }
+    else {
+         $TempResult
+    }
 }
