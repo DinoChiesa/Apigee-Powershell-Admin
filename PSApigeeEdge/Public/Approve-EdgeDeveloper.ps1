@@ -36,7 +36,7 @@ Function Approve-EdgeDeveloper {
        Name = $Name
        NoAccept = 'true'
        ContentType = 'application/octet-stream'
-       QParams = $( ConvertFrom-Hashtable @{ action = 'active' } )
+       QParams = $( ConvertFrom-HashtableToQueryString @{ action = 'active' } )
     }
     
     if ($PSBoundParameters['Debug']) {

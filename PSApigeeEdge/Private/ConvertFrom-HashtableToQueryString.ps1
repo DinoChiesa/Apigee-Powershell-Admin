@@ -1,4 +1,4 @@
-function ConvertFrom-Hashtable {
+function ConvertFrom-HashtableToQueryString {
     <#
     .SYNOPSIS
       Convert a hashtable into a query string

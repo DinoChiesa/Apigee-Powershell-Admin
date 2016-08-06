@@ -36,7 +36,7 @@ Function Revoke-EdgeDevApp {
     )
     
     $Options = @{
-       QParams = $( ConvertFrom-Hashtable @{ action = 'revoke' } )
+       QParams = $( ConvertFrom-HashtableToQueryString @{ action = 'revoke' } )
     }
     
     if ($PSBoundParameters['Debug']) {

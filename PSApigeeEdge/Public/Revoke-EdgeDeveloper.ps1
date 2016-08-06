@@ -36,7 +36,7 @@ Function Revoke-EdgeDeveloper {
        Name = $Name
        NoAccept = 'true'
        ContentType = 'application/octet-stream'
-       QParams = $( ConvertFrom-Hashtable @{ action = 'inactive' } )
+       QParams = $( ConvertFrom-HashtableToQueryString @{ action = 'inactive' } )
     }
     
     if ($PSBoundParameters['Debug']) {

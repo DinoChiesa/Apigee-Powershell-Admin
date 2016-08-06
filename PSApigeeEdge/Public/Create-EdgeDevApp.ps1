@@ -16,8 +16,15 @@ Function Create-EdgeDevApp {
         An array of strings, the names of API Products that should be enabled for this app.
 
     .PARAMETER Expiry
-        The expiry for the key. This can be a string like '90d' or '120m', or a date like '2016-12-10'.
+        Optional. The expiry for the key. This can be a string like '90d' or '120m',
+        or like '2016-12-10'.
         The default is no expiry.
+
+    .PARAMETER CallbackUrl
+        Optional. The callback URL for this app.  Used for 3-legged OAuth. 
+
+    .PARAMETER Attributes
+        Optional. Hashtable specifying custom attributes for the app. 
 
     .PARAMETER Org
         The Apigee Edge organization. The default is to use the value from Set-EdgeConnection.
@@ -36,6 +43,8 @@ Function Create-EdgeDevApp {
         [Parameter(Mandatory=$True)][string]$Developer,
         [Parameter(Mandatory=$True)][string[]]$ApiProducts,
         [string]$Expiry,
+        [string]$CallbackUrl,
+        [hashtable]$Attributes,
         [string]$Org
     )
     
@@ -65,6 +74,13 @@ Function Create-EdgeDevApp {
 
     if ($PSBoundParameters['Expiry']) {
       $Payload.Add('keyExpiresIn', $(Resolve-Expiry $Expiry) )
+    }
+    if ($PSBoundParameters['CallbackUrl']) {
+      $Payload.Add('callbackUrl', $CallbackUrl )
+    }
+    if ($PSBoundParameters['Attributes']) {
+      $a = ConvertFrom-HashtableToAttrList -Values $Attributes
+      $Payload.Add('attributes', $a )
     }
     $Options.Add( 'Payload', $Payload )
 
