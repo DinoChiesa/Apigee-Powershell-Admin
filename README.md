@@ -52,6 +52,17 @@ This project is a work-in-progress. Here's the status:
 Pull requests are welcomed.
 
 
+## Usage
+
+Clone this repo, then start powershell. Then, import the module, like this:
+
+```
+PS> Import-Module c:\path\to\PSApigeeEdge
+```
+
+Then, you can run the cmdlets provided by this module.
+
+
 ## Examples
 
 ### Import the Module
@@ -60,7 +71,7 @@ Do this first, before trying anything else.
 
 ```
 C:\Users\Dino> powershell
-PS C:\Users\Dino> Import-Module c:/random-path/Edge-Powershell-Admin/PSApigeeEdge
+PS C:\Users\Dino> Import-Module c:\random-path\Edge-Powershell-Admin\PSApigeeEdge
 ```
 
 ### List commands provided by the module
