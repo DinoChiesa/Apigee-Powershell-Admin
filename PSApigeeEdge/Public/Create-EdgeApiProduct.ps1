@@ -65,7 +65,6 @@ Function Create-EdgeApiProduct {
         $Options.Add( 'Org', $Org )
     }
 
-    
     if (!$PSBoundParameters['Name']) {
       throw [System.ArgumentNullException] "You must specify the -Name option."
     }
