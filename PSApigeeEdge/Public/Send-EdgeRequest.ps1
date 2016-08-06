@@ -8,15 +8,18 @@ Function Send-EdgeRequest {
         an object in Apigee Edge, to Update an object, Revoke a key, etc. 
 
     .PARAMETER Collection
-        Type of object to create. This may be a composite. 
+        Required. Type of object to create. This may be a composite. 
 
         Example: 'developers', 'apis', or 'apiproducts', or 'developers/dino@apigee.com/apps'
-        
-    .PARAMETER QParams
-        Hashtable, which will be serialized as query params.
 
+    .PARAMETER Name
+        Optional. a Particular name within the collection. 
+
+    .PARAMETER QParams
+        Optional. Hashtable, which will be serialized as query params.
+        
     .PARAMETER Payload
-        Hashtable, which will become the payload of the POST method. Serialized as JSON. 
+        Optional. Hashtable, which will become the payload of the POST method. Serialized as JSON. 
 
     .PARAMETER Org
         The Apigee Edge organization. 
@@ -36,6 +39,8 @@ Function Send-EdgeRequest {
     [cmdletbinding()]
     param(
         [string]$Collection,
+        [string]$Name,
+        [string]$QParams,
         [string]$Org,
         [Hashtable]$Payload
     )
@@ -44,9 +49,6 @@ Function Send-EdgeRequest {
         $DebugPreference = 'Continue'
     }
 
-    if (!$PSBoundParameters['Payload']) {
-      throw [System.ArgumentNullException] "You must specify the -Payload option."
-    }
     if( ! $PSBoundParameters.ContainsKey('Org')) {
       if( ! $MyInvocation.MyCommand.Module.PrivateData['Org']) {
         throw [System.ArgumentNullException] "use the -Org parameter to specify the organization."
@@ -70,7 +72,12 @@ Function Send-EdgeRequest {
       $AuthToken = $MyInvocation.MyCommand.Module.PrivateData['AuthToken']
     }
 
-    $BaseUri = Join-Parts -Separator "/" -Parts $MgmtUri, '/v1/o', $Org, $Collection
+    if ($PSBoundParameters['Name']) {
+      $BaseUri = Join-Parts -Separator "/" -Parts $MgmtUri, '/v1/o', $Org, $Collection, $Name
+    }
+    else {
+      $BaseUri = Join-Parts -Separator "/" -Parts $MgmtUri, '/v1/o', $Org, $Collection
+    }
     Write-Debug ( "Uri $BaseUri`n" )
 
     $decrypted = [System.Runtime.InteropServices.marshal]::PtrToStringAuto([System.Runtime.InteropServices.marshal]::SecureStringToBSTR($AuthToken))
