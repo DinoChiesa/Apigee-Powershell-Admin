@@ -36,8 +36,8 @@ Function Clear-EdgeCache {
     }
     
     $Options = @{
-       Collection = $( Join-Parts -Separator "/" -Parts 'e', $Env, 'caches' )
-       Name = $Name
+       Collection = $( Join-Parts -Separator "/" -Parts 'e', $Env, 'caches', $Name )
+       Name = 'entries'
        NoAccept = 'true'
        ContentType = 'application/octet-stream'
        QParams = $( ConvertFrom-HashtableToQueryString @{ action = 'clear' } )

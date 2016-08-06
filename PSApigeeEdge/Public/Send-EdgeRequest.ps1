@@ -19,10 +19,10 @@ Function Send-EdgeRequest {
         Optional. Hashtable, which will be serialized as query params.
         
     .PARAMETER NoAccept
-        Optional. string. Set it to turn off the Accept header.
+        Optional. A string; set it to turn off the Accept header.
         
     .PARAMETER ContentType
-        Optional. string. to override the content-type header.
+        Optional. A string, to override the content-type header.
         
     .PARAMETER Payload
         Optional. Hashtable, which will become the payload of the POST method. Serialized as JSON. 
