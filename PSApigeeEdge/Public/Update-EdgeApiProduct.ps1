@@ -1,13 +1,13 @@
-Function Create-EdgeApiProduct {
+Function Update-EdgeApiProduct {
     <#
     .SYNOPSIS
-        Create a API Product in Apigee Edge.
+        Update a API Product in Apigee Edge.
 
     .DESCRIPTION
-        Create a API Product in Apigee Edge.
+        Update a API Product in Apigee Edge.
 
     .PARAMETER Name
-        The name of the product. It must be unique for the organization.
+        The name of the product. It must exist.
 
     .PARAMETER Environments
         An array of strings, the names of environments this Product should be valid for.
@@ -47,10 +47,10 @@ Function Create-EdgeApiProduct {
     param(
         [Parameter(Mandatory=$True)][string]$Name,
         [Parameter(Mandatory=$True)][string[]]$Environments,
+        [Parameter(Mandatory=$True)][string]$DisplayName,
         [Parameter(Mandatory=$True)][string[]]$Proxies,
         [string]$Approval = 'auto',
         [hashtable]$Attributes,
-        [string]$DisplayName,
         [string]$Description,
         [string[]]$Scopes,
         [string]$Org
@@ -74,9 +74,9 @@ Function Create-EdgeApiProduct {
     if (!$PSBoundParameters['Proxies']) {
       throw [System.ArgumentNullException] "You must specify the -Proxies option."
     }
+    $Options.Add( 'Name', $Name )
 
     $Payload = @{
-      name = $Name
       environments = $Environments
       proxies = $Proxies
       approvalType = $Approval
