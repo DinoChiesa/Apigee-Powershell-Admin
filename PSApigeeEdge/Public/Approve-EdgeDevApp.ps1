@@ -35,7 +35,9 @@ Function Approve-EdgeDevApp {
         [string]$Org
     )
     
-    $Options = @{ }
+    $Options = @{
+       QParams = @{ action = 'approve' }
+    }
     
     if ($PSBoundParameters['Debug']) {
         $Options.Add( 'Debug', $Debug )
@@ -59,12 +61,6 @@ Function Approve-EdgeDevApp {
     if ($PSBoundParameters['Org']) {
         $Options.Add( 'Org', $Org )
     }
-
-    $QParams = @{
-      action = 'approve'
-    }
-
-    $Options.Add( 'QParams', $QParams )
 
     Send-EdgeRequest @Options
 }

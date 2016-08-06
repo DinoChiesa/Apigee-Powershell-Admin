@@ -35,7 +35,9 @@ Function Revoke-EdgeDevApp {
         [string]$Org
     )
     
-    $Options = @{ }
+    $Options = @{
+       QParams = @{ action = 'revoke' }
+    }
     
     if ($PSBoundParameters['Debug']) {
         $Options.Add( 'Debug', $Debug )
@@ -59,12 +61,6 @@ Function Revoke-EdgeDevApp {
     if ($PSBoundParameters['Org']) {
         $Options.Add( 'Org', $Org )
     }
-
-    $QParams = @{
-      action = 'revoke'
-    }
-
-    $Options.Add( 'QParams', $QParams )
 
     Send-EdgeRequest @Options
 }
