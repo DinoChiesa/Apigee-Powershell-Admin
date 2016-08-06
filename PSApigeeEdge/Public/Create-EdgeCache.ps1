@@ -66,14 +66,14 @@ Function Create-EdgeCache {
       throw [System.ArgumentNullException] "You must specify the -Environment option."
     }
 
-    $Options('Collection'] = $( Join-Parts -Separator '/' -Parts 'e', $Environment, 'caches' ) 
+    $Options['Collection'] = $( Join-Parts -Separator '/' -Parts 'e', $Environment, 'caches' ) 
     $Options['QParams'] = $( ConvertFrom-HashtableToQueryString @{ name = $Name } )
       
     $Payload = @{
       description = $Description
       distributed = if ($Distributed) {'true'} else {'false'}
       expirySettings = @{
-        timeoutInSec =  @ { value = $(Resolve-Expiry $Expiry)/1000 },
+        timeoutInSec =  @{ value = $(Resolve-Expiry $Expiry)/1000 }
         valuesNull = 'false'
       }
     }
