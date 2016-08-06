@@ -117,7 +117,7 @@ Function Send-EdgeRequest {
       $IRMParams.Headers.Remove('Accept')
     }
     if ($PSBoundParameters['ContentType']) {
-      $IRMParams.Headers.Set('content-type', $ContentType )
+      $IRMParams.Headers['content-type'] = $ContentType  # overwrite
     }
     
     Write-Debug ( "Running $($MyInvocation.MyCommand).`n" +
