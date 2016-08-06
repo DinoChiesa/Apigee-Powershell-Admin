@@ -1,25 +1,25 @@
-Function Deploy-EdgeApi {
+Function Export-EdgeApi {
     <#
     .SYNOPSIS
-        Deploy an apiproxy in Apigee Edge.
+        Export an apiproxy from Apigee Edge, into a zip file.
 
     .DESCRIPTION
-        Deploy a revision of an API proxy that is not yet deployed. 
+        Export an apiproxy from Apigee Edge, into a zip file.
 
     .PARAMETER Name
-        The name of the apiproxy to deploy.
-
-    .PARAMETER Env
-        The name of the environment to which to deploy the api proxy.
+        The name to use for the apiproxy, once imported
 
     .PARAMETER Revision
-        The revision of the apiproxy. 
+        The name to use for the apiproxy, once imported
+
+    .PARAMETER Dest
+        The name of the destination file, which will be a ZIP bundle.
 
     .PARAMETER Org
         The Apigee Edge organization. The default is to use the value from Set-EdgeConnection.
 
     .EXAMPLE
-        Deploy-EdgeApi -Name oauth2-pwd-cc -Env test -Revision 8
+        Import-EdgeApi -Name oauth2-pwd-cc -Source bundle.zip
 
     .FUNCTIONALITY
         ApigeeEdge
@@ -29,10 +29,9 @@ Function Deploy-EdgeApi {
     [cmdletbinding()]
     param(
         [string]$Name,
-        [string]$Env,
         [string]$Revision,
-        [string]$Org,
-        [Hashtable]$Params
+        [string]$Dest,
+        [string]$Org
     )
     
     if ($PSBoundParameters['Debug']) {
@@ -42,8 +41,8 @@ Function Deploy-EdgeApi {
     if (!$PSBoundParameters['Name']) {
       throw [System.ArgumentNullException] "You must specify the -Name option."
     }
-    if (!$PSBoundParameters['Env']) {
-      throw [System.ArgumentNullException] "You must specify the -Env option."
+    if (!$PSBoundParameters['Dest']) {
+      throw [System.ArgumentNullException] "You must specify the -Dest option."
     }
     if (!$PSBoundParameters['Revision']) {
       throw [System.ArgumentNullException] "You must specify the -Revision option."
@@ -71,32 +70,23 @@ Function Deploy-EdgeApi {
       $AuthToken = $MyInvocation.MyCommand.Module.PrivateData['AuthToken']
     }
 
-    $BaseUri = Join-Parts -Separator '/' -Parts $MgmtUri, '/v1/o', $Org, 'apis', $Name, 'revisions', $Revision, 'deployments'
-
+    $BaseUri = Join-Parts -Separator '/' -Parts $MgmtUri, '/v1/o', $Org, 'apis', $Name, 'revisions', $Revision
 
     $decrypted = [System.Runtime.InteropServices.marshal]::PtrToStringAuto([System.Runtime.InteropServices.marshal]::SecureStringToBSTR($AuthToken))
 
     $IRMParams = @{
-        Uri = $BaseUri
-        Method = 'POST'
+        Uri = "$BaseUri?format=bundle"
+        Method = 'GET'
         Headers = @{
-            Accept = 'application/json'
-            'content-type' = 'application/x-www-form-urlencoded'
             Authorization = "Basic $decrypted"
         }
-        # these will transform into query params?  postbody? 
-        Body = @{
-          action = 'deploy'
-          env = $Env
-          override = 'true'
-          delay = 30
-        }
+        OutFile = $Dest
     }
 
     Remove-Variable decrypted
 
     Try {
-        $TempResult = Invoke-RestMethod @IRMParams
+        $TempResult = Invoke-WebRequest @IRMParams
 
         Write-Debug "Raw:`n$($TempResult | Out-String)"
     }
