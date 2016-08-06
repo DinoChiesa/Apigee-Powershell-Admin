@@ -6,7 +6,7 @@ It allows Powershell scripts to do these things:
 
 | entity type   | actions             |
 | :------------ | :------------------ |
-| apis          | list, query, import or export, create, deploy or undeploy
+| apis          | list, query, import or export, create, delete, delete revision, deploy or undeploy
 | apiproducts   | list/query, create, delete, modify (change quota, or add/remove proxy)
 | developers    | list/query, create, delete
 | developer app | list/query, create, delete, edit (add credential, add product to credential)
@@ -30,8 +30,8 @@ then you have Powershell 5.0.
 
 ## Status
 
-This project is still in the "dream" stage.
-Only one method has been created, as yet. 
+This project is a work-in-progress.
+
 
 ## Examples
 
@@ -205,6 +205,53 @@ server        : {@{status=undeployed; type=System.Object[]; uUID=a4850e3b-6ce9-4
                 uUID=647de67b-1142-4c07-8b22-c5d6f85616a4}, @{status=undeployed; type=System.Object[]; uUID=6b4a729b-16e2-45c0-8560-51eb37f50ece},
                 @{status=undeployed; type=System.Object[]; uUID=589aa4f0-0a1b-492c-be1a-da3e295cf44d}...}
 state         : undeployed
+
+```
+
+### Delete an API Proxy
+
+```
+PS C:\dev\ps> Delete-EdgeApi dino-test-4
+
+
+configurationVersion : @{majorVersion=4; minorVersion=0}
+contextInfo          : Revision null of application -NA-, in organization -NA-
+name                 : dino-test-4
+policies             : {}
+proxyEndpoints       : {}
+resourceFiles        : @{resourceFile=System.Object[]}
+resources            : {}
+targetEndpoints      : {}
+targetServers        : {}
+type                 : Application
+
+
+```
+
+### Delete a revision of an API Proxy
+
+```
+PS C:\dev\ps> Delete-EdgeApi -Name oauth2-pwd-cc -Revision 3
+
+
+configurationVersion : @{majorVersion=4; minorVersion=0}
+contextInfo          : Revision 3 of application oauth2-pwd-cc, in organization cap500
+createdAt            : 1470082789542
+createdBy            : DChiesa@apigee.com
+description          : Dispense OAuth v2.0 Bearer tokens for password and client_credentials grant_types. In this proxy, the user authentication is
+                       handled by a mock service.
+displayName          : oauth2-pwd-cc
+lastModifiedAt       : 1470082789542
+lastModifiedBy       : DChiesa@apigee.com
+name                 : oauth2-pwd-cc
+policies             : {}
+proxyEndpoints       : {}
+resourceFiles        : @{resourceFile=System.Object[]}
+resources            : {}
+revision             : 3
+targetEndpoints      : {}
+targetServers        : {}
+type                 : Application
 
 ```
 
