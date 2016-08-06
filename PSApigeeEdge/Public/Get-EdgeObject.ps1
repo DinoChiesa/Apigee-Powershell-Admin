@@ -80,10 +80,10 @@ Function Get-EdgeObject {
     }
     
     if($PSBoundParameters['Name']) {
-      $BaseUri = Join-Parts -Separator '/' -Parts $MgmtUri, $PartialPath, $($Collection.ToLower()), $Name
+      $BaseUri = Join-Parts -Separator '/' -Parts $MgmtUri, $PartialPath, $Collection, $Name
     }
     else {
-      $BaseUri = Join-Parts -Separator '/' -Parts $MgmtUri, $PartialPath, $($Collection.ToLower())
+      $BaseUri = Join-Parts -Separator '/' -Parts $MgmtUri, $PartialPath, $Collection
     }
 
     $decrypted = [System.Runtime.InteropServices.marshal]::PtrToStringAuto([System.Runtime.InteropServices.marshal]::SecureStringToBSTR($AuthToken))
