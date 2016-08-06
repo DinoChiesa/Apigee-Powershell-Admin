@@ -41,13 +41,14 @@ Function Export-EdgeApi {
     if (!$PSBoundParameters['Name']) {
       throw [System.ArgumentNullException] "You must specify the -Name option."
     }
-    if (!$PSBoundParameters['Dest']) {
-      throw [System.ArgumentNullException] "You must specify the -Dest option."
-    }
     if (!$PSBoundParameters['Revision']) {
       throw [System.ArgumentNullException] "You must specify the -Revision option."
     }
-
+    if (!$PSBoundParameters['Dest']) {
+        $tstmp = [System.DateTime]::Now.ToString('yyMMdd-HHss')
+        $Dest = "${Name}-${Revision}-${tstmp}.zip"
+    }
+    
     if( ! $PSBoundParameters.ContainsKey('Org')) {
       if( ! $MyInvocation.MyCommand.Module.PrivateData['Org']) {
         throw [System.ArgumentNullException] "use the -Org parameter to specify the organization."
@@ -71,11 +72,13 @@ Function Export-EdgeApi {
     }
 
     $BaseUri = Join-Parts -Separator '/' -Parts $MgmtUri, '/v1/o', $Org, 'apis', $Name, 'revisions', $Revision
+    Write-Debug "BaseUri: $BaseUri"
+
 
     $decrypted = [System.Runtime.InteropServices.marshal]::PtrToStringAuto([System.Runtime.InteropServices.marshal]::SecureStringToBSTR($AuthToken))
-
+    
     $IRMParams = @{
-        Uri = "$BaseUri?format=bundle"
+        Uri = "${BaseUri}?format=bundle"
         Method = 'GET'
         Headers = @{
             Authorization = "Basic $decrypted"
@@ -97,5 +100,5 @@ Function Export-EdgeApi {
         Remove-Variable IRMParams
     }
 
-    $TempResult
+    $Dest
 }
