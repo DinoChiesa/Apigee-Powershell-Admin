@@ -45,8 +45,8 @@ Function Export-EdgeApi {
       throw [System.ArgumentNullException] "You must specify the -Revision option."
     }
     if (!$PSBoundParameters['Dest']) {
-        $tstmp = [System.DateTime]::Now.ToString('yyMMdd-HHss')
-        $Dest = "${Name}-${Revision}-${tstmp}.zip"
+        $tstmp = [System.DateTime]::Now.ToString('yyyyMMdd-HHmmss')
+        $Dest = "${Name}-r${Revision}-${tstmp}.zip"
     }
     
     if( ! $PSBoundParameters.ContainsKey('Org')) {

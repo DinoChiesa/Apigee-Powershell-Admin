@@ -68,12 +68,12 @@ Function Import-EdgeApi {
     $decrypted = [System.Runtime.InteropServices.marshal]::PtrToStringAuto([System.Runtime.InteropServices.marshal]::SecureStringToBSTR($AuthToken))
 
     $IRMParams = @{
-        Uri = "$BaseUri?action=import&name=$Name"
+        Uri = "${BaseUri}?action=import&name=${Name}"
         Method = 'POST'
         Headers = @{
             Accept = 'application/json'
             'content-type' = 'application/octet-stream'
-            Authorization = "Basic $decrypted"
+            Authorization = "Basic ${decrypted}"
         }
         InFile = $Source
     }
