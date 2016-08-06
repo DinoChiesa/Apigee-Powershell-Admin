@@ -1,12 +1,12 @@
 # Edge Powershell Admin module
 
-This is a module that can be used Windows Powershell module for managing Apigee Edge.
+This is a Windows Powershell module for managing Apigee Edge.
 
 The goal is to allow Powershell scripts to do these things:
 
 | entity type   | actions             |
 | :------------ | :------------------ |
-| apis          | list, query, import or export, create, delete, delete revision, deploy or undeploy
+| apis          | list, query, import, export, delete, delete revision, deploy, undeploy
 | apiproducts   | list, query, create, delete, change quota, add or remove proxy, add or remove custom attrs
 | developers    | list, query, create, delete, make active or inactive, add or remove custom attrs
 | developer app | list, query, create, delete, revoke, approve, add or remove credential, add or remove custom attrs
@@ -20,6 +20,8 @@ Not in scope:
 
 - TargetServers: list, create, edit, etc
 - keystores, truststores: adding certs, listing certs
+- apimodels
+- analytics or custom reports
 - DebugSessions (trace)
 - anything in BaaS
 - OPDK-specific things.  Like starting, stopping services, manipulating pods, etc.
@@ -35,9 +37,9 @@ This project is a work-in-progress.
 
 | entity type   | implemented              | Not implemented yet
 | :------------ | :----------------------- | :-------------
-| apis          | list, query, import or export, create, delete, delete revision, deploy or undeploy
+| apis          | list, query, import, export, delete, delete revision, deploy, undeploy
 | apiproducts   | list, query | create, delete, change quota, add or remove proxy, add or remove custom attrs
-| developers    | list, query, make active or inactive,  | create, delete, add or remove custom attrs
+| developers    | list, query, make active or inactive  | create, delete, add or remove custom attrs
 | developer app | list, query, create, delete, revoke, approve | add or remove credential, add or remove custom attrs
 | credential    | list | query, create, delete, revoke
 | kvm           |  | list, add entry, remove entry
@@ -55,7 +57,7 @@ Do this first, before trying anything else.
 
 ```
 C:\Users\Dino> powershell
-PS C:\Users\Dino> Import-Module c:/random-path/PSApigeeEdge
+PS C:\Users\Dino> Import-Module c:/random-path/Edge-Powershell-Admin/PSApigeeEdge
 ```
 
 ### List commands provided by the module
