@@ -2,14 +2,15 @@
 
 This is a module that can be used Windows Powershell module for managing Apigee Edge.
 
-It allows Powershell scripts to do these things:
+The goal is to allow Powershell scripts to do these things:
 
 | entity type   | actions             |
 | :------------ | :------------------ |
 | apis          | list, query, import or export, create, delete, delete revision, deploy or undeploy
-| apiproducts   | list/query, create, delete, modify (change quota, or add/remove proxy)
-| developers    | list/query, create, delete
-| developer app | list/query, create, delete, edit (add credential, add product to credential)
+| apiproducts   | list/query, create, delete, change quota, add or remove proxy, add or remove custom attrs
+| developers    | list/query, create, delete, make active or inactive, add or remove custom attrs
+| developer app | list/query, create, delete, revoke, add or remove credential, add or remove custom attrs
+| credential    | list/query, create, delete, revoke
 | kvm           | list, add entry, remove entry
 | cache         | create, clear, remove
 | environment   | list, query
@@ -31,6 +32,18 @@ then you have Powershell 5.0.
 ## Status
 
 This project is a work-in-progress.
+
+| entity type   | implemented actions             | Not implemented actions
+| :------------ | :------------------------------ | :-------------
+| apis          | list, query, import or export, create, delete, delete revision, deploy or undeploy
+| apiproducts   | list/query | create, delete, change quota, add or remove proxy, add or remove custom attrs
+| developers    | list/query | create, delete, make active or inactive, add or remove custom attrs
+| developer app |  | list/query, create, delete, revoke, add or remove credential, add or remove custom attrs
+| credential    |  | list/query, create, delete, revoke
+| kvm           |  | list, add entry, remove entry
+| cache         |  | create, clear, remove
+| environment   |  | list, query
+
 
 
 ## Examples
