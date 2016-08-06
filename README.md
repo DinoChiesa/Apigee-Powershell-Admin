@@ -7,7 +7,7 @@ The goal is to allow Powershell scripts to do these things:
 | entity type   | actions             |
 | :------------ | :------------------ |
 | apis          | list, query, import, export, delete, delete revision, deploy, undeploy
-| apiproducts   | list, query, create, delete, change quota, modify public/private, modify description, modify approvalType, add or remove proxy, add or remove custom attrs
+| apiproducts   | list, query, create, delete, change quota, modify public/private, modify description, modify approvalType, modify scopes, add or remove proxy, add or remove custom attrs
 | developers    | list, query, create, delete, make active or inactive, add or remove custom attrs
 | developer app | list, query, create, delete, revoke, approve, add or remove credential, add or remove custom attrs
 | credential    | list, query, create, delete, revoke, add apiproduct, remove apiproduct
@@ -39,7 +39,7 @@ This project is a work-in-progress. Here's the status:
 | entity type   | implemented              | Not implemented yet
 | :------------ | :----------------------- | :-------------
 | apis          | list, query, import, export, delete, delete revision, deploy, undeploy
-| apiproducts   | list, query, create, delete, modify description, modify approvalType, add or remove proxy, add or remove custom attrs | change quota, modify public/private 
+| apiproducts   | list, query, create, delete, modify description, modify approvalType, modify scopes, add or remove proxy, add or remove custom attrs | change quota, modify public/private 
 | developers    | list, query, make active or inactive, create, delete | add or remove custom attrs
 | developer app | list, query, create, delete, revoke, approve | add or remove credential, add or remove custom attrs
 | credential    | list | query, create, delete, revoke, add apiproduct, remove apiproduct
