@@ -208,6 +208,43 @@ state         : undeployed
 
 ```
 
+
+### Export an API Proxy
+
+```
+PS C:\dev\ps> Export-EdgeApi -Name oauth2-pwd-cc -Revision 8
+oauth2-pwd-cc-r8-20160805-175438.zip
+```
+
+
+### Import an API Proxy
+
+```
+PS C:\dev\ps> Import-EdgeApi -Name dino-test-6 -Source oauth2-pwd-cc-r8-20160805-175438.zip
+
+
+configurationVersion : @{majorVersion=4; minorVersion=0}
+contextInfo          : Revision 1 of application dino-test-6, in organization cap500
+createdAt            : 1470444956300
+createdBy            : dino@apigee.com
+description          : Dispense OAuth v2.0 Bearer tokens for password and client_credentials grant_types. In this proxy, the user authentication is
+                       handled by a mock service.
+displayName          : oauth2-pwd-cc
+lastModifiedAt       : 1470444956300
+lastModifiedBy       : dino@apigee.com
+name                 : dino-test-6
+policies             : {AE-ConsumerKey, AM-CleanResponseHeaders, AM-NoContent, AM-Response...}
+proxyEndpoints       : {oauth-dispensary, resource}
+resourceFiles        : @{resourceFile=System.Object[]}
+resources            : {jsc://dateFormat.js, jsc://groomTokenResponse.js, jsc://mapRolesToScopes.js, jsc://maybeFormatFault.js...}
+revision             : 1
+targetEndpoints      : {}
+targetServers        : {}
+type                 : Application
+
+```
+
+
 ### Delete an API Proxy
 
 ```
@@ -224,7 +261,6 @@ resources            : {}
 targetEndpoints      : {}
 targetServers        : {}
 type                 : Application
-
 
 ```
 
@@ -254,6 +290,7 @@ targetServers        : {}
 type                 : Application
 
 ```
+
 
 ## License
 
