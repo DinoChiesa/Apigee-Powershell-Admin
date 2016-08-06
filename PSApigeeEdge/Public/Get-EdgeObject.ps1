@@ -131,7 +131,7 @@ Function Get-EdgeObject {
     }
 
     if ($Exception) {
-         @Exception
+         $Exception
     }
     else {
          $TempResult
