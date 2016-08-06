@@ -7,10 +7,10 @@ Function Import-EdgeApi {
         Import an apiproxy from a zip file or directory, into Apigee Edge.
 
     .PARAMETER Name
-        The name to use for the apiproxy, once imported
+        The name to use for the apiproxy, once imported.
 
     .PARAMETER Source
-        The source of the apiproxy bundle to import
+        The source of the apiproxy bundle to import.
 
     .PARAMETER Org
         The Apigee Edge organization. The default is to use the value from Set-EdgeConnection.
@@ -25,8 +25,8 @@ Function Import-EdgeApi {
 
     [cmdletbinding()]
     param(
-        [string]$Name,
-        [string]$Source,
+        [Parameter(Mandatory=$True)][string]$Name,
+        [Parameter(Mandatory=$True)][string]$Source,
         [string]$Org
     )
     

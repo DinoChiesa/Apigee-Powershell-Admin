@@ -56,7 +56,7 @@ Function Get-EdgeDevApp {
         if ($PSBoundParameters['Id']) {
             $NameToUse = Join-Parts -Separator '/' -Parts $Developer, 'apps', $Id 
         }
-        else if ($PSBoundParameters['Name']) {
+        ElseIf ($PSBoundParameters['Name']) {
             $NameToUse = Join-Parts -Separator '/' -Parts $Developer, 'apps', $Name 
         }
         else {

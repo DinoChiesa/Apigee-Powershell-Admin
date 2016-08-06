@@ -25,7 +25,7 @@ Function Delete-EdgeApi {
 
     [cmdletbinding()]
     param(
-        [string]$Name,
+        [Parameter(Mandatory=$True)][string]$Name,
         [string]$Revision,
         [string]$Org
     )

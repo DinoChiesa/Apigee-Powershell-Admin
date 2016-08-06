@@ -1,24 +1,28 @@
-Function Create-EdgeObject {
+Function Send-EdgeRequest {
     <#
     .SYNOPSIS
-        Create an object in Apigee Edge
-
+        Send a request to Apigee Edge admin endpoint.
+        
     .DESCRIPTION
-        Create an object in Apigee Edge
+        Send a request to Apigee Edge admin endpoint. This can be used to create
+        an object in Apigee Edge, to Update an object, Revoke a key, etc. 
 
     .PARAMETER Collection
         Type of object to create. This may be a composite. 
 
         Example: 'developers', 'apis', or 'apiproducts', or 'developers/dino@apigee.com/apps'
         
+    .PARAMETER QParams
+        Hashtable, which will be serialized as query params.
+
     .PARAMETER Payload
-        Hashtable, which will become the payload of the POST method. 
+        Hashtable, which will become the payload of the POST method. Serialized as JSON. 
 
     .PARAMETER Org
         The Apigee Edge organization. 
 
     .EXAMPLE
-        Create-EdgeObject -Collection 'developers/dino@apigee.com/apps' -Payload @{
+        Send-EdgeRequest -Collection 'developers/dino@apigee.com/apps' -Payload @{
                 name  =  'abcdefg-1'
                 apiProducts = @('Product1')
                 keyExpiresIn =  86400000
@@ -66,23 +70,31 @@ Function Create-EdgeObject {
       $AuthToken = $MyInvocation.MyCommand.Module.PrivateData['AuthToken']
     }
 
-    $BaseUri = Join-Parts -Separator "/" -Parts $MgmtUri, '/v1/o', $Org, $Collection.ToLower()
+    $BaseUri = Join-Parts -Separator "/" -Parts $MgmtUri, '/v1/o', $Org, $Collection
     Write-Debug ( "Uri $BaseUri`n" )
 
     $decrypted = [System.Runtime.InteropServices.marshal]::PtrToStringAuto([System.Runtime.InteropServices.marshal]::SecureStringToBSTR($AuthToken))
+
+    if ($PSBoundParameters['QParams']) {
+         $qstring = ConvertFrom-Hashtable $QParams
+         $BaseUri = "${BaseUri}?${qstring}"
+    }
     
+
     $IRMParams = @{
         Uri = $BaseUri
         Method = 'POST'
         Headers = @{
             Accept = 'application/json'
-            'content-type' = 'application/json'
             Authorization = "Basic $decrypted"
         }
-        Body = $( $Payload | ConvertTo-JSON )
     }
-    
     Remove-Variable decrypted
+
+    if ($PSBoundParameters['Payload']) {
+        $IRMParams.Add('Body', $( $Payload | ConvertTo-JSON ) )
+        $IRMParams.Add('content-type', 'application/json')
+    }
 
     Write-Debug ( "Running $($MyInvocation.MyCommand).`n" +
                  "Invoke-RestMethod parameters:`n$($IRMParams | Format-List | Out-String)" )

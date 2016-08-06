@@ -66,5 +66,5 @@ Function Create-EdgeDevApp {
     }
     $Options.Add( 'Payload', $Payload )
 
-    Create-EdgeObject @Options
+    Send-EdgeRequest @Options
 }

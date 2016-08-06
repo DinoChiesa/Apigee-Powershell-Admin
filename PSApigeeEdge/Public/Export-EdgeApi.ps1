@@ -7,19 +7,21 @@ Function Export-EdgeApi {
         Export an apiproxy from Apigee Edge, into a zip file.
 
     .PARAMETER Name
-        The name to use for the apiproxy, once imported
+        The name of the api proxy to export. 
 
     .PARAMETER Revision
-        The name to use for the apiproxy, once imported
+        The revision of the api proxy to export. 
 
     .PARAMETER Dest
         The name of the destination file, which will be a ZIP bundle.
+        By default the zip file gets a name derived from the proxy name, the
+        revision, and the time of export. 
 
     .PARAMETER Org
         The Apigee Edge organization. The default is to use the value from Set-EdgeConnection.
 
     .EXAMPLE
-        Import-EdgeApi -Name oauth2-pwd-cc -Source bundle.zip
+        Import-EdgeApi -Name oauth2-pwd-cc -Revision 4 -Dest bundle.zip
 
     .FUNCTIONALITY
         ApigeeEdge
@@ -28,9 +30,9 @@ Function Export-EdgeApi {
 
     [cmdletbinding()]
     param(
-        [string]$Name,
-        [string]$Revision,
-        [string]$Dest,
+        [Parameter(Mandatory=$True)][string]$Name,
+        [Parameter(Mandatory=$True)][string]$Revision,
+        string]$Dest,
         [string]$Org
     )
     

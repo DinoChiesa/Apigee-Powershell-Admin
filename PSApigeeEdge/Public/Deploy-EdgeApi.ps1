@@ -28,9 +28,9 @@ Function Deploy-EdgeApi {
 
     [cmdletbinding()]
     param(
-        [string]$Name,
-        [string]$Env,
-        [string]$Revision,
+        [Parameter(Mandatory=$True)][string]$Name,
+        [Parameter(Mandatory=$True)][string]$Env,
+        [Parameter(Mandatory=$True)][string]$Revision,
         [string]$Org,
         [Hashtable]$Params
     )
