@@ -32,7 +32,7 @@ Function Export-EdgeApi {
     param(
         [Parameter(Mandatory=$True)][string]$Name,
         [Parameter(Mandatory=$True)][string]$Revision,
-        string]$Dest,
+        [string]$Dest,
         [string]$Org
     )
     

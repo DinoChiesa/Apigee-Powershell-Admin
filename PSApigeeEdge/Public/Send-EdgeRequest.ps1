@@ -93,15 +93,17 @@ Function Send-EdgeRequest {
 
     if ($PSBoundParameters['Payload']) {
         $IRMParams.Add('Body', $( $Payload | ConvertTo-JSON ) )
-        $IRMParams.Add('content-type', 'application/json')
+        $IRMParams.Headers.Add('content-type', 'application/json')
     }
-
+    else {
+        $IRMParams.Headers.Add('content-type', 'application/x-www-form-urlencoded')
+    }
+    
     Write-Debug ( "Running $($MyInvocation.MyCommand).`n" +
                  "Invoke-RestMethod parameters:`n$($IRMParams | Format-List | Out-String)" )
 
     Try {
         $TempResult = Invoke-RestMethod @IRMParams
-
         Write-Debug "Raw:`n$($TempResult | Out-String)"
     }
     Catch {

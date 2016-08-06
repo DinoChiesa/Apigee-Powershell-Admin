@@ -12,6 +12,9 @@ Function Create-EdgeDevApp {
     .PARAMETER Developer
         The id or email of the developer for which to create the app.
 
+    .PARAMETER ApiProducts
+        An array of strings, the names of API Products that should be enabled for this app.
+
     .PARAMETER Expiry
         The expiry for the key. This can be a string like '90d' or '120m', or a date like '2016-12-10'.
         The default is no expiry.
