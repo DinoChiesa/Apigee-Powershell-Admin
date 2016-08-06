@@ -9,10 +9,11 @@ function ConvertFrom-StringToQuota {
       minute, hour, day, or month. 
 
     .PARAMETER Quota
-      The string to convert.
+      The string to convert. 
 
     .RETURNVALUE
-      A hashtable of objects.
+      A hashtable like { quota = 1000; quotaTimeUnit = 'minute'; quotaInterval = 1 }
+      If the string is malformed, then an empty hashtable. 
 
     .EXAMPLE
            ConvertFrom-StringToQuota 100pm
@@ -30,11 +31,14 @@ function ConvertFrom-StringToQuota {
           $Result= @{
               quota = 0 + $match.Captures[1].value
               quotaInterval = 1
-              quotaTimeUnit = $intervals[ $match.Captures[2].value ]
+              quotaTimeUnit = switch ($match.Captures[2].value) { 
+                    m { 'minute'; }
+                    h { 'hour'; }
+                    d { 'day'; }
+                    M { 'month'; }
+               }
           }
       }
-      # Return a Hashtable like { quota = 1000; quotaTimeUnit = 'minute'; quotaInterval = 1 }
       $Result
   }
-
 }

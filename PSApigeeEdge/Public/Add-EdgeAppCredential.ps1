@@ -29,7 +29,7 @@ Function Add-EdgeAppCredential {
         The id of the developer app to retrieve.
         
     .EXAMPLE
-        Add-EdgeAppCredential -Name app-1 -Developer dchiesa@example.org -Expiry '2016-12-10' -ApiProducts @( 'Product-7' )
+        Add-EdgeAppCredential -Name DPC6 -Developer dchiesa@example.org -Expiry '2016-12-10' -ApiProducts @( 'Product-7' )
 
     .FUNCTIONALITY
         ApigeeEdge
