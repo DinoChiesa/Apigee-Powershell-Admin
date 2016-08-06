@@ -27,7 +27,6 @@ function ConvertFrom-StringToQuota {
       $Result = @{}
       $match = $regex1.Match($Value) 
       if ($match.Success) {
-          $intervals = @{ m = 'minute'; h = 'hour'; d = 'day'; M = 'month' }
           $Result= @{
               quota = 0 + $match.Captures[1].value
               quotaInterval = 1
