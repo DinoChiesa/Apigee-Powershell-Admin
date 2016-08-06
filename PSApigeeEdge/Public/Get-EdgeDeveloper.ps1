@@ -34,8 +34,8 @@ Function Get-EdgeDeveloper {
 
     [cmdletbinding()]
     param(
-        [string]$Org,
         [string]$Name,
+        [string]$Org,
         [Hashtable]$Params
     )
     

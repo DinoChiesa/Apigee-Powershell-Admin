@@ -72,14 +72,14 @@ Function Get-EdgeObject {
       $AuthToken = $MyInvocation.MyCommand.Module.PrivateData['AuthToken']
     }
 
-    if($PSBoundParameters.ContainsKey('Env')) {
+    if($PSBoundParameters['Env']) {
          $PartialPath = Join-Parts -Separator '/' -Parts '/v1/o', $Org, 'e', $Env
     }
     else {
          $PartialPath = Join-Parts -Separator '/' -Parts '/v1/o', $Org
     }
     
-    if($PSBoundParameters.ContainsKey('Name')) {
+    if($PSBoundParameters['Name']) {
       $BaseUri = Join-Parts -Separator '/' -Parts $MgmtUri, $PartialPath, $($Collection.ToLower()), $Name
     }
     else {

@@ -7,22 +7,22 @@ The goal is to allow Powershell scripts to do these things:
 | entity type   | actions             |
 | :------------ | :------------------ |
 | apis          | list, query, import or export, create, delete, delete revision, deploy or undeploy
-| apiproducts   | list/query, create, delete, change quota, add or remove proxy, add or remove custom attrs
-| developers    | list/query, create, delete, make active or inactive, add or remove custom attrs
-| developer app | list/query, create, delete, revoke, add or remove credential, add or remove custom attrs
-| credential    | list/query, create, delete, revoke
+| apiproducts   | list, query, create, delete, change quota, add or remove proxy, add or remove custom attrs
+| developers    | list, query, create, delete, make active or inactive, add or remove custom attrs
+| developer app | list, query, create, delete, revoke, add or remove credential, add or remove custom attrs
+| credential    | list, query, create, delete, revoke
 | kvm           | list, add entry, remove entry
-| cache         | create, clear, remove
+| cache         | list, query, create, clear, remove
 | environment   | list, query
 
 
 Not in scope:
 
-- TargetServers: list, create, edit
+- TargetServers: list, create, edit, etc
 - keystores, truststores: adding certs, listing certs
 - DebugSessions (trace)
 - anything in BaaS
-- OPDK-specific things.  Like starting, stopping services, etc.
+- OPDK-specific things.  Like starting, stopping services, manipulating pods, etc.
 
 ## Pre-Requisites
 
@@ -38,11 +38,11 @@ This project is a work-in-progress.
 | apis          | list, query, import or export, create, delete, delete revision, deploy or undeploy
 | apiproducts   | list/query | create, delete, change quota, add or remove proxy, add or remove custom attrs
 | developers    | list/query | create, delete, make active or inactive, add or remove custom attrs
-| developer app |  | list/query, create, delete, revoke, add or remove credential, add or remove custom attrs
+| developer app | list, query | create, delete, revoke, add or remove credential, add or remove custom attrs
 | credential    |  | list/query, create, delete, revoke
 | kvm           |  | list, add entry, remove entry
-| cache         |  | create, clear, remove
-| environment   |  list, query |
+| cache         | list, query | create, clear, remove
+| environment   | list, query |
 
 Pull requests are welcomed.
 

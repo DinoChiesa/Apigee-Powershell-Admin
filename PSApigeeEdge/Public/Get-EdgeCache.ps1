@@ -48,7 +48,7 @@ Function Get-EdgeCache {
         $Options.Add( 'Org', $Org )
     }
     if ($PSBoundParameters['Env']) {
-        $Options.Add( 'Env', $Org )
+        $Options.Add( 'Env', $Env )
     }
     if ($PSBoundParameters['Name']) {
         $Options.Add( 'Name', $Name )
