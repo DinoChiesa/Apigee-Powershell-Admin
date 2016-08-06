@@ -18,6 +18,9 @@ Function Send-EdgeRequest {
     .PARAMETER QParams
         Optional. Hashtable, which will be serialized as query params.
         
+    .PARAMETER NoAccept
+        Optional. string. Set it to turn off the Accept header.
+        
     .PARAMETER Payload
         Optional. Hashtable, which will become the payload of the POST method. Serialized as JSON. 
 
@@ -41,6 +44,7 @@ Function Send-EdgeRequest {
         [string]$Collection,
         [string]$Name,
         [string]$QParams,
+        [string]$NoAccept,
         [string]$Org,
         [Hashtable]$Payload
     )
@@ -103,6 +107,10 @@ Function Send-EdgeRequest {
     }
     else {
         $IRMParams.Headers.Add('content-type', 'application/x-www-form-urlencoded')
+    }
+    
+    if ($PSBoundParameters['NoAccept']) {
+      $IRMParams.Headers.Remove('Accept')
     }
     
     Write-Debug ( "Running $($MyInvocation.MyCommand).`n" +

@@ -34,6 +34,7 @@ Function Revoke-EdgeDeveloper {
     $Options = @{
        Collection = 'developers' 
        Name = $Name
+       NoAccept = 'true'
        QParams = $( ConvertFrom-Hashtable @{ action = 'inactive' } )
     }
     
