@@ -21,7 +21,7 @@ Function Get-EdgeDevApp {
         Get-EdgeDevApp -Org cap500
 
     .EXAMPLE
-        Get-EdgeDeveloper -Id xxxx
+        Get-EdgeDevApp -Id  32ae4dbe-2e39-4225-b994-242042089723
 
     .FUNCTIONALITY
         ApigeeEdge
@@ -48,11 +48,12 @@ Function Get-EdgeDevApp {
     if ($PSBoundParameters['Developer']) {
         $Options.Add( 'Collection', 'developers')
         if ($PSBoundParameters['Id']) {
-            $Options.Add( 'Name', Join-Parts -Separator '/' -Parts $Developer, 'apps', $Id )
+            $NameToUse = Join-Parts -Separator '/' -Parts $Developer, 'apps', $Id 
         }
         else {
-            $Options.Add( 'Name', Join-Parts -Separator '/' -Parts $Developer, 'apps' )
+            $NameToUse = Join-Parts -Separator '/' -Parts $Developer, 'apps' 
        }
+       $Options.Add( 'Name', $NameToUse )
     }
     else {
         $Options.Add( 'Collection', 'apps')

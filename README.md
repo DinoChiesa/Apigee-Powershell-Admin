@@ -65,10 +65,10 @@ C:\dev\ps>powershell
 PS C:\dev\ps> Import-Module ./PSApigeeEdge
 PS C:\dev\ps> Set-EdgeConnection -Org cap500 -User dino@apigee.com -Pass 'Secret1XYZ'
 PS C:\dev\ps> Get-EdgeDeveloper
-mpalmgre@seattlecca.org
+mpalmgre@example.org
 dchiesa@example.org
 dchiesa+workshop1@apigee.com
-mmcsweyn@seattlecca.org
+mmcsweyn@example.org
 Lois@example.com
 akshays@slalom.com
 ecerruti@gmail.com
@@ -110,7 +110,7 @@ PS C:\dev\ps> (Get-EdgeDeveloper -Params @{ expand = 'true' }).developer | Forma
 
 apps             : {my-hospitality-app-oauth, my-hospitality-app}
 companies        : {}
-email            : mpalmgre@seattlecca.org
+email            : mpalmgre@example.org
 developerId      : 0wYm1ALhbLl3er5G
 firstName        : Matt
 lastName         : Palmgren
@@ -323,6 +323,47 @@ name           : test
 properties     : @{property=System.Object[]}
 
 ```
+
+### List Developer Apps for a Developer
+
+```
+PS C:\dev\ps\PSApigeeEdge> (Get-EdgeDevApp -Developer mpalmgre@example.org -Params @{ expand = 'true' }).app
+
+accessType     : read
+appFamily      : default
+appId          : cc631102-80cd-4491-a99a-121cec08e0bb
+attributes     : {@{name=DisplayName; value=My Hospitality App oauth}, @{name=lastModified; value=2016-08-02 22:07 PM}, @{name=lastModifier;
+                 value=mpalmgre@example.org}, @{name=creationDate; value=2016-08-02 22:07 PM}}
+callbackUrl    :
+createdAt      : 1470175621212
+createdBy      : dchiesa+devportal@apigee.com
+credentials    : {@{apiProducts=System.Object[]; attributes=System.Object[]; consumerKey=9893938398398dddddddjj;
+                 consumerSecret=982kedkjdkdjdkj; expiresAt=1485727621253; issuedAt=1470175621253; scopes=System.Object[]; status=approved}}
+developerId    : 0wYm1ALhbLl3er5G
+lastModifiedAt : 1470175621212
+lastModifiedBy : dchiesa+devportal@apigee.com
+name           : my-hospitality-app-oauth
+scopes         : {}
+status         : approved
+
+accessType     : read
+appFamily      : default
+appId          : ddb7d94b-c389-4df4-a5fb-34a31e9508f7
+attributes     : {@{name=DisplayName; value=My Hospitality App}, @{name=lastModified; value=2016-08-02 21:27 PM}, @{name=lastModifier;
+                 value=mpalmgre@example.org}, @{name=creationDate; value=2016-08-02 21:27 PM}}
+callbackUrl    :
+createdAt      : 1470173267571
+createdBy      : dchiesa+devportal@apigee.com
+credentials    : {@{apiProducts=System.Object[]; attributes=System.Object[]; consumerKey=dkjdkjdkjdkjdk88181;
+                 consumerSecret=xyxyyxyyxy; expiresAt=-1; issuedAt=1470173903609; scopes=System.Object[]; status=approved}}
+developerId    : 0wYm1ALhbLl3er5G
+lastModifiedAt : 1470173903384
+lastModifiedBy : mpalmgre@example.org
+name           : my-hospitality-app
+scopes         : {}
+status         : approved
+```
+
 
 ## License
 
