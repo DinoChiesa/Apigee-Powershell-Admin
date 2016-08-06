@@ -9,7 +9,7 @@ Function Create-EdgeCache {
     .PARAMETER Name
         The name of the cache to create. It must be unique for the environment.
 
-    .PARAMETER Environment
+    .PARAMETER Env
         A string, the name of the environment for this cache. 
 
     .PARAMETER Expiry
@@ -22,7 +22,7 @@ Function Create-EdgeCache {
         A string, describing the purpose of the cache to be created. 
 
     .PARAMETER Distributed
-        Whether the cache will be distributed. Defaults to true. 
+        Whether the cache will be distributed. Defaults to false.
 
     .PARAMETER OtherAttributes
         Optional. A hashtable specifying other attributes for the cache. 
@@ -31,8 +31,7 @@ Function Create-EdgeCache {
         The Apigee Edge organization. The default is to use the value from Set-EdgeConnection.
 
     .EXAMPLE
-        Create-EdgeCache -Name 'Product-7' -Environments @('test') -Proxies @('oauth2-pwd-cc') -Attributes @{ CreatedBy = 'dino'; access = 'public' } -Quota 30pm
-
+        Create-EdgeCache -Name cache103 -Env test -Expiry 30m -Distributed 
 
     .FUNCTIONALITY
         ApigeeEdge
@@ -42,7 +41,7 @@ Function Create-EdgeCache {
     [cmdletbinding()]
     PARAM(
         [Parameter(Mandatory=$True)][string]$Name,
-        [Parameter(Mandatory=$True)][string]$Environment,
+        [Parameter(Mandatory=$True)][string]$Env,
         [string]$Expiry = '86400',
         [string]$Description = 'a general purpose cache',
         [switch]$Distributed,
@@ -62,11 +61,11 @@ Function Create-EdgeCache {
     if (!$PSBoundParameters['Name']) {
       throw [System.ArgumentNullException] "You must specify the -Name option."
     }
-    if (!$PSBoundParameters['Environment']) {
-      throw [System.ArgumentNullException] "You must specify the -Environment option."
+    if (!$PSBoundParameters['Env']) {
+      throw [System.ArgumentNullException] "You must specify the -Env option."
     }
 
-    $Options['Collection'] = $( Join-Parts -Separator '/' -Parts 'e', $Environment, 'caches' ) 
+    $Options['Collection'] = $( Join-Parts -Separator '/' -Parts 'e', $Env, 'caches' ) 
     $Options['QParams'] = $( ConvertFrom-HashtableToQueryString @{ name = $Name } )
       
     $Payload = @{

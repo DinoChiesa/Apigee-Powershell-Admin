@@ -12,7 +12,7 @@ The goal is to allow Powershell scripts to do these things:
 | developer app | list, query, create, delete, revoke, approve, add new credential, remove credential, modify custom attrs
 | credential    | list, revoke, approve, add apiproduct, remove apiproduct
 | kvm           | list, add entry, remove entry
-| cache         | list, query, create, clear, remove
+| cache         | list, query, create, delete, clear
 | environment   | list, query
 
 
@@ -44,7 +44,7 @@ This project is a work-in-progress. Here's the status:
 | developer app | list, query, create, delete, revoke, approve, add new credential, remove credential | modify custom attrs
 | credential    | list, revoke, approve, add apiproduct, remove apiproduct |
 | kvm           |  | list, add entry, remove entry
-| cache         | list, query | create, clear, remove
+| cache         | list, query, create, delete, clear | 
 | environment   | list, query |
 
 Pull requests are welcomed.

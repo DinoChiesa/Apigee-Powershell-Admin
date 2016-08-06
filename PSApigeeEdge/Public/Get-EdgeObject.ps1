@@ -37,7 +37,7 @@ Function Get-EdgeObject {
     #>
 
     [cmdletbinding()]
-    param(
+    PARAM(
         [string]$Collection,
         [string]$Name,
         [string]$Env,

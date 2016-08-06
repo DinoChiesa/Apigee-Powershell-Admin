@@ -10,7 +10,7 @@ Function Get-EdgeCache {
         The name of the cache to retrieve.
         The default is to list all caches
 
-    .PARAMETER Environment
+    .PARAMETER Env
         Required. The name of the environment to search for caches.
 
     .PARAMETER Org
@@ -26,14 +26,14 @@ Function Get-EdgeCache {
 
     [cmdletbinding()]
     PARAM(
-        [Parameter(Mandatory=$True)][string]$Environment,
+        [Parameter(Mandatory=$True)][string]$Env,
         [string]$Name,
         [string]$Org,
         [Hashtable]$Params
     )
     
-    if (!$PSBoundParameters['Environment']) {
-        throw [System.ArgumentNullException] "The -Environment parameter is required."
+    if (!$PSBoundParameters['Env']) {
+        throw [System.ArgumentNullException] "The -Env parameter is required."
     }
     $Options = @{ }
     
@@ -45,7 +45,7 @@ Function Get-EdgeCache {
         $Options.Add( 'Org', $Org )
     }
 
-    $Options['Collection'] = $( Join-Parts -Separator '/' -Parts 'e', $Environment, 'caches' )
+    $Options['Collection'] = $( Join-Parts -Separator '/' -Parts 'e', $Env, 'caches' )
 
     if ($PSBoundParameters['Name']) {
         $Options.Add( 'Name', $Name )

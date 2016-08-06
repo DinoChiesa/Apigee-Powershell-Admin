@@ -60,9 +60,10 @@ Function Revoke-EdgeDevApp {
     }
     
     if ($PSBoundParameters['Debug']) {
+        $DebugPreference = 'Continue'
         $Options.Add( 'Debug', $Debug )
     }
-    
+
     if ($PSBoundParameters['Developer']) {
         if (!$PSBoundParameters['Name']) {
           throw [System.ArgumentNullException] 'use -Name with -Developer'

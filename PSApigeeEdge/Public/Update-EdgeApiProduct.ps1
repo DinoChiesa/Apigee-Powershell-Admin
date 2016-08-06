@@ -55,7 +55,7 @@ Function Update-EdgeApiProduct {
     #>
 
     [cmdletbinding()]
-    param(
+    PARAM(
         [Parameter(Mandatory=$True)][string]$Name,
         [Parameter(Mandatory=$True)][string[]]$Environments,
         [Parameter(Mandatory=$True)][string[]]$Proxies,

@@ -1,20 +1,19 @@
-Function Revoke-EdgeDeveloper {
+Function Clear-EdgeCache {
     <#
     .SYNOPSIS
-        Revoke a developer in Apigee Edge.
-
-    .DESCRIPTION
-        Set the status of the developer to 'Inactive', which means none of the credentials
-        belonging to this developer will be treated as valid, at runtime. 
+        Clear the entries in a cache in Apigee Edge.
 
     .PARAMETER Name
-        The email or id of the Developer to revoke. 
-
+        The name of the cache to clear.
+        
+    .PARAMETER Env
+        The Edge environment that contains the named cache.
+        
     .PARAMETER Org
         The Apigee Edge organization. The default is to use the value from Set-EdgeConnection.
 
     .EXAMPLE
-        Revoke-EdgeDeveloper -Name Elaine@example.org
+        Clear-EdgeCache -Name cache101 -Env test
 
     .FUNCTIONALITY
         ApigeeEdge
@@ -24,19 +23,24 @@ Function Revoke-EdgeDeveloper {
     [cmdletbinding()]
     PARAM(
         [Parameter(Mandatory=$True)][string]$Name,
+        [Parameter(Mandatory=$True)][string]$Env,
         [string]$Org
     )
     
+    
     if (!$PSBoundParameters['Name']) {
-       throw [System.ArgumentNullException] 'the -Name parameter is required.'
+        throw [System.ArgumentNullException] "The -Name parameter is required."
+    }
+    if (!$PSBoundParameters['Env']) {
+        throw [System.ArgumentNullException] "The -Env parameter is required."
     }
     
     $Options = @{
-       Collection = 'developers' 
+       Collection = $( Join-Parts -Separator "/" -Parts 'e', $Env, 'caches' )
        Name = $Name
        NoAccept = 'true'
        ContentType = 'application/octet-stream'
-       QParams = $( ConvertFrom-HashtableToQueryString @{ action = 'inactive' } )
+       QParams = $( ConvertFrom-HashtableToQueryString @{ action = 'clear' } )
     }
     
     if ($PSBoundParameters['Debug']) {

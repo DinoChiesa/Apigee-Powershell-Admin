@@ -9,14 +9,14 @@ Function Delete-EdgeCache {
     .PARAMETER Name
         The name of the cache to delete.
         
-    .PARAMETER Environment
-        The name of the cache to delete.
+    .PARAMETER Env
+        The Edge environment that contains the named cache. 
         
     .PARAMETER Org
         The Apigee Edge organization. The default is to use the value from Set-EdgeConnection.
 
     .EXAMPLE
-        Delete-EdgeApi dino-test-2
+        Delete-EdgeCache -Env test  cache101
 
     .FUNCTIONALITY
         ApigeeEdge
@@ -26,7 +26,7 @@ Function Delete-EdgeCache {
     [cmdletbinding()]
     PARAM(
         [Parameter(Mandatory=$True)][string]$Name,
-        [Parameter(Mandatory=$True)][string]$Environment,
+        [Parameter(Mandatory=$True)][string]$Env,
         [string]$Org
     )
     
@@ -39,11 +39,11 @@ Function Delete-EdgeCache {
     if (!$PSBoundParameters['Name']) {
         throw [System.ArgumentNullException] "The -Name parameter is required."
     }
-    if (!$PSBoundParameters['Environment']) {
-        throw [System.ArgumentNullException] "The -Environment parameter is required."
+    if (!$PSBoundParameters['Env']) {
+        throw [System.ArgumentNullException] "The -Env parameter is required."
     }
     
-    $Options['Collection'] = $(Join-Parts -Separator "/" -Parts 'e', $Environment, 'caches' )
+    $Options['Collection'] = $(Join-Parts -Separator "/" -Parts 'e', $Env, 'caches' )
     $Options.Add( 'Name', $Name )
 
     Write-Debug ( "Options @Options`n" )
