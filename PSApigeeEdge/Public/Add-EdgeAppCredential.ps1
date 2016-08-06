@@ -8,11 +8,9 @@ Function Add-EdgeAppCredential {
 
     .PARAMETER Name
         The name of the developer app to which the credential will be added.
-        You must also specify -Developer when using this option. 
 
     .PARAMETER Developer
         The id or email of the developer that owns the app to which the credential will be added.
-        Use this when employing the -Name option. 
 
     .PARAMETER ApiProducts
         An array of strings, the names of API Products that should be enabled for this credential.
@@ -25,9 +23,6 @@ Function Add-EdgeAppCredential {
     .PARAMETER Org
         The Apigee Edge organization. The default is to use the value from Set-EdgeConnection.
 
-    .PARAMETER Params
-        The id of the developer app to retrieve.
-        
     .EXAMPLE
         Add-EdgeAppCredential -Name DPC6 -Developer dchiesa@example.org -Expiry '2016-12-10' -ApiProducts @( 'Product-7' )
 
