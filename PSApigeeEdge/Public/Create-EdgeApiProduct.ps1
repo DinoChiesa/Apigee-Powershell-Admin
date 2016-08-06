@@ -31,11 +31,16 @@ Function Create-EdgeApiProduct {
     .PARAMETER Scopes
         Optional. An array of strings, each one a valid scope for this product.
             
+    .PARAMETER Quota
+        Optional. Aa string of the form "1000pm" implying 1000 per minute, which represents the quota.
+        The suffix can be 'pm', 'ph', 'pd', 'pM', for minute, hour, day, month. If not
+        specified, no Quota applies. 
+            
     .PARAMETER Org
         The Apigee Edge organization. The default is to use the value from Set-EdgeConnection.
 
     .EXAMPLE
-        Create-EdgeApiProduct -Name 'Product-7' -Environments @('test') -Proxies @('oauth2-pwd-cc') -Attributes @{ CreatedBy = 'dino' }
+        Create-EdgeApiProduct -Name 'Product-7' -Environments @('test') -Proxies @('oauth2-pwd-cc') -Attributes @{ CreatedBy = 'dino'; access = 'public' } -Quota 30pm
 
 
     .FUNCTIONALITY
@@ -53,6 +58,7 @@ Function Create-EdgeApiProduct {
         [string]$DisplayName,
         [string]$Description,
         [string[]]$Scopes,
+        [string]$Quota,
         [string]$Org
     )
     
@@ -99,6 +105,11 @@ Function Create-EdgeApiProduct {
     if ($PSBoundParameters['Scopes']) {
       $Payload.Add('scopes', $Scopes )
     }
+    if ($PSBoundParameters['Quota']) {
+      $quotaInfo = ConvertFrom-StringToQuota $Quota
+      $quotaInfo.getEnumerator() | Foreach-Object { $Payload[$_.Key] = $_.Value  }
+    }
+
     $Options.Add( 'Payload', $Payload )
 
     Send-EdgeRequest @Options

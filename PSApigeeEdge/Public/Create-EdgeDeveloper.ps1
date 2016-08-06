@@ -18,6 +18,9 @@ Function Create-EdgeDeveloper {
     .PARAMETER Last
         The last (sur-) name of the developer to create.
 
+    .PARAMETER Attributes
+        Optional. Hashtable specifying custom attributes for the developer.
+
     .PARAMETER Org
         The Apigee Edge organization. The default is to use the value from Set-EdgeConnection.
 
@@ -35,6 +38,7 @@ Function Create-EdgeDeveloper {
         [Parameter(Mandatory=$True)][string]$Email,
         [Parameter(Mandatory=$True)][string]$First,
         [Parameter(Mandatory=$True)][string]$Last,
+        [hashtable]$Attributes,
         [string]$Org
     )
     
@@ -70,6 +74,10 @@ Function Create-EdgeDeveloper {
       status = 'active'
     }
 
+    if ($PSBoundParameters['Attributes']) {
+      $a = @(ConvertFrom-HashtableToAttrList -Values $Attributes)
+      $Payload.Add('attributes', $a )
+    }
     $Options.Add( 'Payload', $Payload )
 
     Send-EdgeRequest @Options
