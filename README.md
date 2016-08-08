@@ -95,11 +95,12 @@ NB: The above list is not complete.
 
 ```
 PS C:\dev\ps> Import-Module ./PSApigeeEdge
-PS C:\dev\ps> Set-EdgeConnection -Org cap500 -User dino@apigee.com -Pass 'Secret1XYZ'
+PS C:\dev\ps> Set-EdgeConnection -Org cap500 -User dino@apigee.com
+Please enter the password for dino@apigee.com: ***********
 ```
 
 All commands that interact with Apigee Edge rely on this connection information.
-You need to do this only once during a Powershell session.
+You need to do this only once during a Powershell session. If you wish to connect as a different user, you should run this command again. 
 
 
 ### List Developers
