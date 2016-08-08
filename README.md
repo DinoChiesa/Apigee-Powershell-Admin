@@ -54,13 +54,41 @@ Pull requests are welcomed.
 
 ## Usage
 
-Clone this repo, then start powershell. Then, import the module, like this:
+You have two options.
+
+A. Install from Powershell Gallery - this will get you the latest "Released" version of the module.
+B. Clone from github - this will get you the latest source.
+
+### Option A: install from the Powershell Gallery
+
+1. start powershell:  `powershell`
+
+2. Run `install-module`
+
+```
+PS C:\dev\ps> Install-Module PSApigeeEdge
+
+Untrusted repository
+You are installing the modules from an untrusted repository. If you trust this repository, change its
+InstallationPolicy value by running the Set-PSRepository cmdlet. Are you sure you want to install the modules from
+'PSGallery'?
+[Y] Yes  [A] Yes to All  [N] No  [L] No to All  [S] Suspend  [?] Help (default is "N"): Y
+```
+
+### Option B: Clone from Github
+
+1. Clone the repo:  `git clone git@github.com:DinoChiesa/Edge-Powershell-Admin.git`
+
+2. Start powershell: `powershell`
+
+3. import the module, like this:
 
 ```
 PS> Import-Module c:\path\to\PSApigeeEdge
 ```
 
 Then, you can run the cmdlets provided by this module.
+
 
 
 ## Examples
