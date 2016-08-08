@@ -54,12 +54,11 @@ Pull requests are welcomed.
 
 ## Usage
 
-You have two options.
-
-A. Install from Powershell Gallery - this will get you the latest "Released" version of the module.
-B. Clone from github - this will get you the latest source.
+You have two options. You need to use only one of these options. 
 
 ### Option A: install from the Powershell Gallery
+
+This will get you the latest "Released" version of the module.
 
 1. start powershell:  `powershell`
 
@@ -76,6 +75,9 @@ InstallationPolicy value by running the Set-PSRepository cmdlet. Are you sure yo
 ```
 
 ### Option B: Clone from Github
+
+This will get you the latest source.
+
 
 1. Clone the repo:  `git clone git@github.com:DinoChiesa/Edge-Powershell-Admin.git`
 
