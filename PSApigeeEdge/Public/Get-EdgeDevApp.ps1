@@ -35,21 +35,9 @@ Function Get-EdgeDevApp {
 
     [cmdletbinding()]
     PARAM(
-        [Parameter(Position=0,
-         ParameterSetName="byName",
-         ValueFromPipeline=$True)]
         [string]$Name,
-        
-        [Parameter(Position=1,
-         ParameterSetName="byName",
-         ValueFromPipeline=$True)]
         [string]$Developer,
-        
-        [Parameter(Position=0,
-         ParameterSetName="byId",
-         ValueFromPipeline=$True)]
         [string]$Id,
-        
         [string]$Org,
         [Hashtable]$Params
     )
