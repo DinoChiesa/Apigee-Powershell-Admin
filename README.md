@@ -427,6 +427,10 @@ status         : approved
 ```
 
 
+## Other Notes
+
+This module is available [on the Powershell Gallery](https://www.powershellgallery.com/packages/PSApigeeEdge)
+
 ## License
 
 This is licensed under [the Apache 2.0 source license](LICENSE).
@@ -434,6 +438,6 @@ This is licensed under [the Apache 2.0 source license](LICENSE).
 ## Bugs
 
 * There are no tests for this module.
-* The module is not published to the Powershell Module Gallery
+
 
 
