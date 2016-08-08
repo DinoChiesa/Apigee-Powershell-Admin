@@ -31,7 +31,7 @@ Function Set-EdgeConnection {
     [cmdletbinding()]
     param(
         [string]$Org,
-        [string]$User,
+        [Parameter(Mandatory=$True)][string]$User,
         [string]$Pass,
         [string]$MgmtUri = 'https://api.enterprise.apigee.com'
     )
@@ -41,8 +41,12 @@ Function Set-EdgeConnection {
     }
     
     if(! $PSBoundParameters.ContainsKey('User') -or 
-      ! $PSBoundParameters.ContainsKey('Pass')) {
         throw [System.ArgumentNullException] "provide -User and -Pass."
+    }
+
+    if (! $PSBoundParameters.ContainsKey('Pass')) {
+      $SecurePass = Read-Host -assecurestring "Please enter your password: "
+      $Pass = [System.Runtime.InteropServices.marshal]::PtrToStringAuto([System.Runtime.InteropServices.marshal]::SecureStringToBSTR($SecurePass))
     }
     
     $MyInvocation.MyCommand.Module.PrivateData['MgmtUri'] = $MgmtUri
