@@ -55,15 +55,10 @@ Function Get-EdgeObject {
     if( ! $MyInvocation.MyCommand.Module.PrivateData['MgmtUri']) {
       throw [System.ArgumentNullException] "use Set-EdgeConnection to specify the Edge connection information."
     }
-    else {
-      $MgmtUri = $MyInvocation.MyCommand.Module.PrivateData['MgmtUri']
-    }
+    $MgmtUri = $MyInvocation.MyCommand.Module.PrivateData['MgmtUri']
 
-    if( ! $MyInvocation.MyCommand.Module.PrivateData['AuthToken']) {
+    if( ! $MyInvocation.MyCommand.Module.PrivateData['SecurePass']) {
       throw [System.ArgumentNullException] "use Set-EdgeConnection to specify the Edge connection information."
-    }
-    else {
-      $AuthToken = $MyInvocation.MyCommand.Module.PrivateData['AuthToken']
     }
 
     if( ! $PSBoundParameters.ContainsKey('Org')) {
@@ -89,8 +84,6 @@ Function Get-EdgeObject {
       $BaseUri = Join-Parts -Separator '/' -Parts $MgmtUri, $PartialPath, $Collection
     }
 
-    $decrypted = [System.Runtime.InteropServices.marshal]::PtrToStringAuto([System.Runtime.InteropServices.marshal]::SecureStringToBSTR($AuthToken))
-    
     Write-Debug ( "Uri $BaseUri`n" )
 
     $IRMParams = @{
@@ -98,12 +91,10 @@ Function Get-EdgeObject {
         Method = 'Get'
         Headers = @{
             Accept = 'application/json'
-            Authorization = "Basic $decrypted"
+            Authorization = 'Basic ' + $( Get-EdgeBasicAuth )
         }
     }
     
-    Remove-Variable decrypted
-
     if($PSBoundParameters.ContainsKey('Params')) {
         $IRMParams.Add( 'Body', $Params )
     }

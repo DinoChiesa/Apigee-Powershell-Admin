@@ -52,20 +52,13 @@ Function Import-EdgeApi {
     if( ! $MyInvocation.MyCommand.Module.PrivateData['MgmtUri']) {
       throw [System.ArgumentNullException] 'use Set-EdgeConnection to specify the Edge connection information.'
     }
-    else {
-      $MgmtUri = $MyInvocation.MyCommand.Module.PrivateData['MgmtUri']
-    }
+    $MgmtUri = $MyInvocation.MyCommand.Module.PrivateData['MgmtUri']
 
-    if( ! $MyInvocation.MyCommand.Module.PrivateData['AuthToken']) {
+    if( ! $MyInvocation.MyCommand.Module.PrivateData['SecurePass']) {
       throw [System.ArgumentNullException] 'use Set-EdgeConnection to specify the Edge connection information.'
-    }
-    else {
-      $AuthToken = $MyInvocation.MyCommand.Module.PrivateData['AuthToken']
     }
 
     $BaseUri = Join-Parts -Separator '/' -Parts $MgmtUri, '/v1/o', $Org, 'apis'
-
-    $decrypted = [System.Runtime.InteropServices.marshal]::PtrToStringAuto([System.Runtime.InteropServices.marshal]::SecureStringToBSTR($AuthToken))
 
     $IRMParams = @{
         Uri = "${BaseUri}?action=import&name=${Name}"
@@ -73,12 +66,10 @@ Function Import-EdgeApi {
         Headers = @{
             Accept = 'application/json'
             'content-type' = 'application/octet-stream'
-            Authorization = "Basic ${decrypted}"
+            Authorization = 'Basic ' + $( Get-EdgeBasicAuth )
         }
         InFile = $Source
     }
-
-    Remove-Variable decrypted
 
     Try {
         $TempResult = Invoke-WebRequest @IRMParams

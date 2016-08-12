@@ -52,20 +52,12 @@ Function Delete-EdgeObject {
     if( ! $MyInvocation.MyCommand.Module.PrivateData['MgmtUri']) {
       throw [System.ArgumentNullException] "use Set-EdgeConnection to specify the Edge connection information."
     }
-    else {
-      $MgmtUri = $MyInvocation.MyCommand.Module.PrivateData['MgmtUri']
-    }
+    $MgmtUri = $MyInvocation.MyCommand.Module.PrivateData['MgmtUri']
 
-    if( ! $MyInvocation.MyCommand.Module.PrivateData['AuthToken']) {
+    if( ! $MyInvocation.MyCommand.Module.PrivateData['SecurePass']) {
       throw [System.ArgumentNullException] "use Set-EdgeConnection to specify the Edge connection information."
     }
-    else {
-      $AuthToken = $MyInvocation.MyCommand.Module.PrivateData['AuthToken']
-    }
-
     $BaseUri = Join-Parts -Separator "/" -Parts $MgmtUri, '/v1/o', $Org, $Collection, $Name
-
-    $decrypted = [System.Runtime.InteropServices.marshal]::PtrToStringAuto([System.Runtime.InteropServices.marshal]::SecureStringToBSTR($AuthToken))
     
     Write-Debug ( "Uri $BaseUri`n" )
 
@@ -74,12 +66,10 @@ Function Delete-EdgeObject {
         Method = 'Delete'
         Headers = @{
             Accept = 'application/json'
-            Authorization = "Basic $decrypted"
+            Authorization = 'Basic ' + $( Get-EdgeBasicAuth )
         }
     }
     
-    Remove-Variable decrypted
-
     Write-Debug ( "Running $($MyInvocation.MyCommand).`n" +
                  "Invoke-RestMethod parameters:`n$($IRMParams | Format-List | Out-String)" )
 

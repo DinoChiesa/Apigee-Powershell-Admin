@@ -69,15 +69,10 @@ Function Send-EdgeRequest {
     if( ! $MyInvocation.MyCommand.Module.PrivateData['MgmtUri']) {
       throw [System.ArgumentNullException] "use Set-EdgeConnection to specify the Edge connection information."
     }
-    else {
-      $MgmtUri = $MyInvocation.MyCommand.Module.PrivateData['MgmtUri']
-    }
+    $MgmtUri = $MyInvocation.MyCommand.Module.PrivateData['MgmtUri']
 
-    if( ! $MyInvocation.MyCommand.Module.PrivateData['AuthToken']) {
+    if( ! $MyInvocation.MyCommand.Module.PrivateData['SecurePass']) {
       throw [System.ArgumentNullException] "use Set-EdgeConnection to specify the Edge connection information."
-    }
-    else {
-      $AuthToken = $MyInvocation.MyCommand.Module.PrivateData['AuthToken']
     }
 
     if ($PSBoundParameters['Name']) {
@@ -86,8 +81,6 @@ Function Send-EdgeRequest {
     else {
       $BaseUri = Join-Parts -Separator "/" -Parts $MgmtUri, '/v1/o', $Org, $Collection
     }
-
-    $decrypted = [System.Runtime.InteropServices.marshal]::PtrToStringAuto([System.Runtime.InteropServices.marshal]::SecureStringToBSTR($AuthToken))
 
     if ($PSBoundParameters['QParams']) {
          Write-Debug ( "QParams: $QParams`n" )
@@ -100,10 +93,9 @@ Function Send-EdgeRequest {
         Method = 'POST'
         Headers = @{
             Accept = 'application/json'
-            Authorization = "Basic $decrypted"
+            Authorization = 'Basic ' + $( Get-EdgeBasicAuth )
         }
     }
-    Remove-Variable decrypted
 
     if ($PSBoundParameters['Payload']) {
         $IRMParams.Add('Body', $( $Payload | ConvertTo-JSON ) )

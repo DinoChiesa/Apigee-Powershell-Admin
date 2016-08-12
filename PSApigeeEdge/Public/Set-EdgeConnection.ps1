@@ -46,20 +46,9 @@ Function Set-EdgeConnection {
 
     if (! $PSBoundParameters.ContainsKey('Pass')) {
          $SecurePass = Read-Host -assecurestring "Please enter the password for ${User}"
-         $Pass = [System.Runtime.InteropServices.marshal]::PtrToStringAuto([System.Runtime.InteropServices.marshal]::SecureStringToBSTR($SecurePass))
     }
     
     $MyInvocation.MyCommand.Module.PrivateData['MgmtUri'] = $MgmtUri
     $MyInvocation.MyCommand.Module.PrivateData['User'] = $User
-    $pair = "${User}:${Pass}"
-    $bytes = [System.Text.Encoding]::UTF8.GetBytes($pair)
-    $base64 = [System.Convert]::ToBase64String($bytes)
-    $secureString = ConvertTo-SecureString -Force -AsPlainText $base64
-    $MyInvocation.MyCommand.Module.PrivateData['AuthToken'] = $secureString
-    
-    Remove-Variable base64
-    Remove-Variable Pass
-    Remove-Variable pair
-    Remove-Variable bytes
-    Remove-Variable secureString
+    $MyInvocation.MyCommand.Module.PrivateData['SecurePass'] = $SecurePass
 }

@@ -61,20 +61,13 @@ Function UnDeploy-EdgeApi {
     if( ! $MyInvocation.MyCommand.Module.PrivateData['MgmtUri']) {
       throw [System.ArgumentNullException] 'use Set-EdgeConnection to specify the Edge connection information.'
     }
-    else {
-      $MgmtUri = $MyInvocation.MyCommand.Module.PrivateData['MgmtUri']
-    }
+    $MgmtUri = $MyInvocation.MyCommand.Module.PrivateData['MgmtUri']
 
-    if( ! $MyInvocation.MyCommand.Module.PrivateData['AuthToken']) {
+    if( ! $MyInvocation.MyCommand.Module.PrivateData['SecurePass']) {
       throw [System.ArgumentNullException] 'use Set-EdgeConnection to specify the Edge connection information.'
-    }
-    else {
-      $AuthToken = $MyInvocation.MyCommand.Module.PrivateData['AuthToken']
     }
 
     $BaseUri = Join-Parts -Separator '/' -Parts $MgmtUri, '/v1/o', $Org, 'apis', $Name, 'revisions', $Revision, 'deployments'
-
-    $decrypted = [System.Runtime.InteropServices.marshal]::PtrToStringAuto([System.Runtime.InteropServices.marshal]::SecureStringToBSTR($AuthToken))
 
     $IRMParams = @{
         Uri = $BaseUri
@@ -82,7 +75,7 @@ Function UnDeploy-EdgeApi {
         Headers = @{
             Accept = 'application/json'
             'content-type' = 'application/x-www-form-urlencoded'
-            Authorization = "Basic $decrypted"
+            Authorization = 'Basic ' + $( Get-EdgeBasicAuth )
         }
         # these will transform into query params?  postbody? 
         Body = @{
