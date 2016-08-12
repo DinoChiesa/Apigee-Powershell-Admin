@@ -81,7 +81,7 @@ Function Export-EdgeApi {
     }
 
     Try {
-        $TempResult = Invoke-WebRequest @IRMParams
+        $TempResult = Invoke-WebRequest @IRMParams -UseBasicParsing 
 
         Write-Debug "Raw:`n$($TempResult | Out-String)"
     }
