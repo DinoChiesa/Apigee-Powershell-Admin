@@ -1,15 +1,17 @@
 Function Get-EdgeObject {
     <#
     .SYNOPSIS
-        Get one or more objects from Apigee Edge
+        Get one or more objects from Apigee Edge.
 
     .DESCRIPTION
-        Get one or more objects from Apigee Edge, such as developers, apis, apiproducts
+        Get one or more objects from Apigee Edge, such as developers, apis, apiproducts.
+        This is a lower-level cmdlet. You may want to try the higher-level cmdlets like
+        Get-EdgeApi or Get-EdgeDeveloper, etc. 
 
     .PARAMETER Collection
         Type of object to query for. 
 
-        Example: 'developers', 'apis', or 'apiproducts'
+        Example: 'developers', 'apis', 'caches', or 'apiproducts'
 
     .PARAMETER Name
         Name of the object to retrieve.
@@ -19,9 +21,10 @@ Function Get-EdgeObject {
 
     .PARAMETER Env
         The Apigee Edge environment. This parameter does not apply to all object types.
+        It applies to 'caches' and 'kvms' but not developers or apis. 
 
     .PARAMETER Params
-        Hash table with query options for the specific collection type
+        Hash table with query options for the specific collection type.
 
     .EXAMPLE
         Get-EdgeObject -Collection developers -Org cap500
@@ -49,15 +52,6 @@ Function Get-EdgeObject {
         $DebugPreference = 'Continue'
     }
 
-    if( ! $PSBoundParameters.ContainsKey('Org')) {
-      if( ! $MyInvocation.MyCommand.Module.PrivateData['Org']) {
-        throw [System.ArgumentNullException] "use the -Org parameter to specify the organization."
-      }
-      else {
-        $Org = $MyInvocation.MyCommand.Module.PrivateData['Org']
-      }
-    }
-
     if( ! $MyInvocation.MyCommand.Module.PrivateData['MgmtUri']) {
       throw [System.ArgumentNullException] "use Set-EdgeConnection to specify the Edge connection information."
     }
@@ -70,6 +64,15 @@ Function Get-EdgeObject {
     }
     else {
       $AuthToken = $MyInvocation.MyCommand.Module.PrivateData['AuthToken']
+    }
+
+    if( ! $PSBoundParameters.ContainsKey('Org')) {
+      if( ! $MyInvocation.MyCommand.Module.PrivateData['Org']) {
+        throw [System.ArgumentNullException] "use the -Org parameter to specify the organization."
+      }
+      else {
+        $Org = $MyInvocation.MyCommand.Module.PrivateData['Org']
+      }
     }
 
     if($PSBoundParameters['Env']) {
