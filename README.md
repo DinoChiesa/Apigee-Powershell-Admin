@@ -29,7 +29,11 @@ Not in scope:
 - anything in BaaS
 - OPDK-specific things.  Like starting or stopping services, manipulating pods, adding servers into environments, etc.
 
-## Pre-Requisites
+## A Quick Tour
+
+<iframe width="420" height="315" src="https://www.youtube.com/embed/5xwo4PAOeFM" frameborder="0" allowfullscreen></iframe>
+
+## Pre-Requisites to use
 
 You need Windows, and Powershell v3.0 or later. If you're running Windows 10,
 then you have Powershell 5.0, so you're good.
