@@ -31,7 +31,10 @@ Not in scope:
 
 ## A Quick Tour
 
-<iframe width="420" height="315" src="https://www.youtube.com/embed/5xwo4PAOeFM" frameborder="0" allowfullscreen></iframe>
+[![Quick Tour](http://img.youtube.com/vi/5xwo4PAOeFM/0.jpg)](http://www.youtube.com/watch?v=5xwo4PAOeFM "Quick Tour")
+
+
+<iframe width="420" height="315" src="https://www.youtube.com/embed/" frameborder="0" allowfullscreen></iframe>
 
 ## Pre-Requisites to use
 
