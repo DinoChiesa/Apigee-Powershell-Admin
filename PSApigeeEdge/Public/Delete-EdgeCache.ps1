@@ -35,6 +35,9 @@ Function Delete-EdgeCache {
         $DebugPreference = 'Continue'
         $Options.Add( 'Debug', $Debug )
     }
+    if ($PSBoundParameters['Org']) {
+        $Options.Add( 'Org', $Org )
+    }
     
     if (!$PSBoundParameters['Name']) {
         throw [System.ArgumentNullException] "The -Name parameter is required."

@@ -51,6 +51,9 @@ Function Get-EdgeApi {
     if ($PSBoundParameters['Debug']) {
         $Options.Add( 'Debug', $Debug )
     }
+    if ($PSBoundParameters['Org']) {
+        $Options.Add( 'Org', $Org )
+    }
     if ($PSBoundParameters['Params']) {
         $Options.Add( 'Params', $Params )
     }

@@ -7,7 +7,7 @@ Function Get-EdgeAppCredential {
         Get the list of credentials for a developer app.
 
     .PARAMETER AppId
-        The id of the developer app to retrieve.
+        Required. The id of the developer app to retrieve.
 
     .PARAMETER Org
         The Apigee Edge organization. The default is to use the value from Set-EdgeConnection.
@@ -22,7 +22,7 @@ Function Get-EdgeAppCredential {
 
     [cmdletbinding()]
     param(
-        [string]$AppId,
+        [Parameter(Mandatory=$True)][string]$AppId,
         [string]$Org,
         [Hashtable]$Params
     )
@@ -34,6 +34,9 @@ Function Get-EdgeAppCredential {
     }
     if ($PSBoundParameters['Params']) {
         $Options.Add( 'Params', $Params )
+    }
+    if ($PSBoundParameters['Org']) {
+        $Options.Add( 'Org', $Org )
     }
     if (! $PSBoundParameters['AppId']) {
       throw [System.ArgumentNullException] 'missing required parameter -AppId'

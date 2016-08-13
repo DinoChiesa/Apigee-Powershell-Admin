@@ -39,6 +39,9 @@ Function Delete-EdgeDeveloper {
     if ($PSBoundParameters['Debug']) {
         $Options.Add( 'Debug', $Debug )
     }
+    if ($PSBoundParameters['Org']) {
+        $Options.Add( 'Org', $Org )
+    }
     
     Write-Debug ( "Options @Options`n" )
 

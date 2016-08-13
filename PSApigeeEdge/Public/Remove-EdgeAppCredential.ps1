@@ -51,6 +51,9 @@ Function Remove-EdgeAppCredential {
     if ($PSBoundParameters['Debug']) {
         $Options.Add( 'Debug', $Debug )
     }
+    if ($PSBoundParameters['Org']) {
+        $Options.Add( 'Org', $Org )
+    }
 
     if (!$PSBoundParameters['Developer']) {
         throw [System.ArgumentNullException] "You must specify the -Developer option."

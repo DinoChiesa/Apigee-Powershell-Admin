@@ -34,8 +34,8 @@ Function Get-EdgeApiProduct {
 
     [cmdletbinding()]
     param(
-        [string]$Org,
         [string]$Name,
+        [string]$Org,
         [Hashtable]$Params
     )
     
@@ -51,6 +51,9 @@ Function Get-EdgeApiProduct {
     }
     if ($PSBoundParameters['Name']) {
         $Options.Add( 'Name', $Name )
+    }
+    if ($PSBoundParameters['Org']) {
+        $Options.Add( 'Org', $Org )
     }
 
     Get-EdgeObject @Options

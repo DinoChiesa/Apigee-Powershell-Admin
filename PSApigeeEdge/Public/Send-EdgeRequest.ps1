@@ -61,9 +61,7 @@ Function Send-EdgeRequest {
       if( ! $MyInvocation.MyCommand.Module.PrivateData['Org']) {
         throw [System.ArgumentNullException] "use the -Org parameter to specify the organization."
       }
-      else {
-        $Org = $MyInvocation.MyCommand.Module.PrivateData['Org']
-      }
+      $Org = $MyInvocation.MyCommand.Module.PrivateData['Org']
     }
 
     if( ! $MyInvocation.MyCommand.Module.PrivateData['MgmtUri']) {

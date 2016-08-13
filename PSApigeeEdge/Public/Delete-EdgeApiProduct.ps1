@@ -29,15 +29,16 @@ Function Delete-EdgeApiProduct {
     if ($PSBoundParameters['Debug']) {
         $DebugPreference = 'Continue'
     }
-    
     if (!$PSBoundParameters['Name']) {
       throw [System.ArgumentNullException] 'The -Name parameter is required.'
     }
     
     $Options = @{ Collection = 'apiproducts'; Name = $Name; }
-    
     if ($PSBoundParameters['Debug']) {
         $Options.Add( 'Debug', $Debug )
+    }
+    if ($PSBoundParameters['Org']) {
+        $Options.Add( 'Org', $Org )
     }
     
     Write-Debug ( "Options @Options`n" )

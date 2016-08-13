@@ -28,9 +28,9 @@ Function UnDeploy-EdgeApi {
 
     [cmdletbinding()]
     param(
-        [string]$Name,
-        [string]$Env,
-        [string]$Revision,
+        [Parameter(Mandatory=$True)][string]$Name,
+        [Parameter(Mandatory=$True)][string]$Env,
+        [Parameter(Mandatory=$True)][string]$Revision,
         [string]$Org,
         [Hashtable]$Params
     )
@@ -45,7 +45,6 @@ Function UnDeploy-EdgeApi {
     if (!$PSBoundParameters['Env']) {
       throw [System.ArgumentNullException] "You must specify the -Env option."
     }
-
     if (!$PSBoundParameters['Revision']) {
       throw [System.ArgumentNullException] "You must specify the -Revision option."
     }
@@ -54,10 +53,9 @@ Function UnDeploy-EdgeApi {
       if( ! $MyInvocation.MyCommand.Module.PrivateData['Org']) {
         throw [System.ArgumentNullException] "use the -Org parameter to specify the organization."
       }
-      else {
-        $Org = $MyInvocation.MyCommand.Module.PrivateData['Org']
-      }
+      $Org = $MyInvocation.MyCommand.Module.PrivateData['Org']
     }
+    
     if( ! $MyInvocation.MyCommand.Module.PrivateData['MgmtUri']) {
       throw [System.ArgumentNullException] 'use Set-EdgeConnection to specify the Edge connection information.'
     }
@@ -85,8 +83,6 @@ Function UnDeploy-EdgeApi {
           delay = 30
         }
     }
-
-    Remove-Variable decrypted
 
     Try {
         $TempResult = Invoke-RestMethod @IRMParams

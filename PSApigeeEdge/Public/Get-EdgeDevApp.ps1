@@ -50,6 +50,9 @@ Function Get-EdgeDevApp {
     if ($PSBoundParameters['Params']) {
         $Options.Add( 'Params', $Params )
     }
+    if ($PSBoundParameters['Org']) {
+        $Options.Add( 'Org', $Org )
+    }
 
     if ($PSBoundParameters['Developer']) {
         $Options.Add( 'Collection', $(Join-Parts -Separator '/' -Parts 'developers', $Developer, 'apps' ) )

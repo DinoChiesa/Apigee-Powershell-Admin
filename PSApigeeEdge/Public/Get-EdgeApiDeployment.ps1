@@ -22,8 +22,8 @@ Function Get-EdgeApiDeployment {
 
     [cmdletbinding()]
     param(
+        [Parameter(Mandatory=$True)][string]$Name,
         [string]$Org,
-        [string]$Name,
         [Hashtable]$Params
     )
     
@@ -44,6 +44,9 @@ Function Get-EdgeApiDeployment {
     }
     if ($PSBoundParameters['Params']) {
         $Options.Add( 'Params', $Params )
+    }
+    if ($PSBoundParameters['Org']) {
+        $Options.Add( 'Org', $Org )
     }
     
     $Path = Join-Parts -Separator "/" -Parts $Name, 'deployments'
