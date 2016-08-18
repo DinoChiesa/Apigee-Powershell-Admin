@@ -1,14 +1,13 @@
-Function Get-EdgeApi {
+Function Get-EdgeApiRevision {
     <#
     .SYNOPSIS
-        Get one or more apiproxies from Apigee Edge.
+        Get the list of revisions for an apiproxy from Apigee Edge.
 
     .DESCRIPTION
-        Get one or more apiproxies from Apigee Edge.
+        Get the list of revisions for an apiproxy from Apigee Edge.
 
     .PARAMETER Name
-        The name of the apiproxy to retrieve.
-        The default is to list all apiproxies.
+        The name of the apiproxy to retrieve. Required. 
 
     .PARAMETER Org
         The Apigee Edge organization. The default is to use the value from Set-EdgeConnection.
@@ -24,8 +23,7 @@ Function Get-EdgeApi {
     [cmdletbinding()]
     param(
         [string]$Org,
-        [string]$Name,
-        [string]$Revision,
+        [Parameter(Mandatory=$True)][string]$Name
     )
     
     if ($PSBoundParameters['Debug']) {
@@ -44,15 +42,14 @@ Function Get-EdgeApi {
     }
     
     if ($PSBoundParameters['Name']) {
-      if ($PSBoundParameters['Revision']) {
-        $Path = Join-Parts -Separator "/" -Parts $Name, 'revisions', $Revision
-        $Options.Add( 'Name', $Path )
-      }
-      else {
-        $Options.Add( 'Name', $Name )
-      }
+        $Path = Join-Parts -Separator "/" -Parts $Name
+        $Options.Add( 'Name', 'revisions' )
     }
-
+    else {
+      throw [System.ArgumentNullException] 'the -Name parameter is required.'
+    
+    }
+    
     Write-Debug ( "Options @Options`n" )
 
     Get-EdgeObject @Options
