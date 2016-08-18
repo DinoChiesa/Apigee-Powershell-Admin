@@ -17,21 +17,37 @@ Describe "Set-EdgeConnection" {
 
         Set-StrictMode -Version latest
 
-        It 'should succeed' {
+        It 'sets the connection info' {
+            $ConnectionData.password | Should Not BeNullOrEmpty 
+            $ConnectionData.user | Should Not BeNullOrEmpty 
+            $ConnectionData.org | Should Not BeNullOrEmpty 
             Set-EdgeConnection -Org $ConnectionData.org -User $ConnectionData.user -EncryptedPassword $ConnectionData.password
         }
     }
 }
 
 
-Describe "List-Apiproxies" {
+Describe "List-Apiproxies-1" {
 
     Context 'Strict mode' { 
 
         Set-StrictMode -Version latest
 
-        It 'should get a list' {
+        It 'gets a list of proxies' {
             $proxies = Get-EdgeApi
+            $proxies.count | Should BeGreaterThan 0
+        }
+    }
+}
+
+Describe "List-Apiproxies-2" {
+
+    Context 'Strict mode' { 
+
+        Set-StrictMode -Version latest
+
+        It 'gets a list of proxies with expanded details' {
+            $proxies = Get-EdgeApi -Params @{ expand = 'true' }
             $proxies.count | Should BeGreaterThan 0
         }
     }
