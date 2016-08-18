@@ -1,0 +1,10 @@
+#don't upload secrets
+ConnectionData.json
+
+#don't upload useless stuff
+.DS_store
+
+#don't upload zip
+*.zip
+notes-DO-NOT-COMMIT.txt
+todo.txt
