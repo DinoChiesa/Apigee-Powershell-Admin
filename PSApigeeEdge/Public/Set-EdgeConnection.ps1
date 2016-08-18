@@ -47,7 +47,10 @@ Function Set-EdgeConnection {
     if (! $PSBoundParameters.ContainsKey('Pass')) {
          $SecurePass = Read-Host -assecurestring "Please enter the password for ${User}"
     }
-    
+    else {
+         $SecurePass = ConvertTo-SecureString -String $Pass
+    }
+
     $MyInvocation.MyCommand.Module.PrivateData['MgmtUri'] = $MgmtUri
     $MyInvocation.MyCommand.Module.PrivateData['User'] = $User
     $MyInvocation.MyCommand.Module.PrivateData['SecurePass'] = $SecurePass
