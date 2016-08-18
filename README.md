@@ -474,7 +474,7 @@ This is licensed under [the Apache 2.0 source license](LICENSE).
 
 ## Bugs
 
-* There are no tests for this module.
+* The tests are very incomplete.
 
 
 
