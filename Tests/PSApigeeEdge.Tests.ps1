@@ -39,12 +39,16 @@ Describe "Get-Apiproxy-1" {
         }
         
         It 'gets a list of proxies with expanded details' {
+            $proxies = Get-EdgeApi
+            $proxies.count | Should BeGreaterThan 0
             $detailproxies = Get-EdgeApi -Params @{ expand = 'true' }
             $detailproxies.count | Should BeGreaterThan 0
             $detailproxies.count | Should Be $proxies.count
         }
        
         It 'gets one apiproxy with expanded details' {
+            $proxies = Get-EdgeApi
+            $proxies.count | Should BeGreaterThan 0
             $oneproxy = Get-EdgeApi -Name $proxies[0] -Params @{ expand = 'true' }
             $oneproxy | Should Not BeNullOrEmpty
             $oneproxy.metaData | Should Not BeNullOrEmpty
