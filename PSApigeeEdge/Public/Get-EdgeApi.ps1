@@ -13,19 +13,8 @@ Function Get-EdgeApi {
     .PARAMETER Org
         The Apigee Edge organization. The default is to use the value from Set-EdgeConnection.
 
-    .PARAMETER Params
-        Hash table with query options for the specific collection type
-
-        Example for getting all details of developers:
-            -Params @{
-                expand  = 'true'
-            }
-
     .EXAMPLE
         Get-EdgeApi -Org cap500
-
-    .EXAMPLE
-        Get-EdgeApi -Params @{ expand = 'true' }
 
     .FUNCTIONALITY
         ApigeeEdge
@@ -37,7 +26,6 @@ Function Get-EdgeApi {
         [string]$Org,
         [string]$Name,
         [string]$Revision,
-        [Hashtable]$Params
     )
     
     if ($PSBoundParameters['Debug']) {
@@ -53,9 +41,6 @@ Function Get-EdgeApi {
     }
     if ($PSBoundParameters['Org']) {
         $Options.Add( 'Org', $Org )
-    }
-    if ($PSBoundParameters['Params']) {
-        $Options.Add( 'Params', $Params )
     }
     
     if ($PSBoundParameters['Name']) {
