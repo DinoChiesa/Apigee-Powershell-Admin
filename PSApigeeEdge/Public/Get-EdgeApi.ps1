@@ -25,7 +25,7 @@ Function Get-EdgeApi {
     param(
         [string]$Org,
         [string]$Name,
-        [string]$Revision,
+        [string]$Revision
     )
     
     if ($PSBoundParameters['Debug']) {
