@@ -15,8 +15,7 @@ $Connection = Connect-vRAServer -Server $JSON.Connection.vRAAppliance -Tenant $J
 
 
 
-#Integration test example
-Describe "Set-EdgeConnection PS$PSVersion Integrations tests" {
+Describe "Set-EdgeConnection" {
 
     Context 'Strict mode' { 
 
