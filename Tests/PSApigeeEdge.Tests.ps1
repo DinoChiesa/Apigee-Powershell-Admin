@@ -10,10 +10,6 @@ Import-Module $PSScriptRoot\..\PSApigeeEdge -Force
 # --- Get data for the tests
 $ConnectionData = Get-Content .\ConnectionData.json -Raw | ConvertFrom-JSON
 
-# --- Startup
-$Connection = Connect-vRAServer -Server $JSON.Connection.vRAAppliance -Tenant $JSON.Connection.Tenant -Username $JSON.Connection.Username -Password $JSON.Connection.Password -IgnoreCertRequirements
-
-
 
 Describe "Set-EdgeConnection" {
 
@@ -22,7 +18,21 @@ Describe "Set-EdgeConnection" {
         Set-StrictMode -Version latest
 
         It 'should succeed' {
-            Set-EdgeConnection -Org $ConnectionData.org -User $ConnectionData.user -Pass $ConnectionData.password
+            Set-EdgeConnection -Org $ConnectionData.org -User $ConnectionData.user -EncryptedPassword $ConnectionData.password
+        }
+    }
+}
+
+
+Describe "List-Apiproxies" {
+
+    Context 'Strict mode' { 
+
+        Set-StrictMode -Version latest
+
+        It 'should get a list' {
+            $proxies = Get-EdgeApi
+            $proxies.count | Should BeGreaterThan 0
         }
     }
 }

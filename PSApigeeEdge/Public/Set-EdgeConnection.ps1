@@ -32,7 +32,8 @@ Function Set-EdgeConnection {
     param(
         [string]$Org,
         [Parameter(Mandatory=$True)][string]$User,
-        [string]$Pass,
+        [string]$Password,
+        [string]$EncryptedPassword,
         [string]$MgmtUri = 'https://api.enterprise.apigee.com'
     )
 
@@ -44,11 +45,14 @@ Function Set-EdgeConnection {
         throw [System.ArgumentNullException] "provide -User and -Pass."
     }
 
-    if (! $PSBoundParameters.ContainsKey('Pass')) {
+    if (! $PSBoundParameters.ContainsKey('Password') -and ! $PSBoundParameters.ContainsKey('EncryptedPassword')) {
          $SecurePass = Read-Host -assecurestring "Please enter the password for ${User}"
     }
+    else if ($PSBoundParameters.ContainsKey('Password') {
+         $SecurePass = ConvertTo-SecureString -String $Password -AsPlainText -Force
+    }
     else {
-         $SecurePass = ConvertTo-SecureString -String $Pass
+         $SecurePass = ConvertTo-SecureString -String $EncryptedPassword 
     }
 
     $MyInvocation.MyCommand.Module.PrivateData['MgmtUri'] = $MgmtUri
