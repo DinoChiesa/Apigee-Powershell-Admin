@@ -48,7 +48,7 @@ Function Set-EdgeConnection {
     if (! $PSBoundParameters.ContainsKey('Password') -and ! $PSBoundParameters.ContainsKey('EncryptedPassword')) {
          $SecurePass = Read-Host -assecurestring "Please enter the password for ${User}"
     }
-    else if ($PSBoundParameters.ContainsKey('Password') {
+    elseif ($PSBoundParameters.ContainsKey('Password') {
          $SecurePass = ConvertTo-SecureString -String $Password -AsPlainText -Force
     }
     else {
