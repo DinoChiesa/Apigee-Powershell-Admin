@@ -7,7 +7,10 @@ Function Get-EdgeApiDeployment {
         Get the deployment status for an apiproxy in Apigee Edge
 
     .PARAMETER Name
-        The name of the apiproxy to inquire.
+        Required. The name of the apiproxy to inquire.
+
+    .PARAMETER Revision
+        Optional. The revision of the named apiproxy to inquire.
 
     .PARAMETER Org
         The Apigee Edge organization. The default is to use the value from Set-EdgeConnection.
@@ -24,6 +27,7 @@ Function Get-EdgeApiDeployment {
     param(
         [Parameter(Mandatory=$True)][string]$Name,
         [string]$Org,
+        [string]$Revision,
         [Hashtable]$Params
     )
     
@@ -49,12 +53,24 @@ Function Get-EdgeApiDeployment {
         $Options.Add( 'Org', $Org )
     }
     
-    $Path = Join-Parts -Separator "/" -Parts $Name, 'deployments'
+    if ($PSBoundParameters['Revision']) {
+        $Path = Join-Parts -Separator "/" -Parts $Name, 'revisions', $Revision, 'deployments'
+    }
+    else {
+        $Path = Join-Parts -Separator "/" -Parts $Name, 'deployments'
+    }
     $Options.Add( 'Name', $Path )
 
     Write-Debug ( "Options @Options`n" )
 
-    # an array of environments
-    (Get-EdgeObject @Options).environment
+    if ( ! $PSBoundParameters['Revision'] ) {
+        # an array of environments. Map it appropriately
+        (Get-EdgeObject @Options).environment | % {
+          @{ 'Environment' = $_.name, 'Revision' = $_.revision }
+        }
+    }
+    else {
+        (Get-EdgeObject @Options).environment 
+    }
 
 }

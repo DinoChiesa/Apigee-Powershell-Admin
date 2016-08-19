@@ -38,6 +38,32 @@ Describe "Set-EdgeConnection" {
 }
 
 
+Describe "Get-EdgeEnvironment-1" {
+
+    Context 'Strict mode' { 
+
+        Set-StrictMode -Version latest
+
+        It 'gets a list of environments' {
+            $envs = Get-EdgeEnvironment
+            $envs.count | Should BeGreaterThan 0
+        }
+        
+        It 'queries environment <Name> by name' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
+            param($Name)
+
+            $OneEnv = Get-EdgeEnvironment -Name $Name
+            $NowMilliseconds = [int64](([datetime]::UtcNow)-(get-date "1/1/1970")).TotalMilliseconds
+            $OneEnv.createdAt | Should BeLessthan $NowMilliseconds
+            $OneEnv.lastModifiedAt | Should BeLessthan $NowMilliseconds
+            $OneEnv.name | Should Be $Name
+            $OneEnv.properties | Should Not BeNullOrEmpty
+        }
+    }
+}
+
+
+
 Describe "Get-EdgeApi-1" {
 
     Context 'Strict mode' { 
@@ -63,8 +89,8 @@ Describe "Get-EdgeApi-1" {
 }
 
 
-Describe "Get-ApiRevisions-1" {
 
+Describe "Get-ApiRevisions-1" {
     
     Context 'Strict mode' {
     
@@ -87,31 +113,18 @@ Describe "Get-ApiRevisions-1" {
             $NowMilliseconds = [int64](([datetime]::UtcNow)-(get-date "1/1/1970")).TotalMilliseconds
             $RevisionDetails.createdAt | Should BeLessthan $NowMilliseconds
         }
-    }
-}
 
 
-
-Describe "Get-EdgeEnvironment-1" {
-
-    Context 'Strict mode' { 
-
-        Set-StrictMode -Version latest
-
-        It 'gets a list of environments' {
-            $envs = Get-EdgeEnvironment
-            $envs.count | Should BeGreaterThan 0
-        }
-        
-        It 'queries environment <Name> by name' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
+        It 'gets deployment status the revisions of API Proxy <Name>'  -TestCases @( ToArrayOfHash @( Get-EdgeApi ) ) {
             param($Name)
 
-            $OneEnv = Get-EdgeEnvironment -Name $Name
-            $NowMilliseconds = [int64](([datetime]::UtcNow)-(get-date "1/1/1970")).TotalMilliseconds
-            $OneEnv.createdAt | Should BeLessthan $NowMilliseconds
-            $OneEnv.lastModifiedAt | Should BeLessthan $NowMilliseconds
-            $OneEnv.name | Should Be $Name
-            $OneEnv.properties | Should Not BeNullOrEmpty
+            $revisions = @( Get-EdgeApiRevision -Name $Name )
+            $revisions.count | Should BeGreaterThan 0
+
+            foreach ($rev in $revisions) {
+                $DeploymentStatus = Get-EdgeApiDeployment -Name $Name -Revision $revisions[-1]
+                # TODO: insert validation here
+            }
         }
     }
 }
