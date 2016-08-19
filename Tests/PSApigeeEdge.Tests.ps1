@@ -115,7 +115,7 @@ Describe "Get-ApiRevisions-1" {
         }
 
 
-        It 'gets deployment status the revisions of API Proxy <Name>'  -TestCases @( ToArrayOfHash @( Get-EdgeApi ) ) {
+        It 'gets deployment status of all the revisions of API Proxy <Name>'  -TestCases @( ToArrayOfHash @( Get-EdgeApi ) ) {
             param($Name)
 
             $revisions = @( Get-EdgeApiRevision -Name $Name )
@@ -128,5 +128,7 @@ Describe "Get-ApiRevisions-1" {
         }
     }
 }
+
+## TODO: insert more tests here 
 
 
