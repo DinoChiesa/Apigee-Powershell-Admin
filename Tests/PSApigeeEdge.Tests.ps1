@@ -247,11 +247,13 @@ Describe "Get-Apps-1" {
                 # $app2 | Should Be $app  # No.
 
                 $app2.psobject.properties | % {
-                  $value = $_.Value
+                  $value2 = $_.Value
                   $name = $_.Name
                   Write-Host "prop: $name"
-                  Write-Host "value2: $value"
-                  #$value | Should Be $app[$prop]
+                  Write-Host "value2: $value2"
+                  
+                  $value1 = $app[$name]
+                  Write-Host "value1: $value1"
                 }
             }
         }
