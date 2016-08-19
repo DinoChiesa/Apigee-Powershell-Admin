@@ -11,6 +11,17 @@ Import-Module $PSScriptRoot\..\PSApigeeEdge -Force
 $ConnectionData = Get-Content .\ConnectionData.json -Raw | ConvertFrom-JSON
 
 
+Function ToArrayOfHash {
+  param($a)
+
+  $list = New-Object System.Collections.Generic.List[System.Object]
+  for ( $i = 0; $i -lt $a.Length; $i++ ) {
+     $list.Add( @{ Name = $a[$i] } )
+  }
+  $list.ToArray()
+}
+
+
 Describe "Set-EdgeConnection" {
 
     Context 'Strict mode' { 
@@ -59,36 +70,19 @@ Describe "Get-ApiRevisions-1" {
     
         Set-StrictMode -Version latest
 
-        Function ToArrayOfHash {
-          param($a)
-
-          $list = New-Object System.Collections.Generic.List[System.Object]
-          for ( $i = 0; $i -lt $a.Length; $i++ ) {
-             $list.Add( @{ Name = $a[$i] } )
-          }
-          $list.ToArray()
-        }
-        
-# It "identifies <Number> as <Class>" -TestCases $TestCases {
-#         param($Number, $Class, $Reason)
-# 
-#         $c = & $cmd -Number $Number
-#         $c | Should Be $Class
-#     }
-    
-        It 'gets a list of revisions for an API Proxy' -TestCases @( ToArrayOfHash @( Get-EdgeApi ) ) {
+        It 'gets a list of revisions for API Proxy <Name>' -TestCases @( ToArrayOfHash @( Get-EdgeApi ) ) {
             param($Name)
             $revisions = @( Get-EdgeApiRevision -Name $Name )
             $revisions.count | Should BeGreaterThan 0
         }
 
-        It 'gets details for a revision of an API Proxy' {
-            $proxies = Get-EdgeApi
-            $proxies.count | Should BeGreaterThan 0
-            $revisions = Get-EdgeApiRevision -Name $proxies[0]
+        It 'gets details for the latest revision of API Proxy <Name>'  -TestCases @( ToArrayOfHash @( Get-EdgeApi ) ) {
+            param($Name)
+
+            $revisions = @( Get-EdgeApiRevision -Name $Name )
             $revisions.count | Should BeGreaterThan 0
-            $RevisionDetails = Get-EdgeApi -Name $proxies[0] -Revision $revisions[-1]
-            $RevisionDetails.name | Should Be $proxies[0]
+            $RevisionDetails = Get-EdgeApi -Name $Name -Revision $revisions[-1]
+            $RevisionDetails.name | Should Be $Name
             $RevisionDetails.revision | Should Be $revisions[-1]
             $NowMilliseconds = [int64](([datetime]::UtcNow)-(get-date "1/1/1970")).TotalMilliseconds
             $RevisionDetails.createdAt | Should BeLessthan $NowMilliseconds
@@ -109,9 +103,10 @@ Describe "Get-EdgeEnvironment-1" {
             $envs.count | Should BeGreaterThan 0
         }
         
-        It 'gets one environment by name' {
-            $envs = Get-EdgeEnvironment
-            $OneEnv = Get-EdgeEnvironment -Name $envs[0]
+        It 'queries environment <Name> by name' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
+            param($Name)
+
+            $OneEnv = Get-EdgeEnvironment -Name $Name
             $NowMilliseconds = [int64](([datetime]::UtcNow)-(get-date "1/1/1970")).TotalMilliseconds
             $OneEnv.createdAt | Should BeLessthan $NowMilliseconds
             $OneEnv.lastModifiedAt | Should BeLessthan $NowMilliseconds
