@@ -531,7 +531,7 @@ This is licensed under [the Apache 2.0 source license](LICENSE).
 
 ## Bugs
 
-* The tests are very incomplete.
+* The tests are incomplete.
 
 
 
