@@ -240,6 +240,7 @@ Describe "Get-Apps-1" {
             param($Name)
         
             $appsExpanded = @(( Get-EdgeDevApp -Developer $Name -Params @{ expand = 'true' } ).app)
+            $excludedProps = @( 'attributes', 'apiProducts', 'credentials')
             Write-Host "dev: $Name"
 
             foreach ($app in $appsExpanded) {
@@ -252,7 +253,8 @@ Describe "Get-Apps-1" {
                 $app2.psobject.properties | % {
                   $value2 = $_.Value
                   $name = $_.Name
-                  if (! ($name -eq 'attributes' -or $name -eq 'apiProducts')) {
+                  if ( $excludedProps -notcontains $name ) {
+
                       Write-Host "prop: $name"
                       Write-Host "value2: $value2"
 
