@@ -42,7 +42,7 @@ Function Get-EdgeApiRevision {
     }
     
     if ($PSBoundParameters['Name']) {
-        $Options.Add( 'Name', Join-Parts -Separator "/" -Parts $Name, 'revisions' )
+        $Options.Add( 'Name', $( Join-Parts -Separator "/" -Parts $Name, 'revisions' ) )
     }
     else {
       throw [System.ArgumentNullException] 'the -Name parameter is required.'
