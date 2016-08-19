@@ -41,7 +41,7 @@ Describe "Get-EdgeApi-1" {
         It 'gets details of one apiproxy' {
             $proxies = Get-EdgeApi
             $proxies.count | Should BeGreaterThan 0
-            $oneproxy = Get-EdgeApi -Name $proxies[0] -Params @{ expand = 'true' }
+            $oneproxy = Get-EdgeApi -Name $proxies[0]
             $oneproxy | Should Not BeNullOrEmpty
             $oneproxy.metaData | Should Not BeNullOrEmpty
             $NowMilliseconds = [int64](([datetime]::UtcNow)-(get-date "1/1/1970")).TotalMilliseconds
@@ -52,25 +52,25 @@ Describe "Get-EdgeApi-1" {
 }
 
 
-Describe "Get-EdgeEnvironment-1" {
+Describe "Get-ApiRevisions-1" {
 
     Context 'Strict mode' { 
 
         Set-StrictMode -Version latest
 
-        It 'gets a list of environments' {
-            $envs = Get-EdgeEnvironment
-            $envs.count | Should BeGreaterThan 0
+        It 'gets a list of revisions for an API Proxy' {
+            $proxies = Get-EdgeApi
+            $proxies.count | Should BeGreaterThan 0
+            $revisions = Get-EdgeApiRevision -Name $proxies[0]
+            $revisions.count | Should BeGreaterThan 0
         }
-        
-        It 'gets one environment by name' {
-            $envs = Get-EdgeEnvironment
-            $OneEnv = Get-EdgeEnvironment -Name $envs[0]
-            $NowMilliseconds = [int64](([datetime]::UtcNow)-(get-date "1/1/1970")).TotalMilliseconds
-            $OneEnv.createdAt | Should BeLessthan $NowMilliseconds
-            $OneEnv.lastModifiedAt | Should BeLessthan $NowMilliseconds
-            $OneEnv.name | Should Be $envs[0]
-            $OneEnv.properties | Should Not BeNullOrEmpty
+
+        It 'gets details for a revision of an API Proxy' {
+            $proxies = Get-EdgeApi
+            $proxies.count | Should BeGreaterThan 0
+            $revisions = Get-EdgeApiRevision -Name $proxies[0]
+            $revisions.count | Should BeGreaterThan 0
+            $ProxyDetails = Get-EdgeApi -Name $proxies[0] -Revision $revisions[-1]
         }
     }
 }
