@@ -29,7 +29,6 @@ Describe "Set-EdgeConnection" {
         Set-StrictMode -Version latest
 
         It 'sets the connection info' {
-            $ConnectionData.password | Should Not BeNullOrEmpty 
             $ConnectionData.user | Should Not BeNullOrEmpty 
             $ConnectionData.org | Should Not BeNullOrEmpty
             if ( $ConnectionData.cryptoPassword ) {
