@@ -78,7 +78,7 @@ Describe "Get-ApiRevisions-1" {
     
         It 'gets a list of revisions for an API Proxy' -TestCases @( ToArrayOfHash @( Get-EdgeApi ) ) {
             param($Name)
-            $revisions = Get-EdgeApiRevision -Name $Name
+            $revisions = @( Get-EdgeApiRevision -Name $Name )
             $revisions.count | Should BeGreaterThan 0
         }
 
