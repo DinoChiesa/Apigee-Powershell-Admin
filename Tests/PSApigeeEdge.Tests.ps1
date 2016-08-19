@@ -252,8 +252,9 @@ Describe "Get-Apps-1" {
                   Write-Host "prop: $name"
                   Write-Host "value2: $value2"
                   
-                  $value1 = $app[$name]
+                  $value1 = $( $app | select -expand $name )
                   Write-Host "value1: $value1"
+                  $value2 | Should Be $value1
                 }
             }
         }
