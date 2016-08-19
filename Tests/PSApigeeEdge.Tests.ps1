@@ -101,7 +101,7 @@ Describe "Get-ApiRevisions-1" {
             $revisions.count | Should BeGreaterThan 0
         }
 
-        It 'gets details for the latest revision of API Proxy <Name>'  -TestCases @( ToArrayOfHash @( Get-EdgeApi ) ) {
+        It 'gets details for latest revision of API Proxy <Name>'  -TestCases @( ToArrayOfHash @( Get-EdgeApi ) ) {
             param($Name)
 
             $revisions = @( Get-EdgeApiRevision -Name $Name )
@@ -114,7 +114,7 @@ Describe "Get-ApiRevisions-1" {
         }
 
 
-        It 'gets deployment status of all the revisions of API Proxy <Name>' -TestCases @( ToArrayOfHash @( Get-EdgeApi ) ) {
+        It 'gets deployment status of all revisions of API Proxy <Name>' -TestCases @( ToArrayOfHash @( Get-EdgeApi ) ) {
             param($Name)
 
             $revisions = @( Get-EdgeApiRevision -Name $Name )
@@ -212,9 +212,9 @@ Describe "Get-Apps-1" {
         It 'gets a list of apps for developer <Name>'  -TestCases @( ToArrayOfHash  @( Get-EdgeDeveloper ) ) {
             param($Name)
         
-            $apps = @(( Get-EdgeDevApp -Developer $Name).app )
+            $apps = @( Get-EdgeDevApp -Developer $Name )
             $apps.count | Should Not BeNullOrEmpty
-            $appsExpanded = @(( Get-EdgeDevApp -Developer $Name -Params @{ expand = 'true' }).app)
+            $appsExpanded = @(( Get-EdgeDevApp -Developer $Name -Params @{ expand = 'true' } ).app)
  
             $apps.count | Should Not $appsExpanded.count
         }
