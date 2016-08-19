@@ -71,14 +71,13 @@ Describe "Get-EdgeApi-1" {
         Set-StrictMode -Version latest
 
         It 'gets a list of proxies' {
-            $proxies = Get-EdgeApi
+            $proxies = @( Get-EdgeApi )
             $proxies.count | Should BeGreaterThan 0
         }
        
-        It 'gets details of one apiproxy' {
-            $proxies = Get-EdgeApi
-            $proxies.count | Should BeGreaterThan 0
-            $oneproxy = Get-EdgeApi -Name $proxies[0]
+        It 'gets details of apiproxy <Name>'  -TestCases @( ToArrayOfHash @( Get-EdgeApi ) ) {
+            param($Name)
+            $oneproxy = Get-EdgeApi -Name $Name
             $oneproxy | Should Not BeNullOrEmpty
             $oneproxy.metaData | Should Not BeNullOrEmpty
             $NowMilliseconds = [int64](([datetime]::UtcNow)-(get-date "1/1/1970")).TotalMilliseconds
@@ -115,7 +114,7 @@ Describe "Get-ApiRevisions-1" {
         }
 
 
-        It 'gets deployment status of all the revisions of API Proxy <Name>'  -TestCases @( ToArrayOfHash @( Get-EdgeApi ) ) {
+        It 'gets deployment status of all the revisions of API Proxy <Name>' -TestCases @( ToArrayOfHash @( Get-EdgeApi ) ) {
             param($Name)
 
             $revisions = @( Get-EdgeApiRevision -Name $Name )
@@ -125,6 +124,35 @@ Describe "Get-ApiRevisions-1" {
                 $DeploymentStatus = Get-EdgeApiDeployment -Name $Name -Revision $revisions[-1]
                 # TODO: insert validation here
             }
+        }
+    }
+}
+
+
+
+Describe "Get-Developers-1" {
+    
+    Context 'Strict mode' {
+    
+        Set-StrictMode -Version latest
+
+        It 'gets a list of developers' {
+            $devs = @( Get-EdgeDeveloper )
+            $devs.count | Should BeGreaterThan 0
+        }
+
+        It 'gets a list of developers with expansion' {
+            $devs = @( Get-EdgeDeveloper )
+            $devs.count | Should BeGreaterThan 0
+            $devsExpanded = @(Get-EdgeDeveloper -Params @{ expand = 'true' }).developer
+            $devs.count | Should Be $devsExpanded.count
+        }
+
+        It 'gets details for developer <Name>'  -TestCases @( ToArrayOfHash  @( Get-EdgeDeveloper ) ) {
+            param($Name)
+
+            $dev = @( Get-EdgeDeveloper -Name $Name )
+            # TODO: validate developer details
         }
     }
 }
