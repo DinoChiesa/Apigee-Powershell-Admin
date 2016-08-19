@@ -152,10 +152,86 @@ Describe "Get-Developers-1" {
             param($Name)
 
             $dev = @( Get-EdgeDeveloper -Name $Name )
-            # TODO: validate developer details
+            $dev.email | Should Be $Name
+            $NowMilliseconds = [int64](([datetime]::UtcNow)-(get-date "1/1/1970")).TotalMilliseconds
+            $dev.createdAt | Should BeLessthan $NowMilliseconds
+            $dev.lastModifiedAt | Should BeLessthan $NowMilliseconds
+            $dev.organizationName | Should Be $ConnectionData.org 
         }
     }
 }
+
+Describe "Get-ApiProduct-1" {
+    
+    Context 'Strict mode' {
+    
+        Set-StrictMode -Version latest
+
+        It 'gets a list of apiproducts' {
+            $prods = @( get-edgeapiproduct )
+            $prods.count | Should BeGreaterThan 0
+        }
+
+        It 'gets a list of apiproducts with expansion' {
+            $prods = @( get-edgeapiproduct )
+            $prods.count | Should BeGreaterThan 0
+            $prodsExpanded = @(Get-edgeapiproduct -Params @{ expand = 'true' }).apiProduct
+            $prods.count | Should Be $prodsExpanded.count
+        }
+
+        It 'gets details for apiproduct <Name>'  -TestCases @( ToArrayOfHash  @( Get-EdgeApiProduct ) ) {
+            param($Name)
+
+            $prod = @( Get-EdgeApiProduct -Name $Name )
+            $NowMilliseconds = [int64](([datetime]::UtcNow)-(get-date "1/1/1970")).TotalMilliseconds
+            $prod.createdAt | Should BeLessthan $NowMilliseconds
+            $prod.lastModifiedAt | Should BeLessthan $NowMilliseconds
+            $prod.approvalType | Should Not BeNullOrEmpty
+            $prod.lastModifiedBy | Should Not BeNullOrEmpty
+        }
+    }
+}
+
+
+
+Describe "Get-Apps-1" {
+    
+    Context 'Strict mode' {
+    
+        Set-StrictMode -Version latest
+
+        It 'gets a list of apps' {
+            $apps = @( get-edgeDevApp )
+            $apps.count | Should BeGreaterThan 0
+        }
+        It 'gets a list of apps with expansion' {
+            $apps = @( get-edgeDevApp -Params @{ expand = 'true' } )
+            $apps.count | Should BeGreaterThan 0
+        }
+        
+        It 'gets a list of apps for developer <Name>'  -TestCases @( ToArrayOfHash  @( Get-EdgeDeveloper ) ) {
+            param($Name)
+        
+            $apps = @(( Get-EdgeDevApp -Developer $Name).app )
+            $apps.count | Should Not BeNullOrEmpty
+            $appsExpanded = @(( Get-EdgeDevApp -Developer $Name -Params @{ expand = 'true' }).app)
+ 
+            $apps.count | Should Not $appsExpanded.count
+        }
+
+        It 'gets details of app <Name>'  -TestCases @( ToArrayOfHash  @( Get-EdgeDevApp ) ) {
+            param($Name)
+        
+            $app = Get-EdgeDevApp -Id $Name
+            $app.appId | Should Be $Name
+            $NowMilliseconds = [int64](([datetime]::UtcNow)-(get-date "1/1/1970")).TotalMilliseconds
+            $app.createdAt | Should BeLessthan $NowMilliseconds
+            $app.lastModifiedAt | Should BeLessthan $NowMilliseconds
+            $app.status | Should Not BeNullOrEmpty
+        }
+    }
+}
+
 
 ## TODO: insert more tests here 
 
