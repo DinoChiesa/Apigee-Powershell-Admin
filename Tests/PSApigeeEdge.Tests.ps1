@@ -242,8 +242,6 @@ Describe "Get-Apps-1" {
         
             $appsExpanded = @(( Get-EdgeDevApp -Developer $Name -Params @{ expand = 'true' } ).app)
             $excludedProps = @( 'attributes', 'apiProducts', 'credentials')
-            Write-Host "dev: $Name"
-
             foreach ($app in $appsExpanded) {
                 $app2 = Get-EdgeDevApp -Id $app.appId 
                 # $app2 | Should Be $app  # No.
