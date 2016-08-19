@@ -50,5 +50,5 @@ Function Get-EdgeApiRevision {
     
     Write-Debug ( "Options @Options`n" )
 
-    Get-EdgeObject @Options
+    @( Get-EdgeObject @Options )
 }
