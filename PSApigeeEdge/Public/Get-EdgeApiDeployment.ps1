@@ -66,7 +66,7 @@ Function Get-EdgeApiDeployment {
     if ( ! $PSBoundParameters['Revision'] ) {
         # an array of environments. Map it appropriately
         (Get-EdgeObject @Options).environment | % {
-          @{ 'Environment' = $_.name, 'Revision' = $_.revision }
+          @{ 'Environment' = $_.name; 'Revision' = $_.revision }
         }
     }
     else {
