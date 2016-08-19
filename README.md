@@ -464,6 +464,45 @@ status         : approved
 ```
 
 
+## Running Tests
+
+The tests for this module rely with [Pester](https://github.com/pester/Pester).
+
+To run the tests:
+
+```
+  PS C:\dev\ps\Edge-Powershell-Admin> invoke-pester   
+```
+
+You will need a file named ConnectionData.json, which is not provided in this source repo.  It should have this structure:
+
+```
+{
+  "org" : "myorg",
+  "user" : "dino@example.org",
+  "password" : "Secret123"
+}
+```
+
+If you wish to not store your password in a file in plaintext, you can convert the string to a secure string and then an encrypted string, like this:
+
+```
+ $SecurePass = ConvertTo-SecureString -String $Password -AsPlainText -Force
+ ConvertFrom-SecureString $SecurePass
+```
+
+... and store the value like so in the ConnectionData.json file:
+
+```
+{
+  "org" : "myorg",
+  "user" : "dino@example.org",
+  "cryptoPassword" : "01000000d08c9ddf0115d1118c7a00c04fc297e....6e0b49de4241b4b01e8f"
+}
+```
+
+
+
 ## Other Notes
 
 This module is available [on the Powershell Gallery](https://www.powershellgallery.com/packages/PSApigeeEdge)

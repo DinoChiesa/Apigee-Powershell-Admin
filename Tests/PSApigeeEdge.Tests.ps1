@@ -31,8 +31,16 @@ Describe "Set-EdgeConnection" {
         It 'sets the connection info' {
             $ConnectionData.password | Should Not BeNullOrEmpty 
             $ConnectionData.user | Should Not BeNullOrEmpty 
-            $ConnectionData.org | Should Not BeNullOrEmpty 
-            Set-EdgeConnection -Org $ConnectionData.org -User $ConnectionData.user -EncryptedPassword $ConnectionData.password
+            $ConnectionData.org | Should Not BeNullOrEmpty
+            if ( $ConnectionData.cryptoPassword ) {
+                Set-EdgeConnection -Org $ConnectionData.org -User $ConnectionData.user -EncryptedPassword $ConnectionData.cryptoPassword
+            }
+            elseif ( $ConnectionData.password ) {
+                Set-EdgeConnection -Org $ConnectionData.org -User $ConnectionData.user -EncryptedPassword $ConnectionData.password
+            }
+            else {
+                throw [System.ArgumentNullException] "need one of password or cryptoPassword in ConnectionData.json"
+            }
         }
     }
 }
