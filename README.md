@@ -140,6 +140,24 @@ All commands that interact with Apigee Edge rely on this connection information.
 You need to do this only once during a Powershell session. If you wish to connect as a different user, you should run this command again. 
 
 
+If you employ the module from a script that runs without user interaction, you will want to
+specify the encrypted password, like so:
+
+```
+Import-Module ./PSApigeeEdge
+Set-EdgeConnection -Org $Connection.org -User $Connection.User -EncryptedPassword $Connection.password
+```
+
+To get the encrypted password, you can do this:
+
+```
+   $SecurePass = Read-Host -assecurestring "Please enter the password"
+   $encryptedPassword = ConvertFrom-SecureString $SecurePass
+```
+
+By the way, this secure string and encrypted secure string stuff is just basic Powershell; it's not special to this module. 
+
+
 ### List Developers
 
 ```

@@ -12,8 +12,15 @@ Function Set-EdgeConnection {
     .PARAMETER User
         The Apigee Edge administrative user. 
 
-    .PARAMETER Pass
-        The password for the Apigee Edge administrative user. 
+    .PARAMETER Password
+        The plaintext password for the Apigee Edge administrative user. 
+
+    .PARAMETER EncryptedPassword
+        The encrypted password for the Apigee Edge administrative user. Use this as an
+        alternative to the Password parameter. To get the encrypted password, you can do this:
+
+         $SecurePass = Read-Host -assecurestring "Please enter the password"
+         ConvertFrom-SecureString $SecurePass
 
     .PARAMETER MgmtUri
         The base Uri for the Edge API Management server.
