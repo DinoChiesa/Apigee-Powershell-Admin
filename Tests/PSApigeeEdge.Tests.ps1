@@ -59,14 +59,14 @@ Describe "Get-ApiRevisions-1" {
     
         Set-StrictMode -Version latest
 
-        Function ConvertArrayToHash {
+        Function ToArrayOfHash {
           param($a)
 
-          $table = new-object System.Collections.Hashtable
+          $list = New-Object System.Collections.Generic.List[System.Object]
           for ( $i = 0; $i -lt $a.Length; $i++ ) {
-            $table.Add('Name',$list[$i]);
+             $list.Add( @{ Name = $a[$i] } )
           }
-          $table
+          $list.ToArray()
         }
         
 # It "identifies <Number> as <Class>" -TestCases $TestCases {
@@ -76,7 +76,7 @@ Describe "Get-ApiRevisions-1" {
 #         $c | Should Be $Class
 #     }
     
-        It 'gets a list of revisions for an API Proxy' -TestCases @{ ConvertArrayToHash @( Get-EdgeApi ) } {
+        It 'gets a list of revisions for an API Proxy' -TestCases @( ToArrayOfHash @( Get-EdgeApi ) ) {
             param($Name)
             $revisions = Get-EdgeApiRevision -Name $Name
             $revisions.count | Should BeGreaterThan 0
