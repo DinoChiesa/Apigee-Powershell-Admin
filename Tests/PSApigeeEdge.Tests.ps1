@@ -65,7 +65,7 @@ Describe "Get-ApiRevisions-1" {
 #         $c | Should Be $Class
 #     }
     
-        It 'gets a list of revisions for an API Proxy' -TestCases $( get-EdgeApi ) {
+        It 'gets a list of revisions for an API Proxy' -TestCases @( Get-EdgeApi ) {
             param($Proxy)
             $revisions = Get-EdgeApiRevision -Name $Proxy
             $revisions.count | Should BeGreaterThan 0
