@@ -110,7 +110,7 @@ Describe "Get-EdgeEnvironment-1" {
             $NowMilliseconds = [int64](([datetime]::UtcNow)-(get-date "1/1/1970")).TotalMilliseconds
             $OneEnv.createdAt | Should BeLessthan $NowMilliseconds
             $OneEnv.lastModifiedAt | Should BeLessthan $NowMilliseconds
-            $OneEnv.name | Should Be $envs[0]
+            $OneEnv.name | Should Be $Name
             $OneEnv.properties | Should Not BeNullOrEmpty
         }
     }
