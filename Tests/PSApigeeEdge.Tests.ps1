@@ -58,10 +58,16 @@ Describe "Get-ApiRevisions-1" {
 
         Set-StrictMode -Version latest
 
-        It 'gets a list of revisions for an API Proxy' {
-            $proxies = Get-EdgeApi
-            $proxies.count | Should BeGreaterThan 0
-            $revisions = Get-EdgeApiRevision -Name $proxies[0]
+# It "identifies <Number> as <Class>" -TestCases $TestCases {
+#         param($Number, $Class, $Reason)
+# 
+#         $c = & $cmd -Number $Number
+#         $c | Should Be $Class
+#     }
+    
+        It 'gets a list of revisions for an API Proxy' -TestCases $( get-EdgeApi ) {
+            param($Proxy)
+            $revisions = Get-EdgeApiRevision -Name $Proxy
             $revisions.count | Should BeGreaterThan 0
         }
 
@@ -70,7 +76,11 @@ Describe "Get-ApiRevisions-1" {
             $proxies.count | Should BeGreaterThan 0
             $revisions = Get-EdgeApiRevision -Name $proxies[0]
             $revisions.count | Should BeGreaterThan 0
-            $ProxyDetails = Get-EdgeApi -Name $proxies[0] -Revision $revisions[-1]
+            $RevisionDetails = Get-EdgeApi -Name $proxies[0] -Revision $revisions[-1]
+            $RevisionDetails.name | Should Be $proxies[0]
+            $RevisionDetails.revision | Should Be $revisions[-1]
+            $NowMilliseconds = [int64](([datetime]::UtcNow)-(get-date "1/1/1970")).TotalMilliseconds
+            $RevisionDetails.createdAt | Should BeLessthan $NowMilliseconds
         }
     }
 }
