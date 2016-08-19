@@ -246,11 +246,12 @@ Describe "Get-Apps-1" {
                 $app2 = Get-EdgeDevApp -Id $app.appId 
                 # $app2 | Should Be $app  # No.
 
-                @(($app2 | Get-member -MemberType *Property).Name) | % {
-                  $prop = $_
-                  Write-Host "prop: $prop"
-                  Write-Host "value: $app[$prop]"
-                  #$app2[$prop] | Should Be $app[$prop]
+                $app2.psobject.properties | % {
+                  $value = $_.Value
+                  $name = $_.Name
+                  Write-Host "prop: $name"
+                  Write-Host "value2: $value"
+                  #$value | Should Be $app[$prop]
                 }
             }
         }
