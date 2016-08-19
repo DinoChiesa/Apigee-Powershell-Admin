@@ -246,15 +246,20 @@ Describe "Get-Apps-1" {
                 $app2 = Get-EdgeDevApp -Id $app.appId 
                 # $app2 | Should Be $app  # No.
 
+                # I think it might be possible to do something smart with Compare-Object
+                # But... instead we will iterate the properties and compare each one, while
+                # excluding properties with non-primitive values.
                 $app2.psobject.properties | % {
                   $value2 = $_.Value
                   $name = $_.Name
-                  Write-Host "prop: $name"
-                  Write-Host "value2: $value2"
-                  
-                  $value1 = $( $app | select -expand $name )
-                  Write-Host "value1: $value1"
-                  $value2 | Should Be $value1
+                  if (! ($name -eq 'attributes' -or $name -eq 'apiProducts')) {
+                      Write-Host "prop: $name"
+                      Write-Host "value2: $value2"
+
+                      $value1 = $( $app | select -expand $name )
+                      Write-Host "value1: $value1"
+                      $value2 | Should Be $value1
+                  }
                 }
             }
         }
