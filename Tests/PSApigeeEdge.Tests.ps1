@@ -263,6 +263,28 @@ Describe "Get-Apps-1" {
 }
 
 
+Describe "Get-EdgeKvm-1" {
+
+    Context 'Strict mode' { 
+
+        Set-StrictMode -Version latest
+
+        It 'gets a list of kvms' {
+            $kvms = @( Get-EdgeKvm )
+            $kvms.count | Should BeGreaterThan 0
+        }
+       
+        It 'lists kvms for env <Name>' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
+            param($Name)
+        
+            $kvms = @( Get-EdgeKvm -Env $Name )
+            $kvms.count | Should BeGreaterThan 0
+        }
+    }
+}
+
+
+
 ## TODO: insert more tests here 
 
 

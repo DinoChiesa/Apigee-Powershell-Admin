@@ -1,10 +1,20 @@
 Function Import-EdgeApi {
     <#
     .SYNOPSIS
-        Import an apiproxy from a zip file or directory, into Apigee Edge.
+        Import an apiproxy from a zip file into Apigee Edge.
 
     .DESCRIPTION
-        Import an apiproxy from a zip file or directory, into Apigee Edge.
+        Import an apiproxy from a zip file into Apigee Edge.
+        You will need to produce the zipfile, probably with something
+        like this:
+
+        function ZipFiles( $zipfilename, $sourcedir )
+        {
+           Add-Type -Assembly System.IO.Compression.FileSystem
+           $compressionLevel = [System.IO.Compression.CompressionLevel]::Optimal
+           [System.IO.Compression.ZipFile]::CreateFromDirectory($sourcedir,
+                $zipfilename, $compressionLevel, $false)
+        }
 
     .PARAMETER Name
         The name to use for the apiproxy, once imported.
@@ -17,6 +27,12 @@ Function Import-EdgeApi {
 
     .EXAMPLE
         Import-EdgeApi -Name oauth2-pwd-cc -Source bundle.zip
+
+    .LINK
+       Deploy-EdgeApi
+       
+    .LINK
+       Export-EdgeApi
 
     .FUNCTIONALITY
         ApigeeEdge

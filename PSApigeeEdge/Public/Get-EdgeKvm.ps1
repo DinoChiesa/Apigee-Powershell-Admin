@@ -1,23 +1,24 @@
-Function Get-EdgeApi {
+Function Get-EdgeKvm {
     <#
     .SYNOPSIS
-        Get one or more apiproxies from Apigee Edge.
+        Get one or more Key-Value Maps (KVMs) from Apigee Edge.
 
     .DESCRIPTION
-        Get one or more apiproxies from Apigee Edge.
+        Get one or more Key-Value Maps (KVMs) from Apigee Edge.
 
     .PARAMETER Name
-        Optional. The name of the apiproxy to retrieve.
+        Optional. The name of the KVM to retrieve.
         The default is to list all apiproxies.
-
-    .PARAMETER Revision
-        Optional. The revision of the apiproxy. Use only when also using the -Name option.
 
     .PARAMETER Org
         Optional. The Apigee Edge organization. The default is to use the value from Set-EdgeConnection.
 
+    .PARAMETER Env
+        Optional. The Apigee Edge environment. The default is to use the organization-wide
+        Key-Value Map.
+
     .EXAMPLE
-        Get-EdgeApi -Org cap500
+        Get-EdgeKvm -Env test
 
     .FUNCTIONALITY
         ApigeeEdge
@@ -26,18 +27,16 @@ Function Get-EdgeApi {
 
     [cmdletbinding()]
     param(
-        [string]$Org,
         [string]$Name,
-        [string]$Revision
+        [string]$Org,
+        [string]$Env
     )
     
     if ($PSBoundParameters['Debug']) {
         $DebugPreference = 'Continue'
     }
     
-    $Options = @{
-        Collection = 'apis'
-    }
+    $Options = @{ Collection = 'keyvaluemaps' }
     
     if ($PSBoundParameters['Debug']) {
         $Options.Add( 'Debug', $Debug )
@@ -46,14 +45,11 @@ Function Get-EdgeApi {
         $Options.Add( 'Org', $Org )
     }
     
+    if ($PSBoundParameters['Env']) {
+        $Path = Join-Parts -Separator "/" -Parts 'e', $Env
+    }
     if ($PSBoundParameters['Name']) {
-      if ($PSBoundParameters['Revision']) {
-        $Path = Join-Parts -Separator "/" -Parts $Name, 'revisions', $Revision
-        $Options.Add( 'Name', $Path )
-      }
-      else {
         $Options.Add( 'Name', $Name )
-      }
     }
 
     Write-Debug ( "Options @Options`n" )
