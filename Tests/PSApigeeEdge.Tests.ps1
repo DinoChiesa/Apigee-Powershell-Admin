@@ -242,11 +242,11 @@ Describe "Get-Apps-1" {
             $appsExpanded = @(( Get-EdgeDevApp -Developer $Name -Params @{ expand = 'true' } ).app)
 
             foreach ($app in $appsExpanded) {
-                $app2 = @( Get-EdgeDevApp -Id $app.appId )
+                $app2 = Get-EdgeDevApp -Id $app.appId 
                 # $app2 | Should Be $app  # No.
 
-                $app2.GetEnumerator() | % {
-                  $prop = $_.key
+                @(($app2 | Get-member -MemberType *Property).Name) | % {
+                  $prop = $_
                   $app2[$prop] | Should Be $app$[$prop]
                 }
             }
