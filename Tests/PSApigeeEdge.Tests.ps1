@@ -102,7 +102,7 @@ Describe "Get-ApiRevisions-1" {
     
         Set-StrictMode -Version latest
 
-        It 'gets a list of revisions for API Proxy <Name>' -TestCases @( ToArrayOfHash @( Get-EdgeApi ) ) {
+        It 'gets a list of revisions for apiproxy <Name>' -TestCases @( ToArrayOfHash @( Get-EdgeApi ) ) {
             param($Name)
             $revisions = @( Get-EdgeApiRevision -Name $Name )
             $revisions.count | Should BeGreaterThan 0
@@ -240,12 +240,14 @@ Describe "Get-Apps-1" {
             param($Name)
         
             $appsExpanded = @(( Get-EdgeDevApp -Developer $Name -Params @{ expand = 'true' } ).app)
+
             foreach ($app in $appsExpanded) {
                 $app2 = Get-EdgeDevApp -Id $app.appId
                 # $app2 | Should Be $app  # No.
 
-                ForEach($prop in $app2.KEYS.GetEnumerator()) {
-                    $app2[$prop] | Should Be $app$[$prop]
+                $app2.GetEnumerator() | % {
+                  $prop = $_.key
+                  $app2[$prop] | Should Be $app$[$prop]
                 }
             }
         }
