@@ -37,7 +37,7 @@ Describe "Set-EdgeConnection" {
             $ConnectionData.user | Should Not BeNullOrEmpty 
             $ConnectionData.org | Should Not BeNullOrEmpty
             
-            if (! $ConnectionData.encryptedPassword && ! $ConnectionData.password ) {
+            if (! $ConnectionData.encryptedPassword -and ! $ConnectionData.password ) {
                 throw [System.ArgumentNullException] "need one of password or encryptedPassword in ConnectionData.json"
            }
            
