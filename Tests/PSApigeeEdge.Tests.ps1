@@ -348,13 +348,12 @@ Describe "Get-EdgeKvm-1" {
 
         It 'gets a list of kvms' {
             $kvms = @( Get-EdgeKvm )
-            $kvms.count | Should BeGreaterThan 0
+            $kvms | Should Not Throw
         }
        
-        It 'lists kvms for env <Name>' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
-            param($Name)
-        
-            $kvms = @( Get-EdgeKvm -Env $Name )
+        It 'lists kvms for 1st env' {
+            $env = $( @( Get-EdgeEnvironment )[0]) # the first environment
+            $kvms = @( Get-EdgeKvm -Env $env )
             $kvms.count | Should BeGreaterThan 0
         }
     }
@@ -369,7 +368,7 @@ Describe "Delete-DevApp-1" {
 
         It 'deletes devapp <Name>' -TestCases $DevApps {
             param($Dev, $Name)
-            Delete-EdgeDevApp -Developer $Dev -Name $Name -Debug
+            Delete-EdgeDevApp -Developer $Dev -Name $Name
         }
     }
 }
