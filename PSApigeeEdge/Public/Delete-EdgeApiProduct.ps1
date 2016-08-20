@@ -41,7 +41,7 @@ Function Delete-EdgeApiProduct {
         $Options.Add( 'Org', $Org )
     }
     
-    Write-Debug ( "Options @Options`n" )
-
+    Write-Debug ([string]::Format("Options {0}`n", $(ConvertTo-Json $Options -Compress ) ) )
+    
     Delete-EdgeObject @Options
 }

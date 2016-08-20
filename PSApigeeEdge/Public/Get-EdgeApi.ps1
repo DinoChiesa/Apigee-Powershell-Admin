@@ -7,11 +7,14 @@ Function Get-EdgeApi {
         Get one or more apiproxies from Apigee Edge.
 
     .PARAMETER Name
-        The name of the apiproxy to retrieve.
+        Optional. The name of the apiproxy to retrieve.
         The default is to list all apiproxies.
 
+    .PARAMETER Revision
+        Optional. The revision of the apiproxy. Use only when also using the -Name option.
+
     .PARAMETER Org
-        The Apigee Edge organization. The default is to use the value from Set-EdgeConnection.
+        Optional. The Apigee Edge organization. The default is to use the value from Set-EdgeConnection.
 
     .EXAMPLE
         Get-EdgeApi -Org cap500
