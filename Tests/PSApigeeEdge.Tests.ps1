@@ -150,7 +150,7 @@ Describe "Create-KVM-1" {
 
         It 'creates a KVM' {
             $Params = @{
-              Name = [string]::Format('pstest-{0}',$Script:Props.guid.Substring(0,10))
+              Name = [string]::Format('pstest-{0}', $Script:Props.guid.Substring(0,10))
               Env = $( @( Get-EdgeEnvironment )[0]) # the first environment
               Values = @{
                  key1 = 'value1'
@@ -159,7 +159,25 @@ Describe "Create-KVM-1" {
               }
             }
             $kvm = Create-EdgeKvm @Params
+            { $kvm } | Should Not Throw
         }
+
+        It 'creates a kvm in Environment <Name>' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
+            param($Name)
+            $Params = @{
+              Name = [string]::Format('pstest-{0}{1}', $(Get-Random), $Script:Props.guid.Substring(0,10))
+              Env = $Name
+              Values = @{
+                 key1 = [string]::Format('value1-{0}', $(Get-Random))
+                 key2 = [string]::Format('value2-{0}', $(Get-Random))
+                 key3 = [string]::Format('value3-{0}', $([guid]::NewGuid()).ToString().Replace('-',''))
+              }
+            }
+            $kvm = Create-EdgeKvm @Params
+            { $kvm } | Should Not Throw
+            # TODO? - validate response
+        }
+
     }
 }
 

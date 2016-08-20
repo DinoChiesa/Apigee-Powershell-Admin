@@ -346,9 +346,10 @@ oauth2-pwd-cc-r8-20160805-175438.zip
 
 ### Import an API Proxy
 
+Note: I have seen situations in which an access denied error prevents this command from succeeding, if the source ZIP file is Read-only. Needs further investigation. Until that is resolved, make sure your zip file is writeable. The command does not modify the zip, but for now it appears that the zip needs to be writable.
+
 ```
 PS C:\dev\ps> Import-EdgeApi -Name dino-test-6 -Source oauth2-pwd-cc-r8-20160805-175438.zip
-
 
 configurationVersion : @{majorVersion=4; minorVersion=0}
 contextInfo          : Revision 1 of application dino-test-6, in organization cap500
@@ -431,7 +432,6 @@ prod
 ```
 PS C:\dev\ps> get-EdgeEnvironment -name test
 
-
 createdAt      : 1408425529572
 createdBy      : lyeo@apigee.com
 lastModifiedAt : 1464341439395
@@ -479,6 +479,18 @@ lastModifiedBy : mpalmgre@example.org
 name           : my-hospitality-app
 scopes         : {}
 status         : approved
+```
+
+
+### Create a Key Value Map (KVM)
+
+```
+PS C:\dev\ps> Create-EdgeKvm -Name kvm1 -Env env1 -Values @{
+                 key1 = 'value1'
+                 key2 = 'value2'
+                 key3 = 'CEBF0408-F5BF-4A6E-B841-FBF107BB3B60'
+            }
+
 ```
 
 

@@ -62,7 +62,7 @@ Function Create-EdgeKvm {
       
     $Payload = @{
       name = $Name
-      entry = @( $Values.keys |% { @{ name = $_ ; value = $map[$_] } } )
+      entry = @( $Values.keys |% { @{ name = $_ ; value = $Values[$_] } } )
     }
     
     $Options.Add( 'Payload', $Payload )
