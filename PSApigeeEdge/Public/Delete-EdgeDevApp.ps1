@@ -48,11 +48,11 @@ Function Delete-EdgeDevApp {
         $Options.Add( 'Name', $Name)
     }
     else {
-        if (!$PSBoundParameters['Id']) {
-          throw [System.ArgumentNullException] 'use -Id if not specifying -Name and -Developer'
+        if (!$PSBoundParameters['AppId']) {
+          throw [System.ArgumentNullException] 'use -AppId if not specifying -Name and -Developer'
         }
         $Options.Add( 'Collection', 'apps')
-        $Options.Add( 'Name', $Id)
+        $Options.Add( 'Name', $AppId)
     }
 
     if ($PSBoundParameters['Debug']) {

@@ -218,7 +218,6 @@ Describe "Create-ApiProduct-1" {
             $prod.createdAt | Should BeLessthan $NowMilliseconds
             $prod.lastModifiedAt | Should BeLessthan $NowMilliseconds
             $prod.createdBy | Should Be $ConnectionData.User
-            $prod.organizationName | Should Be $ConnectionData.Org
         }
    }
 }
@@ -342,23 +341,15 @@ Describe "Get-EdgeKvm-1" {
 
 Describe "Delete-DevApp-1" {
     Context 'Strict mode' {
-    
         Set-StrictMode -Version latest
-
-        # get devapps with our special name prefix 
-        # $DevApps = @( Get-EdgeDevApp -Params @{ expand = 'true'} ).app | ?{
-        #     $($_.psobject.properties | ?{ $_.Name -eq 'attributes' }).Value |
-        #       where { $_.name -eq 'DisplayName' -and $_.value.StartsWith('pstest-') }
-        # } 
-
         $DevApps = @( Get-EdgeDevApp -Params @{ expand = 'true'} ).app |
             ?{ $_.name.StartsWith('pstest-') } | % { @{ AppId = $_.appId } }
 
-        It 'deletes devapp <Name>' -TestCases @DevApps {
+        It 'deletes devapp <AppId>' -TestCases $DevApps {
             param($AppId)
-            Delete-EdgeDevApp -AppId -$AppID
+            Delete-EdgeDevApp -AppId -$AppId
         }
-   }
+    }
 }
 
 
@@ -372,7 +363,7 @@ Describe "Delete-ApiProduct-1" {
         $Products = @( Get-EdgeApiProduct -Params @{ expand = 'true'} ).apiProduct |
             ?{ $_.name.StartsWith('pstest-') } | % { @{ Name = $_.name } }
 
-        It 'deletes product <Name>' -TestCases @( ToArrayOfHash $Products ) {
+        It 'deletes product <Name>' -TestCases $Products  {
             param($Name)
             Delete-EdgeApiProduct -Name -$Name
         }
@@ -389,7 +380,7 @@ Describe "Delete-Developer-1" {
           ?{ $_.StartsWith('pstest-') } |
           % { @{ Email = $_ } }
                  
-        It 'deletes developer <Name>' -TestCases @Developers {
+        It 'deletes developer <Email>' -TestCases $Developers {
             param($Email)
             Delete-EdgeDeveloper -Name -$Email
         }
