@@ -215,10 +215,10 @@ Describe "Create-ApiProduct-1" {
             }
             $prod = Create-EdgeApiProduct @Params
             $NowMilliseconds = [int64](([datetime]::UtcNow)-(get-date "1/1/1970")).TotalMilliseconds
-            $dev.createdAt | Should BeLessthan $NowMilliseconds
-            $dev.lastModifiedAt | Should BeLessthan $NowMilliseconds
-            $dev.createdBy | Should Be $ConnectionData.User
-            $dev.organizationName | Should Be $ConnectionData.Org
+            $prod.createdAt | Should BeLessthan $NowMilliseconds
+            $prod.lastModifiedAt | Should BeLessthan $NowMilliseconds
+            $prod.createdBy | Should Be $ConnectionData.User
+            $prod.organizationName | Should Be $ConnectionData.Org
         }
    }
 }
@@ -352,11 +352,11 @@ Describe "Delete-DevApp-1" {
         # } 
 
         $DevApps = @( Get-EdgeDevApp -Params @{ expand = 'true'} ).app |
-            ?{ $_.name.StartsWith('pstest-') } | select-object appId
+            ?{ $_.name.StartsWith('pstest-') } | % { @{ AppId = $_.appId } }
 
-        It 'deletes devapp <Name>' -TestCases @( ToArrayOfHash @DevApps ) {
-            param($Name)
-            Delete-EdgeDevApp -AppId -$Name
+        It 'deletes devapp <Name>' -TestCases @DevApps {
+            param($AppId)
+            Delete-EdgeDevApp -AppId -$AppID
         }
    }
 }
@@ -370,7 +370,7 @@ Describe "Delete-ApiProduct-1" {
         # get apiproducts with our special name prefix 
 
         $Products = @( Get-EdgeApiProduct -Params @{ expand = 'true'} ).apiProduct |
-            ?{ $_.name.StartsWith('pstest-') } | select-object name
+            ?{ $_.name.StartsWith('pstest-') } | % { @{ Name = $_.name } }
 
         It 'deletes product <Name>' -TestCases @( ToArrayOfHash $Products ) {
             param($Name)
@@ -385,11 +385,13 @@ Describe "Delete-Developer-1" {
     
         Set-StrictMode -Version latest
 
-        $Developers = $( ToArrayOfHash @( Get-EdgeDeveloper ) ).GetEnumerator() |
-                 ?{ $_.Name.StartsWith('pstest-')  }
+        $Developers = @( Get-EdgeDeveloper ) |
+          ?{ $_.StartsWith('pstest-') } |
+          % { @{ Email = $_ } }
+                 
         It 'deletes developer <Name>' -TestCases @Developers {
-            param($Name)
-            Delete-EdgeDeveloper -Name -$Name
+            param($Email)
+            Delete-EdgeDeveloper -Name -$Email
         }
    }
 }
