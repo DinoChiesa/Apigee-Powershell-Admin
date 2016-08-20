@@ -284,16 +284,16 @@ Describe "Create-App-1" {
         Set-StrictMode -Version latest
 
         It 'creates an App with expiry' {
-            $Developers = @( Get-EdgeDeveloper ) |
-              ?{ $_.StartsWith('pstest-') } | % { @{ Email = $_ } }
+            $Developers = @( @( Get-EdgeDeveloper ) |
+              ?{ $_.StartsWith('pstest-') } | % { @{ Email = $_ } } )
               
-            $Products = @( Get-EdgeApiProduct -Params @{ expand = 'true'} ).apiProduct |
-              ?{ $_.name.StartsWith('pstest-') } | % { @{ Name = $_.name } }
+            $Products = @( @( Get-EdgeApiProduct -Params @{ expand = 'true'} ).apiProduct |
+              ?{ $_.name.StartsWith('pstest-') } | % { @{ Name = $_.name } } )
 
             $Params = @{
               Name = [string]::Format('pstest-{0}', $Script:Props.guid.Substring(0,10))
               Developer = $Developers[0].Email
-              ApiProducts = @( $Products[0].Name
+              ApiProducts = @( $Products[0].Name )
               Expiry = '88d'
             }
             $app = Create-EdgeDevApp @Params
@@ -344,7 +344,7 @@ Describe "Get-Apps-1" {
             param($Name)
         
             $appsExpanded = @(( Get-EdgeDevApp -Developer $Name -Params @{ expand = 'true' } ).app)
-            $excludedProps = @( 'attributes', 'apiProducts', 'credentials')
+            $excludedProps = @( 'attributes', 'apiProducts', 'credentials' )
             foreach ($app in $appsExpanded) {
                 $app2 = Get-EdgeDevApp -Id $app.appId 
                 # $app2 | Should Be $app  # No.
@@ -387,8 +387,8 @@ Describe "Get-EdgeKvm-1" {
 Describe "Delete-DevApp-1" {
     Context 'Strict mode' {
         Set-StrictMode -Version latest
-        $DevApps = @( Get-EdgeDevApp -Params @{ expand = 'true'} ).app |
-            ?{ $_.name.StartsWith('pstest-') } | % { @{ Dev = $_.developerId; Name = $_.name } }
+        $DevApps = @( @( Get-EdgeDevApp -Params @{ expand = 'true'} ).app |
+            ?{ $_.name.StartsWith('pstest-') } | % { @{ Dev = $_.developerId; Name = $_.name } } )
 
         It 'deletes devapp <Name>' -TestCases $DevApps {
             param($Dev, $Name)
@@ -405,8 +405,8 @@ Describe "Delete-ApiProduct-1" {
 
         # get apiproducts with our special name prefix 
 
-        $Products = @( Get-EdgeApiProduct -Params @{ expand = 'true'} ).apiProduct |
-            ?{ $_.name.StartsWith('pstest-') } | % { @{ Name = $_.name } }
+        $Products = @( @( Get-EdgeApiProduct -Params @{ expand = 'true'} ).apiProduct |
+            ?{ $_.name.StartsWith('pstest-') } | % { @{ Name = $_.name } } )
 
         It 'deletes product <Name>' -TestCases $Products  {
             param($Name)
@@ -421,8 +421,8 @@ Describe "Delete-Developer-1" {
     
         Set-StrictMode -Version latest
 
-        $Developers = @( Get-EdgeDeveloper ) |
-          ?{ $_.StartsWith('pstest-') } | % { @{ Email = $_ } }
+        $Developers = @( @( Get-EdgeDeveloper ) |
+          ?{ $_.StartsWith('pstest-') } | % { @{ Email = $_ } } )
                  
         It 'deletes developer <Email>' -TestCases $Developers {
             param($Email)
@@ -436,12 +436,12 @@ Describe "Delete-KVM-1" {
     Context 'Strict mode' {
         Set-StrictMode -Version latest
         $env = $( @( Get-EdgeEnvironment )[0]) # the first environment
-        $kvms = @( Get-EdgeKvm -Env $env ) |
-            ?{ $_.StartsWith('pstest-') } | % { @{ Name = $_ } }
+        $kvms = @( @( Get-EdgeKvm -Env $env ) |
+            ?{ $_.StartsWith('pstest-') } | % { @{ Name = $_ } } )
 
         It 'deletes KVM <Name>' -TestCases $kvms {
             param($Name)
-            Delete-EdgeKvm -Env $env -Name $Name -Debug
+            Delete-EdgeKvm -Env $env -Name $Name 
         }
     }
 }
