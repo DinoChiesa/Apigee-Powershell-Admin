@@ -190,7 +190,6 @@ Describe "Create-Developer-1" {
 }
 
 
-
 Describe "Get-Developers-1" {
     
     Context 'Strict mode' {
@@ -279,6 +278,32 @@ Describe "Get-ApiProduct-1" {
 
 
 
+Describe "Create-App-1" {
+    Context 'Strict mode' {
+    
+        Set-StrictMode -Version latest
+
+        It 'creates an App with expiry' {
+            $Developers = @( Get-EdgeDeveloper ) |
+              ?{ $_.StartsWith('pstest-') } | % { @{ Email = $_ } }
+              
+            $Products = @( Get-EdgeApiProduct -Params @{ expand = 'true'} ).apiProduct |
+              ?{ $_.name.StartsWith('pstest-') } | % { @{ Name = $_.name } }
+
+            $Params = @{
+              Name = [string]::Format('pstest-{0}', $Script:Props.guid.Substring(0,10))
+              Developer = $Developers[0].Email
+              ApiProducts = @( $Products[0].Name
+              Expiry = '88d'
+            }
+            $app = Create-EdgeDevApp @Params
+            #TODO : verify expiry
+        }
+    }
+}
+
+
+
 Describe "Get-Apps-1" {
     
     Context 'Strict mode' {
@@ -347,8 +372,7 @@ Describe "Get-EdgeKvm-1" {
         Set-StrictMode -Version latest
 
         It 'gets a list of kvms' {
-            $kvms = @( Get-EdgeKvm )
-            $kvms | Should Not Throw
+            { @( Get-EdgeKvm ) } | Should Not Throw
         }
        
         It 'lists kvms for 1st env' {
@@ -411,12 +435,13 @@ Describe "Delete-Developer-1" {
 Describe "Delete-KVM-1" {
     Context 'Strict mode' {
         Set-StrictMode -Version latest
-        $DevApps = @( Get-EdgeKvm -Params @{ expand = 'true'} ).app |
-            ?{ $_.name.StartsWith('pstest-') } | % { @{ Dev = $_.developerId; Name = $_.name } }
+        $env = $( @( Get-EdgeEnvironment )[0]) # the first environment
+        $kvms = @( Get-EdgeKvm -Env $env ) |
+            ?{ $_.StartsWith('pstest-') } | % { @{ Name = $_ } }
 
-        It 'deletes devapp <Name>' -TestCases $DevApps {
-            param($Dev, $Name)
-            Delete-EdgeDevApp -Developer $Dev -Name $Name -Debug
+        It 'deletes KVM <Name>' -TestCases $kvms {
+            param($Name)
+            Delete-EdgeKvm -Env $env -Name $Name -Debug
         }
     }
 }
