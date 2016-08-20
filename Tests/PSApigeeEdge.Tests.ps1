@@ -13,8 +13,11 @@ Import-Module $PSScriptRoot\..\PSApigeeEdge -Force
 $json = Get-Content $Connection -Raw | ConvertFrom-JSON
 $ConnectionData = @{}
 foreach ($prop in $json.psobject.properties.name) {
-  $ConnectionData[$prop] = $x.$prop;
+  $ConnectionData.Add( $prop , $json.$prop )
 }
+
+$guid = 'pstest-' ([guid]::NewGuid()).Replace('-', '')
+$StartMilliseconds = [int64](([datetime]::UtcNow)-(get-date "1/1/1970")).TotalMilliseconds
 
 Function ToArrayOfHash {
   param($a)
@@ -37,11 +40,13 @@ Describe "Set-EdgeConnection" {
             $ConnectionData.user | Should Not BeNullOrEmpty 
             $ConnectionData.org | Should Not BeNullOrEmpty
 
-            if (! $ConnectionData.encryptedPassword -and ! $ConnectionData.password ) {
-                throw [System.ArgumentNullException] "need one of password or encryptedPassword in ConnectionData.json"
-           }
-           
-           Set-EdgeConnection @ConnectionData
+            if (! $ConnectionData.ContainsKey("User") -or ! $ConnectionData.ContainsKey('Org')) {
+                throw [System.ArgumentNullException] 'must specify Org and User and either Password or EncryptedPassword in ConnectionData.json'
+            }
+            if (! $ConnectionData.ContainsKey("EncryptedPassword") -and ! $ConnectionData.ContainsKey('Password')) {
+                throw [System.ArgumentNullException] 'must specify Org and User and either Password or EncryptedPassword in ConnectionData.json'
+            }
+            Set-EdgeConnection @ConnectionData
         }
     }
 }
@@ -54,7 +59,7 @@ Describe "Get-EdgeEnvironment-1" {
         Set-StrictMode -Version latest
 
         It 'gets a list of environments' {
-            $envs = Get-EdgeEnvironment
+            $envs = @( Get-EdgeEnvironment )
             $envs.count | Should BeGreaterThan 0
         }
         
@@ -62,9 +67,8 @@ Describe "Get-EdgeEnvironment-1" {
             param($Name)
 
             $OneEnv = Get-EdgeEnvironment -Name $Name
-            $NowMilliseconds = [int64](([datetime]::UtcNow)-(get-date "1/1/1970")).TotalMilliseconds
-            $OneEnv.createdAt | Should BeLessthan $NowMilliseconds
-            $OneEnv.lastModifiedAt | Should BeLessthan $NowMilliseconds
+            $OneEnv.createdAt | Should BeLessthan $StartMilliseconds
+            $OneEnv.lastModifiedAt | Should BeLessthan $StartMilliseconds
             $OneEnv.name | Should Be $Name
             $OneEnv.properties | Should Not BeNullOrEmpty
         }
@@ -89,8 +93,8 @@ Describe "Get-EdgeApi-1" {
             $oneproxy = Get-EdgeApi -Name $Name
             $oneproxy | Should Not BeNullOrEmpty
             $oneproxy.metaData | Should Not BeNullOrEmpty
-            $NowMilliseconds = [int64](([datetime]::UtcNow)-(get-date "1/1/1970")).TotalMilliseconds
-            $oneproxy.metaData.createdAt | Should BeLessthan $NowMilliseconds
+            #$oneproxy.metaData.createdAt | Should BeLessthan $NowMilliseconds
+            $oneproxy.metaData.lastModifiedAt | Should BeLessthan $StartwMilliseconds
             $oneproxy.metaData.lastModifiedBy | Should Not BeNullOrEmpty
         }
     }
@@ -118,7 +122,6 @@ Describe "Get-ApiRevisions-1" {
             $RevisionDetails = Get-EdgeApi -Name $Name -Revision $revisions[-1]
             $RevisionDetails.name | Should Be $Name
             $RevisionDetails.revision | Should Be $revisions[-1]
-            $NowMilliseconds = [int64](([datetime]::UtcNow)-(get-date "1/1/1970")).TotalMilliseconds
             $RevisionDetails.createdAt | Should BeLessthan $NowMilliseconds
         }
 
@@ -137,6 +140,29 @@ Describe "Get-ApiRevisions-1" {
     }
 }
 
+
+Describe "Create-Developer-1" {
+    Context 'Strict mode' {
+    
+        Set-StrictMode -Version latest
+
+        It 'creates a developer' {
+            @Params = {
+              Name = $guid.Substring(0,13)
+              First = $guid.Substring(20)
+              Last = $guid.Substring(7,20)
+              Email = [string]::Format('{0}.{1}@example.org', $guid.Substring(20), $guid.Substring(7,20))
+            }
+            $dev = Create-EdgeDeveloper @Params
+            $NowMilliseconds = [int64](([datetime]::UtcNow)-(get-date "1/1/1970")).TotalMilliseconds
+            $dev.createdAt | Should BeLessthan $NowMilliseconds
+            $dev.lastModifiedAt | Should BeLessthan $NowMilliseconds
+            $dev.createdBy | Should Be $ConnectionData.User
+            $dev.organizationName | Should Be $ConnectionData.Org
+            $dev.email | Should Be $Params['Email']
+        }
+   }
+}
 
 
 Describe "Get-Developers-1" {
