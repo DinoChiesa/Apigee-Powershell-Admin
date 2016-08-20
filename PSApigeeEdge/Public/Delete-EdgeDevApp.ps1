@@ -46,7 +46,7 @@ Function Delete-EdgeDevApp {
         throw [System.ArgumentNullException] 'use -Name and -Developer.'
     }
 
-    $Options.Add( 'Collection', $( Join-Parts -Separator '/' -Parts 'developers', $Developer, 'app' ))
+    $Options.Add( 'Collection', $( Join-Parts -Separator '/' -Parts 'developers', $Developer, 'apps'))
     $Options.Add( 'Name', $Name)
 
     if ($PSBoundParameters['Debug']) {
