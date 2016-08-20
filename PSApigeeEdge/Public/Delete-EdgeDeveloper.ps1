@@ -13,8 +13,11 @@ Function Delete-EdgeDeveloper {
         The Apigee Edge organization. The default is to use the value from Set-EdgeConnection.
 
     .EXAMPLE
-        Delete-EdgeDeveloper -Name dchiesa@example.org 
-
+        Delete-EdgeDeveloper -Name dchiesa@example.org
+        
+    .EXAMPLE
+        Create-EdgeDeveloper
+        
     .FUNCTIONALITY
         ApigeeEdge
 

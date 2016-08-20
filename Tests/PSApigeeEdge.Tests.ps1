@@ -16,8 +16,8 @@ foreach ($prop in $json.psobject.properties.name) {
   $ConnectionData.Add( $prop , $json.$prop )
 }
 
-$Script:Props = {
-  guid = [string]::Format('pstest-{0}', $([guid]::NewGuid()).ToString().Replace('-',''))
+$Script:Props = @{
+  guid = $([guid]::NewGuid()).ToString().Replace('-','')
   StartMilliseconds = [int64](([datetime]::UtcNow)-(get-date "1/1/1970")).TotalMilliseconds
 }
 
@@ -96,12 +96,11 @@ Describe "Get-EdgeApi-1" {
             $oneproxy | Should Not BeNullOrEmpty
             $oneproxy.metaData | Should Not BeNullOrEmpty
             #$oneproxy.metaData.createdAt | Should BeLessthan $NowMilliseconds
-            $oneproxy.metaData.lastModifiedAt | Should BeLessthan $Script:Props.StartwMilliseconds
+            $oneproxy.metaData.lastModifiedAt | Should BeLessthan $Script:Props.StartMilliseconds
             $oneproxy.metaData.lastModifiedBy | Should Not BeNullOrEmpty
         }
     }
 }
-
 
 
 Describe "Get-ApiRevisions-1" {
@@ -124,6 +123,7 @@ Describe "Get-ApiRevisions-1" {
             $RevisionDetails = Get-EdgeApi -Name $Name -Revision $revisions[-1]
             $RevisionDetails.name | Should Be $Name
             $RevisionDetails.revision | Should Be $revisions[-1]
+            $NowMilliseconds = [int64](([datetime]::UtcNow)-(get-date "1/1/1970")).TotalMilliseconds
             $RevisionDetails.createdAt | Should BeLessthan $NowMilliseconds
         }
 
@@ -150,12 +150,12 @@ Describe "Create-Developer-1" {
 
         It 'creates a developer' {
             $Params = @{
-              Name = $Script:Props.guid.Substring(0,13)
-              First = $Script:Props.guid.Substring(20)
-              Last = $Script:Props.guid.Substring(7,20)
-              Email = [string]::Format('{0}.{1}@example.org',
-                     $Script:Props.guid.Substring(20),
-                     $Script:Props.guid.Substring(7,20))
+              Name = [string]::Format('pstest-{0}',$Script:Props.guid.Substring(0,9))
+              First = $Script:Props.guid.Substring(0,9)
+              Last = $Script:Props.guid.Substring(9,20)
+              Email = [string]::Format('pstest-{0}.{1}@example.org',
+                     $Script:Props.guid.Substring(0,9),
+                     $Script:Props.guid.Substring(9,20))
             }
             $dev = Create-EdgeDeveloper @Params
             $NowMilliseconds = [int64](([datetime]::UtcNow)-(get-date "1/1/1970")).TotalMilliseconds
@@ -199,6 +199,30 @@ Describe "Get-Developers-1" {
         }
     }
 }
+
+Describe "Create-ApiProduct-1" {
+    Context 'Strict mode' {
+    
+        Set-StrictMode -Version latest
+
+        It 'creates a product' {
+            # Create-EdgeApiProduct -Name pstest-198191891  -Environments @( 'env1' )
+
+            $Params = @{
+              Name = [string]::Format('pstest-{0}',$Script:Props.guid.Substring(3,11))
+              Environments = @( Get-EdgeEnvironment ) # all of them
+              Proxies = @( @( Get-EdgeApi )[0] )
+            }
+            $prod = Create-EdgeApiProduct @Params
+            $NowMilliseconds = [int64](([datetime]::UtcNow)-(get-date "1/1/1970")).TotalMilliseconds
+            $dev.createdAt | Should BeLessthan $NowMilliseconds
+            $dev.lastModifiedAt | Should BeLessthan $NowMilliseconds
+            $dev.createdBy | Should Be $ConnectionData.User
+            $dev.organizationName | Should Be $ConnectionData.Org
+        }
+   }
+}
+
 
 Describe "Get-ApiProduct-1" {
     
@@ -315,6 +339,60 @@ Describe "Get-EdgeKvm-1" {
     }
 }
 
+
+Describe "Delete-DevApp-1" {
+    Context 'Strict mode' {
+    
+        Set-StrictMode -Version latest
+
+        # get devapps with our special name prefix 
+        # $DevApps = @( Get-EdgeDevApp -Params @{ expand = 'true'} ).app | ?{
+        #     $($_.psobject.properties | ?{ $_.Name -eq 'attributes' }).Value |
+        #       where { $_.name -eq 'DisplayName' -and $_.value.StartsWith('pstest-') }
+        # } 
+
+        $DevApps = @( Get-EdgeDevApp -Params @{ expand = 'true'} ).app |
+            ?{ $_.name.StartsWith('pstest-') } | select-object appId
+
+        It 'deletes devapp <Name>' -TestCases @( ToArrayOfHash @DevApps ) {
+            param($Name)
+            Delete-EdgeDevApp -AppId -$Name
+        }
+   }
+}
+
+
+Describe "Delete-ApiProduct-1" {
+    Context 'Strict mode' {
+    
+        Set-StrictMode -Version latest
+
+        # get apiproducts with our special name prefix 
+
+        $Products = @( Get-EdgeApiProduct -Params @{ expand = 'true'} ).apiProduct |
+            ?{ $_.name.StartsWith('pstest-') } | select-object name
+
+        It 'deletes product <Name>' -TestCases @( ToArrayOfHash $Products ) {
+            param($Name)
+            Delete-EdgeApiProduct -Name -$Name
+        }
+   }
+}
+
+
+Describe "Delete-Developer-1" {
+    Context 'Strict mode' {
+    
+        Set-StrictMode -Version latest
+
+        $Developers = $( ToArrayOfHash @( Get-EdgeDeveloper ) ).GetEnumerator() |
+                 ?{ $_.Name.StartsWith('pstest-')  }
+        It 'deletes developer <Name>' -TestCases @Developers {
+            param($Name)
+            Delete-EdgeDeveloper -Name -$Name
+        }
+   }
+}
 
 
 ## TODO: insert more tests here 
