@@ -150,7 +150,7 @@ Describe "Create-KVM-1" {
 
         It 'creates a KVM' {
             $Params = @{
-              Name = [string]::Format('pstest-{0}',$Script:Props.guid.Substring(0,10))
+              Name = [string]::Format('pstest-{0}', $Script:Props.guid.Substring(0,10))
               Env = $( @( Get-EdgeEnvironment )[0]) # the first environment
               Values = @{
                  key1 = 'value1'
@@ -159,7 +159,25 @@ Describe "Create-KVM-1" {
               }
             }
             $kvm = Create-EdgeKvm @Params
+            { $kvm } | Should Not Throw
         }
+
+        It 'creates a kvm in Environment <Name>' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
+            param($Name)
+            $Params = @{
+              Name = [string]::Format('pstest-{0}{1}', $(Get-Random), $Script:Props.guid.Substring(0,10))
+              Env = $Name
+              Values = @{
+                 key1 = [string]::Format('value1-{0}', $(Get-Random))
+                 key2 = [string]::Format('value2-{0}', $(Get-Random))
+                 key3 = [string]::Format('value3-{0}', $([guid]::NewGuid()).ToString().Replace('-',''))
+              }
+            }
+            $kvm = Create-EdgeKvm @Params
+            { $kvm } | Should Not Throw
+            # TODO? - validate response
+        }
+
     }
 }
 
@@ -201,11 +219,12 @@ Describe "Get-Developers-1" {
             $devs.count | Should BeGreaterThan 0
         }
 
-        It 'gets a list of developers with expansion' {
+        It 'gets a list of all developers with expansion' {
             $devs = @( Get-EdgeDeveloper )
             $devs.count | Should BeGreaterThan 0
             $devsExpanded = @(Get-EdgeDeveloper -Params @{ expand = 'true' }).developer
             $devs.count | Should Be $devsExpanded.count
+            $devsExpanded[0].GetType().Name | Should Be 'PSCustomObject'
         }
 
         It 'gets details for developer <Name>'  -TestCases @( ToArrayOfHash  @( Get-EdgeDeveloper ) ) {
@@ -297,6 +316,7 @@ Describe "Create-App-1" {
               Expiry = '88d'
             }
             $app = Create-EdgeDevApp @Params
+            { $app } | Should Not Throw
             #TODO : verify expiry
         }
     }
@@ -371,13 +391,14 @@ Describe "Get-EdgeKvm-1" {
 
         Set-StrictMode -Version latest
 
-        It 'gets a list of kvms' {
-            { @( Get-EdgeKvm ) } | Should Not Throw
+        It 'gets a list of kvms' { # org-scopes kvms. 
+            $kvms = @( Get-EdgeKvm )
+            { $kvms } | Should Not Throw
         }
        
-        It 'lists kvms for 1st env' {
-            $env = $( @( Get-EdgeEnvironment )[0]) # the first environment
-            $kvms = @( Get-EdgeKvm -Env $env )
+        It 'lists kvms for env <Name>' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
+            param($Name)
+            $kvms = @( Get-EdgeKvm -Env $Name )
             $kvms.count | Should BeGreaterThan 0
         }
     }
@@ -435,13 +456,13 @@ Describe "Delete-Developer-1" {
 Describe "Delete-KVM-1" {
     Context 'Strict mode' {
         Set-StrictMode -Version latest
-        $env = $( @( Get-EdgeEnvironment )[0]) # the first environment
-        $kvms = @( @( Get-EdgeKvm -Env $env ) |
-            ?{ $_.StartsWith('pstest-') } | % { @{ Name = $_ } } )
 
-        It 'deletes KVM <Name>' -TestCases $kvms {
-            param($Name)
-            Delete-EdgeKvm -Env $env -Name $Name 
+        It 'deletes test kvms in Env <Name>' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
+          param($Name)
+        
+          @( @( Get-EdgeKvm -Env $Name ) | ?{ $_.StartsWith('pstest-') } ) | % { 
+            Delete-EdgeKvm -Env $Name -Name $_
+          }
         }
     }
 }
