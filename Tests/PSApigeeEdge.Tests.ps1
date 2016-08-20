@@ -16,8 +16,10 @@ foreach ($prop in $json.psobject.properties.name) {
   $ConnectionData.Add( $prop , $json.$prop )
 }
 
-$guid = 'pstest-' ([guid]::NewGuid()).Replace('-', '')
-$StartMilliseconds = [int64](([datetime]::UtcNow)-(get-date "1/1/1970")).TotalMilliseconds
+$Script:Props = {
+  guid = [string]::Format('pstest-{0}', $([guid]::NewGuid()).ToString().Replace('-',''))
+  StartMilliseconds = [int64](([datetime]::UtcNow)-(get-date "1/1/1970")).TotalMilliseconds
+}
 
 Function ToArrayOfHash {
   param($a)
@@ -67,8 +69,8 @@ Describe "Get-EdgeEnvironment-1" {
             param($Name)
 
             $OneEnv = Get-EdgeEnvironment -Name $Name
-            $OneEnv.createdAt | Should BeLessthan $StartMilliseconds
-            $OneEnv.lastModifiedAt | Should BeLessthan $StartMilliseconds
+            $OneEnv.createdAt | Should BeLessthan $Script:Props.StartMilliseconds
+            $OneEnv.lastModifiedAt | Should BeLessthan $Script:Props.StartMilliseconds
             $OneEnv.name | Should Be $Name
             $OneEnv.properties | Should Not BeNullOrEmpty
         }
@@ -94,7 +96,7 @@ Describe "Get-EdgeApi-1" {
             $oneproxy | Should Not BeNullOrEmpty
             $oneproxy.metaData | Should Not BeNullOrEmpty
             #$oneproxy.metaData.createdAt | Should BeLessthan $NowMilliseconds
-            $oneproxy.metaData.lastModifiedAt | Should BeLessthan $StartwMilliseconds
+            $oneproxy.metaData.lastModifiedAt | Should BeLessthan $Script:Props.StartwMilliseconds
             $oneproxy.metaData.lastModifiedBy | Should Not BeNullOrEmpty
         }
     }
@@ -147,11 +149,13 @@ Describe "Create-Developer-1" {
         Set-StrictMode -Version latest
 
         It 'creates a developer' {
-            @Params = {
-              Name = $guid.Substring(0,13)
-              First = $guid.Substring(20)
-              Last = $guid.Substring(7,20)
-              Email = [string]::Format('{0}.{1}@example.org', $guid.Substring(20), $guid.Substring(7,20))
+            $Params = @{
+              Name = $Script:Props.guid.Substring(0,13)
+              First = $Script:Props.guid.Substring(20)
+              Last = $Script:Props.guid.Substring(7,20)
+              Email = [string]::Format('{0}.{1}@example.org',
+                     $Script:Props.guid.Substring(20),
+                     $Script:Props.guid.Substring(7,20))
             }
             $dev = Create-EdgeDeveloper @Params
             $NowMilliseconds = [int64](([datetime]::UtcNow)-(get-date "1/1/1970")).TotalMilliseconds
