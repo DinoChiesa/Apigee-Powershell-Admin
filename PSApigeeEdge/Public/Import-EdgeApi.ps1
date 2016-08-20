@@ -30,8 +30,6 @@ Function Import-EdgeApi {
 
     .LINK
        Deploy-EdgeApi
-       
-    .LINK
        Export-EdgeApi
 
     .FUNCTIONALITY

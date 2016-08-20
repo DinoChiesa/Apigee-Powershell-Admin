@@ -1,3 +1,5 @@
+PARAM([string]$Connection = '.\ConnectionData.json')
+
 $Verbose = @{}
 if($env:APPVEYOR_REPO_BRANCH -and $env:APPVEYOR_REPO_BRANCH -notlike "master")
 {
@@ -8,8 +10,11 @@ $PSVersion = $PSVersionTable.PSVersion.Major
 Import-Module $PSScriptRoot\..\PSApigeeEdge -Force
 
 # --- Get data for the tests
-$ConnectionData = Get-Content .\ConnectionData.json -Raw | ConvertFrom-JSON
-
+$json = Get-Content $Connection -Raw | ConvertFrom-JSON
+$ConnectionData = @{}
+foreach ($prop in $json.psobject.properties.name) {
+  $ConnectionData[$prop] = $x.$prop;
+}
 
 Function ToArrayOfHash {
   param($a)
@@ -31,15 +36,12 @@ Describe "Set-EdgeConnection" {
         It 'sets the connection info' {
             $ConnectionData.user | Should Not BeNullOrEmpty 
             $ConnectionData.org | Should Not BeNullOrEmpty
-            if ( $ConnectionData.cryptoPassword ) {
-                Set-EdgeConnection -Org $ConnectionData.org -User $ConnectionData.user -EncryptedPassword $ConnectionData.cryptoPassword
-            }
-            elseif ( $ConnectionData.password ) {
-                Set-EdgeConnection -Org $ConnectionData.org -User $ConnectionData.user -EncryptedPassword $ConnectionData.password
-            }
-            else {
-                throw [System.ArgumentNullException] "need one of password or cryptoPassword in ConnectionData.json"
-            }
+            
+            if (! $ConnectionData.encryptedPassword && ! $ConnectionData.password ) {
+                throw [System.ArgumentNullException] "need one of password or encryptedPassword in ConnectionData.json"
+           }
+           
+           Set-EdgeConnection -Params $ConnectionData
         }
     }
 }
