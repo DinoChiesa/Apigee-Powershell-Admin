@@ -143,6 +143,27 @@ Describe "Get-ApiRevisions-1" {
 }
 
 
+Describe "Create-KVM-1" {
+    Context 'Strict mode' {
+    
+        Set-StrictMode -Version latest
+
+        It 'creates a KVM' {
+            $Params = @{
+              Name = [string]::Format('pstest-{0}',$Script:Props.guid.Substring(0,10))
+              Env = $( @( Get-EdgeEnvironment )[0]) # the first environment
+              Values = @{
+                 key1 = 'value1'
+                 key2 = 'value2'
+                 key3 = 'value3-CEBF0408-F5BF-4A6E-B841-FBF107BB3B60'
+              }
+            }
+            $kvm = Create-EdgeKvm @Params
+        }
+    }
+}
+
+
 Describe "Create-Developer-1" {
     Context 'Strict mode' {
     
@@ -165,8 +186,9 @@ Describe "Create-Developer-1" {
             $dev.organizationName | Should Be $ConnectionData.Org
             $dev.email | Should Be $Params['Email']
         }
-   }
+    }
 }
+
 
 
 Describe "Get-Developers-1" {
@@ -199,6 +221,7 @@ Describe "Get-Developers-1" {
         }
     }
 }
+
 
 Describe "Create-ApiProduct-1" {
     Context 'Strict mode' {
@@ -319,7 +342,6 @@ Describe "Get-Apps-1" {
 
 
 Describe "Get-EdgeKvm-1" {
-
     Context 'Strict mode' { 
 
         Set-StrictMode -Version latest
@@ -347,7 +369,7 @@ Describe "Delete-DevApp-1" {
 
         It 'deletes devapp <Name>' -TestCases $DevApps {
             param($Dev, $Name)
-            Delete-EdgeDevApp -Developer $Dev -Name $Name
+            Delete-EdgeDevApp -Developer $Dev -Name $Name -Debug
         }
     }
 }
@@ -367,7 +389,7 @@ Describe "Delete-ApiProduct-1" {
             param($Name)
             Delete-EdgeApiProduct -Name $Name
         }
-   }
+    }
 }
 
 
@@ -383,8 +405,23 @@ Describe "Delete-Developer-1" {
             param($Email)
             Delete-EdgeDeveloper -Name $Email
         }
-   }
+    }
 }
+
+
+Describe "Delete-KVM-1" {
+    Context 'Strict mode' {
+        Set-StrictMode -Version latest
+        $DevApps = @( Get-EdgeKvm -Params @{ expand = 'true'} ).app |
+            ?{ $_.name.StartsWith('pstest-') } | % { @{ Dev = $_.developerId; Name = $_.name } }
+
+        It 'deletes devapp <Name>' -TestCases $DevApps {
+            param($Dev, $Name)
+            Delete-EdgeDevApp -Developer $Dev -Name $Name -Debug
+        }
+    }
+}
+
 
 
 ## TODO: insert more tests here 

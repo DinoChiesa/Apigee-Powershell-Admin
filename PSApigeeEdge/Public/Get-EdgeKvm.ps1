@@ -10,12 +10,12 @@ Function Get-EdgeKvm {
         Optional. The name of the KVM to retrieve.
         The default is to list all apiproxies.
 
-    .PARAMETER Org
-        Optional. The Apigee Edge organization. The default is to use the value from Set-EdgeConnection.
-
     .PARAMETER Env
         Optional. The Apigee Edge environment. The default is to use the organization-wide
         Key-Value Map.
+
+    .PARAMETER Org
+        Optional. The Apigee Edge organization. The default is to use the value from Set-EdgeConnection.
 
     .EXAMPLE
         Get-EdgeKvm -Env test
@@ -28,17 +28,14 @@ Function Get-EdgeKvm {
     [cmdletbinding()]
     param(
         [string]$Name,
-        [string]$Org,
-        [string]$Env
-    )
+        [string]$Env,
+        [string]$Org
+        )
+    
+    $Options = @{ }
     
     if ($PSBoundParameters['Debug']) {
         $DebugPreference = 'Continue'
-    }
-    
-    $Options = @{ Collection = 'keyvaluemaps' }
-    
-    if ($PSBoundParameters['Debug']) {
         $Options.Add( 'Debug', $Debug )
     }
     if ($PSBoundParameters['Org']) {
@@ -46,13 +43,17 @@ Function Get-EdgeKvm {
     }
     
     if ($PSBoundParameters['Env']) {
-        $Path = Join-Parts -Separator "/" -Parts 'e', $Env
+        $Options['Collection'] = $(Join-Parts -Separator "/" -Parts 'e', $Env, 'keyvaluemaps' )
     }
+    else {
+         $Options['Collection'] = 'keyvaluemaps'
+    }
+    
     if ($PSBoundParameters['Name']) {
         $Options.Add( 'Name', $Name )
     }
 
-    Write-Debug ( "Options @Options`n" )
+    Write-Debug ([string]::Format("Options {0}`n", $(ConvertTo-Json $Options -Compress ) ) )
 
     Get-EdgeObject @Options
 }
