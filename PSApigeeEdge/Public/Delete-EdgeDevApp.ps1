@@ -58,6 +58,5 @@ Function Delete-EdgeDevApp {
     
     Write-Debug ([string]::Format("Options {0}`n", $(ConvertTo-Json $Options -Compress ) ) )
 
-
     Delete-EdgeObject @Options
 }

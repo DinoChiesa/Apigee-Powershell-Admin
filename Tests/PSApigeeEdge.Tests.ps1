@@ -347,7 +347,7 @@ Describe "Delete-DevApp-1" {
 
         It 'deletes devapp <Name>' -TestCases $DevApps {
             param($Dev, $Name)
-            Delete-EdgeDevApp -Developer -$Dev -Name $Name
+            Delete-EdgeDevApp -Developer $Dev -Name $Name
         }
     }
 }
@@ -365,7 +365,7 @@ Describe "Delete-ApiProduct-1" {
 
         It 'deletes product <Name>' -TestCases $Products  {
             param($Name)
-            Delete-EdgeApiProduct -Name $Name -Debug
+            Delete-EdgeApiProduct -Name $Name
         }
    }
 }
@@ -381,7 +381,7 @@ Describe "Delete-Developer-1" {
                  
         It 'deletes developer <Email>' -TestCases $Developers {
             param($Email)
-            Delete-EdgeDeveloper -Name -$Email
+            Delete-EdgeDeveloper -Name $Email
         }
    }
 }
