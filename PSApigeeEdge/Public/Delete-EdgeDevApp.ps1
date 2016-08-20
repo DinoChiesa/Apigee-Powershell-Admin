@@ -46,7 +46,7 @@ Function Delete-EdgeDevApp {
         throw [System.ArgumentNullException] 'use -Name and -Developer.'
     }
 
-    $Options.Add( 'Collection', $( Join-Parts -Separator '/' -Parts 'developers', $Developer, 'app'
+    $Options.Add( 'Collection', $( Join-Parts -Separator '/' -Parts 'developers', $Developer, 'app' ))
     $Options.Add( 'Name', $Name)
 
     if ($PSBoundParameters['Debug']) {
@@ -56,7 +56,8 @@ Function Delete-EdgeDevApp {
         $Options.Add( 'Org', $Org )
     }
     
-    Write-Debug ( "Options @Options`n" )
+    Write-Debug ([string]::Format("Options {0}`n", $(ConvertTo-Json $Options -Compress ) ) )
+
 
     Delete-EdgeObject @Options
 }

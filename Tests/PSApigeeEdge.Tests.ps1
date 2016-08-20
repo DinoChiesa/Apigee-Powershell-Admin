@@ -365,7 +365,7 @@ Describe "Delete-ApiProduct-1" {
 
         It 'deletes product <Name>' -TestCases $Products  {
             param($Name)
-            Delete-EdgeApiProduct -Name -$Name -Debug
+            Delete-EdgeApiProduct -Name $Name -Debug
         }
    }
 }
