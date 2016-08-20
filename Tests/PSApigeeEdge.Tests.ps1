@@ -41,7 +41,7 @@ Describe "Set-EdgeConnection" {
                 throw [System.ArgumentNullException] "need one of password or encryptedPassword in ConnectionData.json"
            }
            
-           Set-EdgeConnection -Params $ConnectionData
+           Set-EdgeConnection @ConnectionData
         }
     }
 }
