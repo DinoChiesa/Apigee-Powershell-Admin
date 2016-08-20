@@ -343,11 +343,11 @@ Describe "Delete-DevApp-1" {
     Context 'Strict mode' {
         Set-StrictMode -Version latest
         $DevApps = @( Get-EdgeDevApp -Params @{ expand = 'true'} ).app |
-            ?{ $_.name.StartsWith('pstest-') } | % { @{ AppId = $_.appId } }
+            ?{ $_.name.StartsWith('pstest-') } | % { @{ Dev = $_.developerId; Name = $_.name } }
 
-        It 'deletes devapp <AppId>' -TestCases $DevApps {
-            param($AppId)
-            Delete-EdgeDevApp -AppId -$AppId
+        It 'deletes devapp <Name>' -TestCases $DevApps {
+            param($Dev, $Name)
+            Delete-EdgeDevApp -Developer -$Dev -Name $Name
         }
     }
 }
@@ -365,7 +365,7 @@ Describe "Delete-ApiProduct-1" {
 
         It 'deletes product <Name>' -TestCases $Products  {
             param($Name)
-            Delete-EdgeApiProduct -Name -$Name
+            Delete-EdgeApiProduct -Name -$Name -Debug
         }
    }
 }
@@ -377,8 +377,7 @@ Describe "Delete-Developer-1" {
         Set-StrictMode -Version latest
 
         $Developers = @( Get-EdgeDeveloper ) |
-          ?{ $_.StartsWith('pstest-') } |
-          % { @{ Email = $_ } }
+          ?{ $_.StartsWith('pstest-') } | % { @{ Email = $_ } }
                  
         It 'deletes developer <Email>' -TestCases $Developers {
             param($Email)

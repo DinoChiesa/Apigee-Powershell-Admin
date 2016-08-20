@@ -6,9 +6,6 @@ Function Delete-EdgeDevApp {
     .DESCRIPTION
         Delete an developer app from Apigee Edge.
 
-    .PARAMETER AppId
-        The id of the developer app to delete. Use this instead of -Name and -Developer. 
-        
     .PARAMETER Name
         The name of the app to delete. Use this with -Developer. 
         
@@ -21,6 +18,9 @@ Function Delete-EdgeDevApp {
     .EXAMPLE
         Delete-EdgeDevApp -Developer dchiesa@example.org -Name abcdfege-1
 
+    .LINK
+        Create-EdgeDevApp
+        
     .FUNCTIONALITY
         ApigeeEdge
 
@@ -28,9 +28,8 @@ Function Delete-EdgeDevApp {
 
     [cmdletbinding()]
     param(
-        [string]$Name,
-        [string]$Developer,
-        [string]$AppId,
+        [Parameter(Mandatory=$True)][string]$Name,
+        [Parameter(Mandatory=$True)][string]$Developer,
         [string]$Org
     )
     
@@ -40,20 +39,15 @@ Function Delete-EdgeDevApp {
     
     $Options = @{ }
     
-    if ($PSBoundParameters['Developer']) {
-        if (!$PSBoundParameters['Name']) {
-          throw [System.ArgumentNullException] 'use -Name with -Developer.'
-        }
-        $Options.Add( 'Collection', $( Join-Parts -Separator '/' -Parts 'developers', $Developer, 'apps' ) )
-        $Options.Add( 'Name', $Name)
+    if (!$PSBoundParameters['Developer']) {
+        throw [System.ArgumentNullException] 'use -Name and -Developer.'
     }
-    else {
-        if (!$PSBoundParameters['AppId']) {
-          throw [System.ArgumentNullException] 'use -AppId if not specifying -Name and -Developer'
-        }
-        $Options.Add( 'Collection', 'apps')
-        $Options.Add( 'Name', $AppId)
+    if (!$PSBoundParameters['Name']) {
+        throw [System.ArgumentNullException] 'use -Name and -Developer.'
     }
+
+    $Options.Add( 'Collection', $( Join-Parts -Separator '/' -Parts 'developers', $Developer, 'app'
+    $Options.Add( 'Name', $Name)
 
     if ($PSBoundParameters['Debug']) {
         $Options.Add( 'Debug', $Debug )
