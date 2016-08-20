@@ -391,13 +391,14 @@ Describe "Get-EdgeKvm-1" {
 
         Set-StrictMode -Version latest
 
-        It 'gets a list of kvms' {
-            { @( Get-EdgeKvm ) } | Should Not Throw
+        It 'gets a list of kvms' { # org-scopes kvms. 
+            $kvms = @( Get-EdgeKvm )
+            { $kvms } | Should Not Throw
         }
        
-        It 'lists kvms for 1st env' {
-            $env = $( @( Get-EdgeEnvironment )[0]) # the first environment
-            $kvms = @( Get-EdgeKvm -Env $env )
+        It 'lists kvms for env <Name>' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
+            param($Name)
+            $kvms = @( Get-EdgeKvm -Env $Name )
             $kvms.count | Should BeGreaterThan 0
         }
     }
