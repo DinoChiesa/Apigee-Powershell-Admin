@@ -499,6 +499,12 @@ This method reads the values from a JSON file.
 The JSON should be a simple hash with no nesting, only top-level properties.
 
 ```
+PS C:\dev\ps\Edge-Powershell-Admin> type .\data.json
+{
+  "threshold" : "1780",
+  "header-name" : "X-Client-ID",
+  "targetUrl" : "http://192.168.78.12:9090"
+}
 PS C:\dev\ps> Create-EdgeKvm -Name kvm1 -Env env1 -Source .\data.json
 
 ```
