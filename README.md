@@ -484,6 +484,8 @@ status         : approved
 
 ### Create a Key Value Map (KVM)
 
+This method specifies the values in a Powershell Hashtable:
+
 ```
 PS C:\dev\ps> Create-EdgeKvm -Name kvm1 -Env env1 -Values @{
                  key1 = 'value1'
@@ -492,6 +494,41 @@ PS C:\dev\ps> Create-EdgeKvm -Name kvm1 -Env env1 -Values @{
             }
 
 ```
+
+Using the -Source option allows you to load the initial values from a JSON file.
+The JSON can be a simple hash with no nesting, only top-level properties, like so: 
+
+```
+PS C:\dev\ps\Edge-Powershell-Admin> type .\data.json
+{
+  "threshold" : 1780,
+  "allowErrors" : true,
+  "header-name" : "X-Client-ID",
+  "targetUrl" : "http://192.168.78.12:9090"
+}
+PS C:\dev\ps> Create-EdgeKvm -Name kvm1 -Env env1 -Source .\data.json
+
+```
+
+The JSON can also include nested properties, like so:
+
+```
+PS C:\dev\ps\Edge-Powershell-Admin> type .\data.json
+{
+  "threshold" : 5280,
+  "alertEmail" : "opdk@apigee.com",
+  "targetUrl" : "http://192.168.66.12:9090",
+  "settings" : {
+     "one" : 1,
+     "two" : 2,
+     "three" : true
+  }
+}
+PS C:\dev\ps> Create-EdgeKvm -Name kvm2 -Env env1 -Source .\data.json
+
+```
+
+In this case, the value associated to a key with a nested hash, will be a string, containing the JSON-stringified version of the nested hash. In the above, the key 'settings' will be associated with the string '{"one":1,"two":2,"three":true}'.
 
 
 ## Running Tests
@@ -508,9 +545,10 @@ You will need a file named ConnectionData.json, which is not provided in this so
 
 ```
 {
-  "org" : "myorg",
-  "user" : "dino@example.org",
-  "password" : "Secret123"
+  "Org" : "myorg",
+  "MgmtUri" : "http://192.168.56.10:8080",
+  "User" : "dino@example.org",
+  "Password" : "Secret123"
 }
 ```
 
@@ -525,9 +563,10 @@ If you wish to not store your password in a file in plaintext, you can convert t
 
 ```
 {
-  "org" : "myorg",
-  "user" : "dino@example.org",
-  "cryptoPassword" : "01000000d08c9ddf0115d1118c7a00c04fc297e....6e0b49de4241b4b01e8f"
+  "Org" : "myorg",
+  "MgmtUri" : "https://api.enterprise.apigee.com",
+  "User" : "dino@example.org",
+  "EncryptedPassword" : "01000000d08c9ddf0115d1118c7a00c04fc297e....6e0b49de4241b4b01e8f"
 }
 ```
 
