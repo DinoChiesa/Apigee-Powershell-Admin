@@ -484,12 +484,22 @@ status         : approved
 
 ### Create a Key Value Map (KVM)
 
+This method specifies the values in a Powershell Hashtable:
+
 ```
 PS C:\dev\ps> Create-EdgeKvm -Name kvm1 -Env env1 -Values @{
                  key1 = 'value1'
                  key2 = 'value2'
                  key3 = 'CEBF0408-F5BF-4A6E-B841-FBF107BB3B60'
             }
+
+```
+
+This method reads the values from a JSON file.
+The JSON should be a simple hash with no nesting, only top-level properties.
+
+```
+PS C:\dev\ps> Create-EdgeKvm -Name kvm1 -Env env1 -Source .\data.json
 
 ```
 
@@ -508,9 +518,10 @@ You will need a file named ConnectionData.json, which is not provided in this so
 
 ```
 {
-  "org" : "myorg",
-  "user" : "dino@example.org",
-  "password" : "Secret123"
+  "Org" : "myorg",
+  "MgmtUri" : "http://192.168.56.10:8080",
+  "User" : "dino@example.org",
+  "Password" : "Secret123"
 }
 ```
 
@@ -525,9 +536,10 @@ If you wish to not store your password in a file in plaintext, you can convert t
 
 ```
 {
-  "org" : "myorg",
-  "user" : "dino@example.org",
-  "cryptoPassword" : "01000000d08c9ddf0115d1118c7a00c04fc297e....6e0b49de4241b4b01e8f"
+  "Org" : "myorg",
+  "MgmtUri" : "https://api.enterprise.apigee.com",
+  "User" : "dino@example.org",
+  "EncryptedPassword" : "01000000d08c9ddf0115d1118c7a00c04fc297e....6e0b49de4241b4b01e8f"
 }
 ```
 

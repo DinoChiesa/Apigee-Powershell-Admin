@@ -11,7 +11,16 @@ Function Create-EdgeKvm {
         (organization or environment). 
 
     .PARAMETER Values
-        Required. A hashtable specifying key/value pairs. Eg,
+        Optional. A hashtable specifying key/value pairs. Use in lieu of the -Source option.
+        Example:
+          @{
+            key1 = 'value1'
+            key2 = 'value2'
+          }
+          
+    .PARAMETER Source
+        Optional. A file containing JSON that specifis key/value pairs.  Use in
+        lieu of the -Values option. 
 
     .PARAMETER Env
         Optional. A string, the name of the environment for this key-value map.
@@ -31,7 +40,8 @@ Function Create-EdgeKvm {
     [cmdletbinding()]
     PARAM(
         [Parameter(Mandatory=$True)][string]$Name,
-        [Parameter(Mandatory=$True)][hashtable]$Values,
+        [hashtable]$Values,
+        [string]$Source,
         [string]$Env,
         [string]$Org
     )
@@ -49,20 +59,26 @@ Function Create-EdgeKvm {
     if (!$PSBoundParameters['Name']) {
       throw [System.ArgumentNullException] "You must specify the -Name option."
     }
-    if (!$PSBoundParameters['Values']) {
-      throw [System.ArgumentNullException] "You must specify the -Values option."
+    if (!$PSBoundParameters['Values'] -and !$PSBoundParameters['Source']) {
+      throw [System.ArgumentNullException] "You must specify either the -Values or -Source option."
     }
 
+    $Payload = @{ name = $Name }
+    
+    if ($PSBoundParameters['Values']) {
+      $Payload['entry'] = @( $Values.keys |% { @{ name = $_ ; value = $Values[$_] } } )
+    }
+    else {
+      # Read data from the JSON file 
+      $json = Get-Content $Source -Raw | ConvertFrom-JSON
+      $Payload['entry'] = @( $json.psobject.properties.name |% { @{ name =  $_ ; value = $json.$_ } } )
+    }
+    
     if ($PSBoundParameters['Env']) {
       $Options['Collection'] = $( Join-Parts -Separator '/' -Parts 'e', $Env, 'keyvaluemaps' )
     }
     else {
       $Options['Collection'] = 'keyvaluemaps'
-    }
-      
-    $Payload = @{
-      name = $Name
-      entry = @( $Values.keys |% { @{ name = $_ ; value = $Values[$_] } } )
     }
     
     $Options.Add( 'Payload', $Payload )
