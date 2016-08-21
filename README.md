@@ -495,19 +495,40 @@ PS C:\dev\ps> Create-EdgeKvm -Name kvm1 -Env env1 -Values @{
 
 ```
 
-This method reads the values from a JSON file.
-The JSON should be a simple hash with no nesting, only top-level properties.
+Using the -Source option allows you to load the initial values from a JSON file.
+The JSON can be a simple hash with no nesting, only top-level properties, like so: 
 
 ```
 PS C:\dev\ps\Edge-Powershell-Admin> type .\data.json
 {
-  "threshold" : "1780",
+  "threshold" : 1780,
+  "allowErrors" : true,
   "header-name" : "X-Client-ID",
   "targetUrl" : "http://192.168.78.12:9090"
 }
 PS C:\dev\ps> Create-EdgeKvm -Name kvm1 -Env env1 -Source .\data.json
 
 ```
+
+The JSON can also include nested properties, like so:
+
+```
+PS C:\dev\ps\Edge-Powershell-Admin> type .\data.json
+{
+  "threshold" : 5280,
+  "alertEmail" : "opdk@apigee.com",
+  "targetUrl" : "http://192.168.66.12:9090",
+  "settings" : {
+     "one" : 1,
+     "two" : 2,
+     "three" : true
+  }
+}
+PS C:\dev\ps> Create-EdgeKvm -Name kvm2 -Env env1 -Source .\data.json
+
+```
+
+In this case, the value associated to a key with a nested hash, will be a string, containing the JSON-stringified version of the nested hash. In the above, the key 'settings' will be associated with the string '{"one":1,"two":2,"three":true}'.
 
 
 ## Running Tests
