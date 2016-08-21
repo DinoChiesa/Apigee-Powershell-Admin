@@ -571,6 +571,15 @@ If you wish to not store your password in a file in plaintext, you can convert t
 ```
 
 
+You can connect to a different Edge using different Connection files:
+
+```
+  Invoke-Pester -Script @{
+    Path = '.\Tests\PSApigeeEdge.Tests.ps1'
+    Parameters = @{Connection = 'MyCustomConnectionData.json'}
+  }
+```
+
 
 ## Other Notes
 
