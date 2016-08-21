@@ -71,7 +71,17 @@ Function Create-EdgeKvm {
     else {
       # Read data from the JSON file 
       $json = Get-Content $Source -Raw | ConvertFrom-JSON
-      $Payload['entry'] = @( $json.psobject.properties.name |% { @{ name =  $_ ; value = $json.$_ } } )
+      $Payload['entry'] = @( $json.psobject.properties.name |% {
+          $value = ''
+          # convert non-primitives to strings containing json
+          if (($json.$_).GetType().Name -eq 'PSCustomObject') {
+            $value = $($json.$_ | ConvertTo-json  -Compress ).ToString()
+          }
+          else {
+            $value = $json.$_ 
+          }
+          @{ name =  $_ ; value = $value } 
+      } )
     }
     
     if ($PSBoundParameters['Env']) {
