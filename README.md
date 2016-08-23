@@ -182,11 +182,11 @@ PS C:\dev\ps> (Get-EdgeDeveloper -Params @{ expand = 'true' }).developer | Forma
 
 apps             : {my-hospitality-app-oauth, my-hospitality-app}
 companies        : {}
-email            : mpalmgre@example.org
+email            : mpalmer@example.org
 developerId      : 0wYm1ALhbLl3er5G
 firstName        : Matt
-lastName         : Palmgren
-userName         : mpalmgre
+lastName         : Palmer
+userName         : mpalmer
 organizationName : cap500
 status           : active
 attributes       : {}
@@ -499,7 +499,7 @@ Using the -Source option allows you to load the initial values from a JSON file.
 The JSON can be a simple hash with no nesting, only top-level properties, like so: 
 
 ```
-PS C:\dev\ps\Edge-Powershell-Admin> type .\data.json
+PS C:\dev\ps> type .\data.json
 {
   "threshold" : 1780,
   "allowErrors" : true,
@@ -513,7 +513,7 @@ PS C:\dev\ps> Create-EdgeKvm -Name kvm1 -Env env1 -Source .\data.json
 The JSON can also include nested properties, like so:
 
 ```
-PS C:\dev\ps\Edge-Powershell-Admin> type .\data.json
+PS C:\dev\ps> type .\data.json
 {
   "threshold" : 5280,
   "alertEmail" : "opdk@apigee.com",
