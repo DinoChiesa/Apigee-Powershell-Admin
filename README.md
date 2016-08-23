@@ -59,7 +59,7 @@ This project is a work-in-progress. Here's the status:
 Pull requests are welcomed.
 
 
-## Usage
+## Get PSApigee Edge
 
 You have two options. You need to use only one of these options. 
 
@@ -67,7 +67,7 @@ You have two options. You need to use only one of these options.
 
 This will get you the latest "Released" version of the module.
 
-1. start powershell:  `powershell`
+1. As administrator, start powershell:  `powershell`
 
 2. Run `install-module`
 
@@ -81,10 +81,12 @@ InstallationPolicy value by running the Set-PSRepository cmdlet. Are you sure yo
 [Y] Yes  [A] Yes to All  [N] No  [L] No to All  [S] Suspend  [?] Help (default is "N"): Y
 ```
 
+You will need to do this just once, ever, for the machine. To upgrade, you can `remove-module PSApigeeEdge` and then run the `Install-Module` step again. 
+
+
 ### Option B: Clone from Github
 
 This will get you the latest source.
-
 
 1. Clone the repo:  `git clone git@github.com:DinoChiesa/Edge-Powershell-Admin.git`
 
@@ -98,23 +100,16 @@ PS> Import-Module c:\path\to\PSApigeeEdge
 
 Then, you can run the cmdlets provided by this module.
 
+You will need to run steps 2 and 3, for every powershell instance that uses PSApigeeEdge function. 
 
 
-## Examples
 
-### Import the Module
-
-Do this first, before trying anything else.
-
-```
-C:\Users\Dino> powershell
-PS C:\Users\Dino> Import-Module c:\random-path\Edge-Powershell-Admin\PSApigeeEdge
-```
+## Usage Examples
 
 ### List commands provided by the module
 
 ```
-PS C:\dev\ps\PSApigeeEdge> Get-Command -Module PSApigeeEdge
+PS C:\dev\ps> Get-Command -Module PSApigeeEdge
 
 CommandType     Name                                               Version    Source
 -----------     ----                                               -------    ------
@@ -131,7 +126,6 @@ NB: The above list is not complete.
 ### Set Connection information
 
 ```
-PS C:\dev\ps> Import-Module ./PSApigeeEdge
 PS C:\dev\ps> Set-EdgeConnection -Org cap500 -User dino@apigee.com
 Please enter the password for dino@apigee.com: ***********
 ```
@@ -139,24 +133,43 @@ Please enter the password for dino@apigee.com: ***********
 All commands that interact with Apigee Edge rely on this connection information.
 You need to do this only once during a Powershell session. If you wish to connect as a different user, you should run this command again. 
 
+By default, the module will attempt to connect to the Apigee-managed cloud Edge service, which is available at https://api.enterprise.apigee.com . To connect to a self-managed Apigee Edge, specify the base URL of the Edge management server, using the MgmtUri parameter:
+
+
+```
+PS C:\dev\ps> Set-EdgeConnection -Org cap500 -User dino@apigee.com -MgmtUri http://192.168.10.56:8080
+Please enter the password for dino@apigee.com: ***********
+```
+
 
 If you employ the module from a script that runs without user interaction, you will want to
 specify the encrypted password, like so:
 
 ```
-Import-Module ./PSApigeeEdge
 Set-EdgeConnection -Org $Connection.org -User $Connection.User -EncryptedPassword $Connection.password
 ```
 
-To get the encrypted password, you can do this:
+Or, of course you can splat the connection information, like this:
+
+```
+Set-EdgeConnection @{
+   Org = 'myorg'
+   User = 'dino@example.com'
+   MgmtUri = 'http://192.168.56.10:8080'
+   EncryptedPassword = '003093039039...xx'
+   }
+```
+
+To get the encrypted password, for safe storage on the machine, you can do this:
 
 ```
    $SecurePass = Read-Host -assecurestring "Please enter the password"
    $encryptedPassword = ConvertFrom-SecureString $SecurePass
 ```
 
-By the way, this secure string and encrypted secure string stuff is just basic Powershell; it's not special to this module. 
+By the way, this secure string and encrypted secure string stuff is just basic Powershell; it's not special to this module. Please note: The encryption of secure strings in Powershell is machine-specific. 
 
+After setting this connection information, you can run any of the following commands without re-entering your credentials. 
 
 ### List Developers
 
@@ -172,7 +185,6 @@ ecerruti@gmail.com
 justinmadalone@gmail.com
 PS C:\dev\ps>
 ```
-
 
 
 ### List Developers Verbosely
@@ -538,6 +550,7 @@ The tests for this module rely with [Pester](https://github.com/pester/Pester).
 To run the tests:
 
 ```
+  PS C:\dev\ps> cd Edge-Powershell-Admin
   PS C:\dev\ps\Edge-Powershell-Admin> invoke-pester   
 ```
 
@@ -592,6 +605,4 @@ This is licensed under [the Apache 2.0 source license](LICENSE).
 ## Bugs
 
 * The tests are incomplete.
-
-
 

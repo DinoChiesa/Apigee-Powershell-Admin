@@ -36,6 +36,9 @@ Function Set-EdgeConnection {
     #>
 
     [cmdletbinding()]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingUserNameAndPassWordParams")]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText")]
+    
     param(
         [string]$Org,
         [Parameter(Mandatory=$True)][string]$User,
