@@ -302,22 +302,36 @@ Describe "Create-App-1" {
     
         Set-StrictMode -Version latest
 
-        It 'creates an App with expiry' {
+        It 'creates Apps with different credential expiry' {
             $Developers = @( @( Get-EdgeDeveloper ) |
               ?{ $_.StartsWith('pstest-') } | % { @{ Email = $_ } } )
               
             $Products = @( @( Get-EdgeApiProduct -Params @{ expand = 'true'} ).apiProduct |
               ?{ $_.name.StartsWith('pstest-') } | % { @{ Name = $_.name } } )
 
-            $Params = @{
-              Name = [string]::Format('pstest-{0}', $Script:Props.guid.Substring(0,10))
-              Developer = $Developers[0].Email
-              ApiProducts = @( $Products[0].Name )
-              Expiry = '88d'
+            $expiryOptions = @(
+                "48h", "21d", (Get-Date).AddDays(60).ToString('yyyy-MM-dd'), ""
+            )
+
+            foreach ($expiry in $expiryOptions) {
+                
+                $Params = @{
+                    Name = [string]::Format('pstest-{0}-{1}', $Script:Props.guid.Substring(0,5), $expiry )
+                    Developer = $Developers[0].Email
+                    ApiProducts = @( $Products[0].Name )
+                }
+                if ($expiry) {
+                    Write-Host "expiry: ${expiry}" 
+                    $Params['Expiry'] = $expiry
+                }
+                else {
+                    Write-Host "expiry: -none-" 
+                }
+
+                $app = Create-EdgeDevApp @Params
+                { $app } | Should Not Throw
+                #TODO : verify expiry?
             }
-            $app = Create-EdgeDevApp @Params
-            { $app } | Should Not Throw
-            #TODO : verify expiry
         }
     }
 }
@@ -469,6 +483,89 @@ Describe "Delete-KVM-1" {
 
 
 
+Describe "Create-Keystore-1" {
+    Context 'Strict mode' {
+    
+        Set-StrictMode -Version latest
+
+        It 'creates a keystore in Environment <Name>' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
+            param($Name)
+            $Params = @{
+              Name = [string]::Format('pstest-{0}{1}', $(Get-Random), $Script:Props.guid.Substring(0,10))
+              Env = $Name
+            }
+            $keystore = Create-EdgeKeystore @Params
+            { $keystore } | Should Not Throw
+            # TODO? - validate response
+        }
+    }
+}
+
+
+Describe "Get-Keystore-1" {
+    Context 'Strict mode' {
+        Set-StrictMode -Version latest
+
+        It 'gets a list of keystores for Environment <Name>' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
+          param($Name)
+          $keystores = @( Get-EdgeKeystore -Env $Name )
+          $keystores.count | Should BeGreaterThan 0
+        }
+
+        It 'gets specific info on each keystore for Environment <Name>' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
+            param($Name)
+            
+            @( Get-EdgeKeystore -Env $Name ) | % {
+                $keystore = Get-EdgeKeystore -Env $Name -Name $_
+                $keystore | Should Not BeNullOrEmpty
+                $keystore.name | Should Not BeNullOrEmpty
+            }
+        }
+    }
+}
+
+
+Describe "Delete-Keystore-1" {
+    Context 'Strict mode' {
+        Set-StrictMode -Version latest
+
+        It 'deletes the test keystores in Env <Name>' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
+            param($Name)
+        
+            @( @( Get-EdgeKeystore -Env $Name ) | ?{ $_.StartsWith('pstest-') } ) | % { 
+                Delete-EdgeKeystore -Env $Name -Name $_
+            }
+        }
+    }
+}
+
+
+
+Describe "Get-Vhost-1" {
+    Context 'Strict mode' {
+        Set-StrictMode -Version latest
+
+        It 'gets a list of Vhosts for Environment <Name>' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
+          param($Name)
+          $vhosts = @( Get-EdgeVhost -Env $Name )
+          $vhosts.count | Should BeGreaterThan 0
+        }
+
+        It 'gets specific info on each vhost for Environment <Name>' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
+            param($Name)
+            
+            @( Get-EdgeVhost -Env $Name ) | % {
+                $vhost = Get-EdgeVhost -Env $Name -Name $_
+                $vhost | Should Not BeNullOrEmpty
+                $vhost.name | Should Not BeNullOrEmpty
+            }
+        }
+    }
+}
+
+
 ## TODO: insert more tests here 
 
+# Add-EdgeAppCredential - add a new credential to an app
+# Update-EdgeAppCredential.ps1 - revoke or approve a credential, or change products list
 

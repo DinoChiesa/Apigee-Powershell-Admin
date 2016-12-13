@@ -13,6 +13,8 @@ The goal is to allow Powershell scripts to do these things:
 | credential    | list, revoke, approve, add apiproduct, remove apiproduct
 | kvm           | list, query, create, delete, get all entries, get entry, add entry, modify entry, remove entry
 | cache         | list, query, create, delete, clear
+| keystore      | list, query, create, delete, import cert
+| virtualhost   | list, query, create, delete 
 | environment   | list, query
 
 
@@ -20,14 +22,16 @@ Not in scope:
 
 - OAuth2.0 tokens - Listing, Querying, Approving, Revoking, Deleting, or Updating 
 - TargetServers: list, create, edit, etc
-- keystores, truststores: adding certs, listing certs
 - data masks
 - apimodels
 - shared flows or flow hooks (for now; we will deliver this when shared flows are final)
-- analytics or custom reports
+- retrieving analytics or data from custom reports
 - DebugSessions (trace)
 - anything in BaaS
-- OPDK-specific things.  Like starting or stopping services, manipulating pods, adding servers into environments, etc.
+- OPDK-specific things. such as: starting or stopping services,  manipulating pods, adding servers into environments, etc.
+
+These items may be added later as need and demand warrants.
+
 
 ## A Quick Tour
 
@@ -54,6 +58,8 @@ This project is a work-in-progress. Here's the status:
 | credential    | list, revoke, approve, add apiproduct, remove apiproduct |
 | kvm           | list, query, create, delete | get all entries, get entry, add entry, modify entry, remove entry
 | cache         | list, query, create, delete, clear | 
+| keystore      | list, query, create, delete | import cert
+| virtualhost   | list, query | create, delete 
 | environment   | list, query |
 
 Pull requests are welcomed.
@@ -62,6 +68,7 @@ Pull requests are welcomed.
 ## Get PSApigee Edge
 
 You have two options. You need to use only one of these options. 
+
 
 ### Option A: install from the Powershell Gallery
 
@@ -86,7 +93,7 @@ You will need to do this just once, ever, for the machine. To upgrade, you can `
 
 ### Option B: Clone from Github
 
-This will get you the latest source.
+This will get you the latest source. Usually these are the same. 
 
 1. Clone the repo:  `git clone git@github.com:DinoChiesa/Edge-Powershell-Admin.git`
 
@@ -605,4 +612,5 @@ This is licensed under [the Apache 2.0 source license](LICENSE).
 ## Bugs
 
 * The tests are incomplete.
+* Does not handle Encrypted KVM at this time
 

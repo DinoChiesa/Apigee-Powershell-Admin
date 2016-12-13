@@ -7,16 +7,17 @@ Function Set-EdgeConnection {
         Sets connection information, including Organization name, and user credentials, for Apigee Edge administrative actions.
 
     .PARAMETER Org
-        The Apigee Edge organization. 
+        Required. The Apigee Edge organization. 
 
     .PARAMETER User
-        The Apigee Edge administrative user. 
+        Required. The Apigee Edge administrative user. 
 
     .PARAMETER Password
-        The plaintext password for the Apigee Edge administrative user. 
+        Optional. The plaintext password for the Apigee Edge administrative user. Specify this
+        or the EncryptedPassword. 
 
     .PARAMETER EncryptedPassword
-        The encrypted password for the Apigee Edge administrative user. Use this as an
+        Optional. The encrypted password for the Apigee Edge administrative user. Use this as an
         alternative to the Password parameter. To get the encrypted password, you can do this:
 
          $SecurePass = Read-Host -assecurestring "Please enter the password"
@@ -28,7 +29,7 @@ Function Set-EdgeConnection {
         Default: https://api.enterprise.apigee.com
 
     .EXAMPLE
-        Set-EdgeConnection -Org cap500 -User dino@apigee.com -Pass Secret1XYZ
+        Set-EdgeConnection -Org cap500 -User dino@apigee.com -Password Secret1XYZ
 
     .FUNCTIONALITY
         ApigeeEdge
@@ -36,11 +37,11 @@ Function Set-EdgeConnection {
     #>
 
     [cmdletbinding()]
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingUserNameAndPassWordParams")]
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText")]
+    [Diagnostics.CodeAnalysis.SuppressMessage("PSAvoidUsingUserNameAndPassWordParams","")]
+    [Diagnostics.CodeAnalysis.SuppressMessage("PSAvoidUsingConvertToSecureStringWithPlainText","")]
     
     param(
-        [string]$Org,
+        [Parameter(Mandatory=$True)][string]$Org,
         [Parameter(Mandatory=$True)][string]$User,
         [string]$Password,
         [string]$EncryptedPassword,
@@ -48,11 +49,11 @@ Function Set-EdgeConnection {
     )
 
     if( $PSBoundParameters.ContainsKey('Org')) {
-      $MyInvocation.MyCommand.Module.PrivateData['Org'] = $Org
+      $MyInvocation.MyCommand.Module.PrivateData.Connection['Org'] = $Org
     }
     
     if(! $PSBoundParameters.ContainsKey('User') ) {
-        throw [System.ArgumentNullException] "provide -User and -Pass."
+        throw [System.ArgumentNullException] "you must provide the -User parameter."
     }
 
     if (! $PSBoundParameters.ContainsKey('Password') -and ! $PSBoundParameters.ContainsKey('EncryptedPassword')) {
@@ -65,7 +66,7 @@ Function Set-EdgeConnection {
          $SecurePass = ConvertTo-SecureString -String $EncryptedPassword 
     }
 
-    $MyInvocation.MyCommand.Module.PrivateData['MgmtUri'] = $MgmtUri
-    $MyInvocation.MyCommand.Module.PrivateData['User'] = $User
-    $MyInvocation.MyCommand.Module.PrivateData['SecurePass'] = $SecurePass
+    $MyInvocation.MyCommand.Module.PrivateData.Connection['MgmtUri'] = $MgmtUri
+    $MyInvocation.MyCommand.Module.PrivateData.Connection['User'] = $User
+    $MyInvocation.MyCommand.Module.PrivateData.Connection['SecurePass'] = $SecurePass
 }

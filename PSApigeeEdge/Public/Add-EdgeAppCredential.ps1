@@ -46,12 +46,13 @@ Function Add-EdgeAppCredential {
         [Parameter(Mandatory=$True)][string[]]$ApiProducts,
 
         [string]$Expiry,
-
+        
         [string]$Org
     )
-    
+
+
     $Options = @{ }
-    
+
     if ($PSBoundParameters['Debug']) {
         $Options.Add( 'Debug', $Debug )
     }
@@ -59,10 +60,11 @@ Function Add-EdgeAppCredential {
     if (!$PSBoundParameters['Developer']) {
         throw [System.ArgumentNullException] "You must specify the -Developer option."
     }
+
     if (!$PSBoundParameters['Name']) {
       throw [System.ArgumentNullException] "You must specify the -Name option."
     }
-    
+
     $Options.Add( 'Collection', $(Join-Parts -Separator '/' -Parts 'developers', $Developer, 'apps' ) )
     $Options.Add( 'Name', $Name )
 

@@ -1,23 +1,23 @@
-Function Get-EdgeCache {
+Function Get-EdgeVhost {
     <#
     .SYNOPSIS
-        Get one or more cache objects from Apigee Edge
+        Get one or more virtualhost objects from Apigee Edge
 
     .DESCRIPTION
-        Get one or more caches from Apigee Edge
+        Get information about one or more virtualhosts from Apigee Edge
 
     .PARAMETER Name
-        Optional. The name of the cache to retrieve.
-        The default is to list all caches
+        Optional. The name of the virtualhost to retrieve.
+        The default is to list all virtualhosts.
 
     .PARAMETER Env
-        Required. The name of the environment to search for caches.
+        Required. The name of the environment to search for virtualhosts.
 
     .PARAMETER Org
-        The Apigee Edge organization. The default is to use the value from Set-EdgeConnection.
+        Optional. The Apigee Edge organization. The default is to use the value from Set-EdgeConnection.
 
     .EXAMPLE
-        Get-EdgeCache -Org cap500 -Env test
+        Get-EdgeVhost -Org cap500 -Env test
 
     .FUNCTIONALITY
         ApigeeEdge
@@ -45,7 +45,7 @@ Function Get-EdgeCache {
         $Options.Add( 'Org', $Org )
     }
 
-    $Options['Collection'] = $( Join-Parts -Separator '/' -Parts 'e', $Env, 'caches' )
+    $Options['Collection'] = $( Join-Parts -Separator '/' -Parts 'e', $Env, 'virtualhosts' )
 
     if ($PSBoundParameters['Name']) {
         $Options.Add( 'Name', $Name )

@@ -10,7 +10,8 @@
 RootModule = 'PSApigeeEdge.psm1'
 
 # Version number of this module.
-ModuleVersion = '0.2.9'
+ModuleVersion = '0.2.10'
+
 
 # ID used to uniquely identify this module
 GUID = '73EDCAEA-0965-419D-9E47-F7DACC5C9011'
@@ -22,7 +23,7 @@ Author = 'Dino Chiesa'
 CompanyName = 'Apigee'
 
 # Copyright statement for this module
-Copyright = '(c) 2016 Apigee Corp. All rights reserved.'
+Copyright = '(c) 2016 Google, Inc. All rights reserved.'
 
 # Description of the functionality provided by this module
 Description = 'PowerShell module to use the Apigee Edge Admin API'

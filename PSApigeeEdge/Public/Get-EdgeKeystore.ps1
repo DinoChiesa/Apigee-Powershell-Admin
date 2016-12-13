@@ -1,24 +1,23 @@
-Function Get-EdgeKvm {
+Function Get-EdgeKeystore {
     <#
     .SYNOPSIS
-        Get one or more Key-Value Maps (KVMs) from Apigee Edge.
+        Get information about a keystore from Apigee Edge.
 
     .DESCRIPTION
-        Get one or more Key-Value Maps (KVMs) from Apigee Edge.
+        Get information about a keystore from Apigee Edge.
 
     .PARAMETER Name
-        Optional. The name of the specific KVM to retrieve.
-        The default is to list all KVMs in scope (org or environment).
+        Optional. The name of the specific keystore to retrieve.
+        The default is to list all keystores in the environment.
 
     .PARAMETER Env
-        Optional. The Apigee Edge environment. The default is to use the organization-wide
-        Key-Value Map.
+        Required. The Apigee Edge environment. 
 
     .PARAMETER Org
         Optional. The Apigee Edge organization. The default is to use the value from Set-EdgeConnection.
 
     .EXAMPLE
-        Get-EdgeKvm -Env test
+        Get-EdgeKeystore -Name ks1 -Env test
 
     .FUNCTIONALITY
         ApigeeEdge
@@ -27,8 +26,8 @@ Function Get-EdgeKvm {
 
     [cmdletbinding()]
     param(
-        [string]$Name,
-        [string]$Env,
+        [Parameter(Mandatory=$False)][string]$Name,
+        [Parameter(Mandatory=$True)][string]$Env,
         [string]$Org
         )
     
@@ -38,16 +37,16 @@ Function Get-EdgeKvm {
         $DebugPreference = 'Continue'
         $Options.Add( 'Debug', $Debug )
     }
+
+    if (!$PSBoundParameters['Env']) {
+      throw [System.ArgumentNullException] "You must specify the -Env option."
+    }
+    
     if ($PSBoundParameters['Org']) {
         $Options.Add( 'Org', $Org )
     }
     
-    if ($PSBoundParameters['Env']) {
-        $Options['Collection'] = $(Join-Parts -Separator "/" -Parts 'e', $Env, 'keyvaluemaps' )
-    }
-    else {
-         $Options['Collection'] = 'keyvaluemaps'
-    }
+    $Options['Collection'] = $(Join-Parts -Separator "/" -Parts 'e', $Env, 'keystores' )
     
     if ($PSBoundParameters['Name']) {
         $Options.Add( 'Name', $Name )

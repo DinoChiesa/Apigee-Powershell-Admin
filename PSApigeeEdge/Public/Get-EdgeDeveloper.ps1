@@ -7,7 +7,7 @@ Function Get-EdgeDeveloper {
         Get one or more developers from Apigee Edge
 
     .PARAMETER Name
-        The name of the developer to retrieve.
+        Optional. The name of the developer to retrieve.
         The default is to list all developers.
 
     .PARAMETER Org
