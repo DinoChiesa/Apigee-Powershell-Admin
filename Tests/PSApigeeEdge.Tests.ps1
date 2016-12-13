@@ -469,6 +469,88 @@ Describe "Delete-KVM-1" {
 
 
 
+Describe "Create-Keystore-1" {
+    Context 'Strict mode' {
+    
+        Set-StrictMode -Version latest
+
+        It 'creates a keystore in Environment <Env>' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
+            param($Env)
+            $Params = @{
+              Name = [string]::Format('pstest-{0}{1}', $(Get-Random), $Script:Props.guid.Substring(0,10))
+              Env = $Env
+            }
+            $keystore = Create-EdgeKeystore @Params
+            { $keystore } | Should Not Throw
+            # TODO? - validate response
+        }
+    }
+}
+
+
+Describe "Get-Keystore-1" {
+    Context 'Strict mode' {
+        Set-StrictMode -Version latest
+
+        It 'gets a list of keystores for Environment <Env>' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
+          param($Env)
+          $keystores = @( Get-EdgeKeystore -Env $Env )
+          $keystores.count | Should BeGreaterThan 0
+        }
+
+        It 'gets specific info on each keystore for Environment <Env>' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
+            param($Env)
+            
+            @( Get-EdgeKeystore -Env $Env ) | % {
+                $keystore = Get-EdgeKeystore -Env $Env -Name $_
+                $keystore | Should Not BeNullOrEmpty
+                $keystore.name | Should Not BeNullOrEmpty
+            }
+        }
+    }
+}
+
+
+Describe "Delete-Keystore-1" {
+    Context 'Strict mode' {
+        Set-StrictMode -Version latest
+
+        It 'deletes the test keystores in Env <Name>' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
+            param($Name)
+        
+            @( @( Get-EdgeKeystore -Env $Name ) | ?{ $_.StartsWith('pstest-') } ) | % { 
+                Delete-EdgeKeystore -Env $Name -Name $_
+            }
+        }
+    }
+}
+
+
+
+Describe "Get-Vhost-1" {
+    Context 'Strict mode' {
+        Set-StrictMode -Version latest
+
+        It 'gets a list of Vhosts for Environment <Env>' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
+          param($Env)
+          $vhosts = @( Get-EdgeVhost -Env $Env )
+          $vhosts.count | Should BeGreaterThan 0
+        }
+
+        It 'gets specific info on each vhost for Environment <Env>' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
+            param($Env)
+            
+            @( Get-EdgeVhost -Env $Env ) | % {
+                $vhost = Get-EdgeVhost -Env $Env -Name $_
+                $vhost | Should Not BeNullOrEmpty
+                $vhost.name | Should Not BeNullOrEmpty
+            }
+        }
+    }
+}
+
+
+
 ## TODO: insert more tests here 
 
 
