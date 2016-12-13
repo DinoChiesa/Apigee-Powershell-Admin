@@ -91,7 +91,6 @@ InstallationPolicy value by running the Set-PSRepository cmdlet. Are you sure yo
 You will need to do this just once, ever, for the machine. To upgrade, you can `remove-module PSApigeeEdge` and then run the `Install-Module` step again. 
 
 
-
 ### Option B: Clone from Github
 
 This will get you the latest source. Usually these are the same. 
@@ -616,3 +615,4 @@ and is licensed under [the Apache 2.0 source license](LICENSE).
 
 * The tests are incomplete.
 * Does not handle Encrypted KVM at this time
+
