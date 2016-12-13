@@ -606,9 +606,11 @@ You can connect to a different Edge using different Connection files:
 
 This module is available [on the Powershell Gallery](https://www.powershellgallery.com/packages/PSApigeeEdge)
 
-## License
+## License and Copyright
 
-This is licensed under [the Apache 2.0 source license](LICENSE).
+This material is [Copyright (c) 2016 Google Inc.](NOTICE),
+and is licensed under [the Apache 2.0 source license](LICENSE).
+
 
 ## Bugs
 
