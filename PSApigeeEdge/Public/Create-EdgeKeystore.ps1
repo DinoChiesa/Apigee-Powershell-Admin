@@ -42,8 +42,9 @@ Function Create-EdgeKeystore {
     if (!$PSBoundParameters['Name']) {
       throw [System.ArgumentNullException] "You must specify the -Name option."
     }
+    
+    $Options['Collection'] = $(Join-Parts -Separator "/" -Parts 'e', $Env, 'keystores' )
 
-    $Options.Add( 'Collection', 'keystores' )
     if ($PSBoundParameters['Org']) {
         $Options.Add( 'Org', $Org )
     }

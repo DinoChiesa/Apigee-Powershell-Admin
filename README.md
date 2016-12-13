@@ -59,7 +59,7 @@ This project is a work-in-progress. Here's the status:
 | kvm           | list, query, create, delete | get all entries, get entry, add entry, modify entry, remove entry
 | cache         | list, query, create, delete, clear | 
 | keystore      | list, query, create, delete | import cert
-| virtualhost   | | list, query, create, delete 
+| virtualhost   | list, query | create, delete 
 | environment   | list, query |
 
 Pull requests are welcomed.
@@ -68,6 +68,7 @@ Pull requests are welcomed.
 ## Get PSApigee Edge
 
 You have two options. You need to use only one of these options. 
+
 
 ### Option A: install from the Powershell Gallery
 
@@ -90,9 +91,10 @@ InstallationPolicy value by running the Set-PSRepository cmdlet. Are you sure yo
 You will need to do this just once, ever, for the machine. To upgrade, you can `remove-module PSApigeeEdge` and then run the `Install-Module` step again. 
 
 
+
 ### Option B: Clone from Github
 
-This will get you the latest source.
+This will get you the latest source. Usually these are the same. 
 
 1. Clone the repo:  `git clone git@github.com:DinoChiesa/Edge-Powershell-Admin.git`
 

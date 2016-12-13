@@ -302,13 +302,13 @@ Describe "Create-App-1" {
     
         Set-StrictMode -Version latest
 
-        It 'creates an App with expiry' {
+        It 'creates an App with credential expiry' {
             $Developers = @( @( Get-EdgeDeveloper ) |
               ?{ $_.StartsWith('pstest-') } | % { @{ Email = $_ } } )
               
             $Products = @( @( Get-EdgeApiProduct -Params @{ expand = 'true'} ).apiProduct |
               ?{ $_.name.StartsWith('pstest-') } | % { @{ Name = $_.name } } )
-
+            
             $Params = @{
               Name = [string]::Format('pstest-{0}', $Script:Props.guid.Substring(0,10))
               Developer = $Developers[0].Email
@@ -474,11 +474,11 @@ Describe "Create-Keystore-1" {
     
         Set-StrictMode -Version latest
 
-        It 'creates a keystore in Environment <Env>' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
-            param($Env)
+        It 'creates a keystore in Environment <Name>' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
+            param($Name)
             $Params = @{
               Name = [string]::Format('pstest-{0}{1}', $(Get-Random), $Script:Props.guid.Substring(0,10))
-              Env = $Env
+              Env = $Name
             }
             $keystore = Create-EdgeKeystore @Params
             { $keystore } | Should Not Throw
@@ -492,8 +492,8 @@ Describe "Get-Keystore-1" {
     Context 'Strict mode' {
         Set-StrictMode -Version latest
 
-        It 'gets a list of keystores for Environment <Env>' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
-          param($Env)
+        It 'gets a list of keystores for Environment <Name>' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
+          param($Name)
           $keystores = @( Get-EdgeKeystore -Env $Env )
           $keystores.count | Should BeGreaterThan 0
         }
@@ -531,17 +531,17 @@ Describe "Get-Vhost-1" {
     Context 'Strict mode' {
         Set-StrictMode -Version latest
 
-        It 'gets a list of Vhosts for Environment <Env>' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
-          param($Env)
-          $vhosts = @( Get-EdgeVhost -Env $Env )
+        It 'gets a list of Vhosts for Environment <Name>' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
+          param($Name)
+          $vhosts = @( Get-EdgeVhost -Env $Name )
           $vhosts.count | Should BeGreaterThan 0
         }
 
-        It 'gets specific info on each vhost for Environment <Env>' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
-            param($Env)
+        It 'gets specific info on each vhost for Environment <Name>' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
+            param($Name)
             
-            @( Get-EdgeVhost -Env $Env ) | % {
-                $vhost = Get-EdgeVhost -Env $Env -Name $_
+            @( Get-EdgeVhost -Env $Name ) | % {
+                $vhost = Get-EdgeVhost -Env $Name -Name $_
                 $vhost | Should Not BeNullOrEmpty
                 $vhost.name | Should Not BeNullOrEmpty
             }
