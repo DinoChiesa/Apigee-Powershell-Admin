@@ -7,8 +7,8 @@ Function Get-EdgeKvm {
         Get one or more Key-Value Maps (KVMs) from Apigee Edge.
 
     .PARAMETER Name
-        Optional. The name of the KVM to retrieve.
-        The default is to list all apiproxies.
+        Optional. The name of the specific KVM to retrieve.
+        The default is to list all KVMs in scope (org or environment).
 
     .PARAMETER Env
         Optional. The Apigee Edge environment. The default is to use the organization-wide

@@ -7,7 +7,7 @@ Function Get-EdgeCache {
         Get one or more caches from Apigee Edge
 
     .PARAMETER Name
-        The name of the cache to retrieve.
+        Optional. The name of the cache to retrieve.
         The default is to list all caches
 
     .PARAMETER Env
