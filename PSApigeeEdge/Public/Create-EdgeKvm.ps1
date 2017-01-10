@@ -78,7 +78,7 @@ Function Create-EdgeKvm {
     if ($PSBoundParameters['Values']) {
       $Payload['entry'] = @( $Values.keys |% { @{ name = $_ ; value = $Values[$_] } } )
     }
-    else if ($PSBoundParameters['Source']) {
+    elseif ($PSBoundParameters['Source']) {
       # Read data from the JSON file 
       $json = Get-Content $Source -Raw | ConvertFrom-JSON
       $Payload['entry'] = @( $json.psobject.properties.name |% {
