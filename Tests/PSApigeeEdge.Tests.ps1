@@ -162,10 +162,10 @@ Describe "Create-KVM-1" {
             { $kvm } | Should Not Throw
         }
 
-        It 'creates a kvm in Environment <Name>' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
+        It 'creates a KVM in Environment <Name>' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
             param($Name)
             $Params = @{
-              Name = [string]::Format('pstest-{0}{1}', $(Get-Random), $Script:Props.guid.Substring(0,10))
+              Name = [string]::Format('pstest-{0}{1}', $Script:Props.guid.Substring(0,10), $(Get-Random))
               Env = $Name
               Values = @{
                  key1 = [string]::Format('value1-{0}', $(Get-Random))
@@ -177,9 +177,25 @@ Describe "Create-KVM-1" {
             { $kvm } | Should Not Throw
             # TODO? - validate response
         }
-
+        
+        It 'creates an encrypted KVM in Environment <Name>' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
+            param($Name)
+            $Params = @{
+              Name = [string]::Format('pstest-encrypted-{0}{1}', $Script:Props.guid.Substring(0,10), $(Get-Random))
+              Env = $Name
+              Values = @{
+                 key1 = [string]::Format('value1-{0}', $(Get-Random))
+                 key2 = [string]::Format('value2-{0}', $(Get-Random))
+                 key3 = [string]::Format('value3-{0}', $([guid]::NewGuid()).ToString().Replace('-',''))
+              }
+            }
+            $kvm = Create-EdgeKvm @Params
+            { $kvm } | Should Not Throw
+            # TODO? - validate response
+        }
     }
 }
+
 
 
 Describe "Create-Developer-1" {
@@ -189,7 +205,7 @@ Describe "Create-Developer-1" {
 
         It 'creates a developer' {
             $Params = @{
-              Name = [string]::Format('pstest-{0}',$Script:Props.guid.Substring(0,9))
+              Name = [string]::Format('pstest-{0}', $Script:Props.guid.Substring(0,9))
               First = $Script:Props.guid.Substring(0,9)
               Last = $Script:Props.guid.Substring(9,20)
               Email = [string]::Format('pstest-{0}.{1}@example.org',
@@ -250,7 +266,7 @@ Describe "Create-ApiProduct-1" {
             # Create-EdgeApiProduct -Name pstest-198191891  -Environments @( 'env1' )
 
             $Params = @{
-              Name = [string]::Format('pstest-{0}',$Script:Props.guid.Substring(3,11))
+              Name = [string]::Format('pstest-{0}', $Script:Props.guid.Substring(3,11))
               Environments = @( Get-EdgeEnvironment ) # all of them
               Proxies = @( @( Get-EdgeApi )[0] )
             }
@@ -491,7 +507,7 @@ Describe "Create-Keystore-1" {
         It 'creates a keystore in Environment <Name>' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
             param($Name)
             $Params = @{
-              Name = [string]::Format('pstest-{0}{1}', $(Get-Random), $Script:Props.guid.Substring(0,10))
+              Name = [string]::Format('pstest-{0}{1}', $Script:Props.guid.Substring(0,10), $(Get-Random))
               Env = $Name
             }
             $keystore = Create-EdgeKeystore @Params
@@ -507,9 +523,12 @@ Describe "Get-Keystore-1" {
         Set-StrictMode -Version latest
 
         It 'gets a list of keystores for Environment <Name>' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
-          param($Name)
-          $keystores = @( Get-EdgeKeystore -Env $Name )
-          $keystores.count | Should BeGreaterThan 0
+            param($Name)
+            $keystores = @( Get-EdgeKeystore -Env $Name )
+            # check that we have one or more keystores
+            $keystores.count | Should BeGreaterThan 0
+            # check that we have one or more keystores created by this script
+            @( $keystores | ?{ $_.StartsWith('pstest-') } ).count | Should BeGreaterThan 0
         }
 
         It 'gets specific info on each keystore for Environment <Name>' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
@@ -531,10 +550,18 @@ Describe "Delete-Keystore-1" {
 
         It 'deletes the test keystores in Env <Name>' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
             param($Name)
-        
             @( @( Get-EdgeKeystore -Env $Name ) | ?{ $_.StartsWith('pstest-') } ) | % { 
                 Delete-EdgeKeystore -Env $Name -Name $_
             }
+        }
+
+        It 'verifies that the test keystores for Environment <Name> have been removed' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
+            param($Name)
+            $keystores = @( Get-EdgeKeystore -Env $Name )
+            # check that we have one or more keystores
+            $keystores.count | Should BeGreaterThan 0
+            # check that we now have zero keystores created by this script
+            @( $keystores | ?{ $_.StartsWith('pstest-') } ).count | Should Be 0
         }
     }
 }
