@@ -73,7 +73,7 @@ Function Create-EdgeKvm {
     #  throw [System.ArgumentNullException] "You must specify either the -Values or -Source option."
     # }
 
-    $Payload = @{ name = $Name, encrypted = if ($Encrypted) {'true'} else {'false'} } ;
+    $Payload = @{ name = $Name; encrypted = if ($Encrypted) {'true'} else {'false'} } ;
     
     if ($PSBoundParameters['Values']) {
       $Payload['entry'] = @( $Values.keys |% { @{ name = $_ ; value = $Values[$_] } } )
