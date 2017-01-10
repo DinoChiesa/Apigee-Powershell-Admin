@@ -10,15 +10,20 @@ $PSVersion = $PSVersionTable.PSVersion.Major
 Import-Module $PSScriptRoot\..\PSApigeeEdge -Force
 
 # --- Get data for the tests
-$json = Get-Content $Connection -Raw | ConvertFrom-JSON
-$ConnectionData = @{}
-foreach ($prop in $json.psobject.properties.name) {
-  $ConnectionData.Add( $prop , $json.$prop )
-}
 
 $Script:Props = @{
   guid = $([guid]::NewGuid()).ToString().Replace('-','')
   StartMilliseconds = [int64](([datetime]::UtcNow)-(get-date "1/1/1970")).TotalMilliseconds
+}
+
+Function ReadJson {
+  param($filename)
+  $json = Get-Content $filename -Raw | ConvertFrom-JSON
+  $ht = @{}
+  foreach ($prop in $json.psobject.properties.name) {
+    $ht.Add( $prop , $json.$prop )
+  }
+  $ht
 }
 
 Function ToArrayOfHash {
@@ -31,6 +36,7 @@ Function ToArrayOfHash {
   $list.ToArray()
 }
 
+$ConnectionData = ReadJson $Connection 
 
 Describe "Set-EdgeConnection" {
 
@@ -148,9 +154,9 @@ Describe "Create-KVM-1" {
     
         Set-StrictMode -Version latest
 
-        It 'creates a KVM' {
+        It 'creates a KVM specifying values' {
             $Params = @{
-              Name = [string]::Format('pstest-{0}', $Script:Props.guid.Substring(0,10))
+              Name = [string]::Format('pstest-A-{0}', $Script:Props.guid.Substring(0,10))
               Env = $( @( Get-EdgeEnvironment )[0]) # the first environment
               Values = @{
                  key1 = 'value1'
@@ -162,10 +168,10 @@ Describe "Create-KVM-1" {
             { $kvm } | Should Not Throw
         }
 
-        It 'creates a KVM in Environment <Name>' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
+        It 'creates a KVM in Environment <Name> specifying values' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
             param($Name)
             $Params = @{
-              Name = [string]::Format('pstest-{0}{1}', $Script:Props.guid.Substring(0,10), $(Get-Random))
+              Name = [string]::Format('pstest-A-{0}-{1}', $Script:Props.guid.Substring(0,10), $(Get-Random))
               Env = $Name
               Values = @{
                  key1 = [string]::Format('value1-{0}', $(Get-Random))
@@ -175,22 +181,56 @@ Describe "Create-KVM-1" {
             }
             $kvm = Create-EdgeKvm @Params
             { $kvm } | Should Not Throw
+            Write-Host "TODO: validate response (not encrypted)" 
             # TODO? - validate response
+        }
+        
+        It 'creates a KVM in Environment <Name> specifying no values' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
+            param($Name)
+            $Params = @{
+              Name = [string]::Format('pstest-B-{0}-{1}', $Script:Props.guid.Substring(0,10), $(Get-Random))
+              Env = $Name
+            }
+            $kvm = Create-EdgeKvm @Params
+            { $kvm } | Should Not Throw
+            Write-Host "TODO: validate response (not encrypted)" 
+            # TODO? - validate response
+        }
+
+        It 'creates a KVM in Environment <Name> specifying Source' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
+            param($Name)
+            $filename = [string]::Format('{0}\pstest-datafile-{1}.json', $env:temp, $(Get-Random))
+            $object = @{
+                key1 = $(Get-Random)
+                key2 = [string]::Format('value-{0}-{1}', $Script:Props.guid.Substring(0,10), $(Get-Random))
+                envname = $Name
+            }
+            $object | ConvertTo-Json -depth 10 | Out-File $filename
+            
+            $Params = @{
+              Name = [string]::Format('pstest-B-{0}-{1}', $Script:Props.guid.Substring(0,10), $(Get-Random))
+              Env = $Name
+              Source = $filename
+            }
+            $kvm = Create-EdgeKvm @Params
+            { $kvm } | Should Not Throw
+            Write-Host "TODO: validate response (not encrypted), has data from Source" 
+            # TODO? - validate response
+
+            Remove-Item -path $filename
         }
         
         It 'creates an encrypted KVM in Environment <Name>' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
             param($Name)
             $Params = @{
-              Name = [string]::Format('pstest-encrypted-{0}{1}', $Script:Props.guid.Substring(0,10), $(Get-Random))
-              Env = $Name
-              Values = @{
-                 key1 = [string]::Format('value1-{0}', $(Get-Random))
-                 key2 = [string]::Format('value2-{0}', $(Get-Random))
-                 key3 = [string]::Format('value3-{0}', $([guid]::NewGuid()).ToString().Replace('-',''))
-              }
+                Name = [string]::Format('pstest-encrypted-{0}{1}', $Script:Props.guid.Substring(0,10), $(Get-Random))
+                Env = $Name
+                Encrypted = true
             }
             $kvm = Create-EdgeKvm @Params
             { $kvm } | Should Not Throw
+            Write-Host "TODO: validate response (is encrypted)" 
+            { $kvm } | Write-Host 
             # TODO? - validate response
         }
     }
@@ -416,7 +456,7 @@ Describe "Get-Apps-1" {
 }
 
 
-Describe "Get-EdgeKvm-1" {
+Describe "Get-EdgeKVM-1" {
     Context 'Strict mode' { 
 
         Set-StrictMode -Version latest
@@ -430,6 +470,8 @@ Describe "Get-EdgeKvm-1" {
             param($Name)
             $kvms = @( Get-EdgeKvm -Env $Name )
             $kvms.count | Should BeGreaterThan 0
+            # check that we have one or more KVMs created by this script
+            @( $kvms | ?{ $_.StartsWith('pstest-') } ).count | Should BeGreaterThan 0
         }
     }
 }
@@ -487,13 +529,20 @@ Describe "Delete-KVM-1" {
     Context 'Strict mode' {
         Set-StrictMode -Version latest
 
-        It 'deletes test kvms in Env <Name>' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
+        It 'deletes test KVMs in env <Name>' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
           param($Name)
-        
           @( @( Get-EdgeKvm -Env $Name ) | ?{ $_.StartsWith('pstest-') } ) | % { 
             Delete-EdgeKvm -Env $Name -Name $_
           }
         }
+
+        It 'verifies that the test KVMs for env <Name> have been deleted' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
+            param($Name)
+            $kvms = @( Get-EdgeKvm -Env $Name )
+            # check that we have removed the test KVMs 
+            @( $kvms | ?{ $_.StartsWith('pstest-') } ).count | Should Be 0
+        }
+    
     }
 }
 

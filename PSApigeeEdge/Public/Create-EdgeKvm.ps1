@@ -29,12 +29,20 @@ Function Create-EdgeKvm {
     .PARAMETER Org
         Optional. The Apigee Edge organization. The default is to use the value from Set-EdgeConnection.
 
+    .PARAMETER Encrypted
+        Optional. Whether to create an encrypted KVM or not. Defaults to false.
+
     .EXAMPLE
         Create-EdgeKvm -Name kvm101 -Env test -Values @{ key1 = 'value1'; key2 = 'value2' }
 
+    .EXAMPLE
+        Create-EdgeKvm -Name kvm102 -Env test -Encrypted
+
+    .EXAMPLE
+        Create-EdgeKvm -Name kvm102 -Env test -Source .\myfile.json
+
     .FUNCTIONALITY
         ApigeeEdge
-
     #>
 
     [cmdletbinding()]
@@ -43,7 +51,8 @@ Function Create-EdgeKvm {
         [hashtable]$Values,
         [string]$Source,
         [string]$Env,
-        [string]$Org
+        [string]$Org,
+        [switch]$Encrypted
     )
     
     $Options = @{ }
@@ -59,16 +68,17 @@ Function Create-EdgeKvm {
     if (!$PSBoundParameters['Name']) {
       throw [System.ArgumentNullException] "You must specify the -Name option."
     }
-    if (!$PSBoundParameters['Values'] -and !$PSBoundParameters['Source']) {
-      throw [System.ArgumentNullException] "You must specify either the -Values or -Source option."
-    }
+    
+    # if (!$PSBoundParameters['Values'] -and !$PSBoundParameters['Source']) {
+    #  throw [System.ArgumentNullException] "You must specify either the -Values or -Source option."
+    # }
 
-    $Payload = @{ name = $Name }
+    $Payload = @{ name = $Name, encrypted = if ($Encrypted) {'true'} else {'false'} } ;
     
     if ($PSBoundParameters['Values']) {
       $Payload['entry'] = @( $Values.keys |% { @{ name = $_ ; value = $Values[$_] } } )
     }
-    else {
+    else if ($PSBoundParameters['Source']) {
       # Read data from the JSON file 
       $json = Get-Content $Source -Raw | ConvertFrom-JSON
       $Payload['entry'] = @( $json.psobject.properties.name |% {
