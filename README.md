@@ -609,7 +609,7 @@ This module is available [on the Powershell Gallery](https://www.powershellgalle
 
 ## License and Copyright
 
-This material is [Copyright (c) 2016 Google Inc.](NOTICE),
+This material is [Copyright (c) 2016-2017 Google Inc.](NOTICE),
 and is licensed under [the Apache 2.0 source license](LICENSE).
 
 
