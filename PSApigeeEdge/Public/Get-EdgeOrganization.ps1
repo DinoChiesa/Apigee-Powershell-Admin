@@ -11,7 +11,7 @@ Function Get-EdgeOrganization {
         Optional. The Apigee Edge organization. The default is to use the value from Set-EdgeConnection.
 
     .EXAMPLE
-        Get-EdgeOrganization -Org cap500 
+        Get-EdgeOrganization -Org cap500
 
     .LINK
         Get-EdgeEnvironment
@@ -24,9 +24,9 @@ Function Get-EdgeOrganization {
     param(
         [string]$Org
     )
-    
+
     $Options = @{ }
-    
+
     if ($PSBoundParameters['Debug']) {
         $DebugPreference = 'Continue'
         $Options.Add( 'Debug', $Debug )
@@ -34,7 +34,7 @@ Function Get-EdgeOrganization {
     if ($PSBoundParameters['Org']) {
         $Options.Add( 'Org', $Org )
     }
-    
+
     Write-Debug ( "Options @Options`n" )
 
     Get-EdgeObject @Options

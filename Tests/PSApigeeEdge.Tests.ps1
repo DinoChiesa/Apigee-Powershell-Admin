@@ -444,7 +444,7 @@ Describe "Get-Developers-1" {
             $devsExpanded[0].GetType().Name | Should Be 'PSCustomObject'
         }
 
-        It 'gets details for developer <Name>'  -TestCases @( ToArrayOfHash  @( Get-EdgeDeveloper ) ) {
+        It 'gets details for developer <Name>' -TestCases @( ToArrayOfHash  @( Get-EdgeDeveloper ) ) {
             param($Name)
 
             $dev = @( Get-EdgeDeveloper -Name $Name )
@@ -515,43 +515,71 @@ Describe "Get-ApiProduct-1" {
 
 Describe "Create-App-1" {
     Context 'Strict mode' {
-    
+
         Set-StrictMode -Version latest
 
-        It 'creates Apps with different credential expiry' {
-            $Developers = @( @( Get-EdgeDeveloper ) |
-              ?{ $_.StartsWith('pstest-') } | % { @{ Email = $_ } } )
-              
-            $Products = @( @( Get-EdgeApiProduct -Params @{ expand = 'true'} ).apiProduct |
-              ?{ $_.name.StartsWith('pstest-') } | % { @{ Name = $_.name } } )
+        $Developers = @( @( Get-EdgeDeveloper ) |
+          ?{ $_.StartsWith('pstest-') } | % { @{ Email = $_ } } )
 
-            $expiryOptions = @(
-                "48h", "21d", (Get-Date).AddDays(60).ToString('yyyy-MM-dd'), ""
-            )
+        $Products = @( @( Get-EdgeApiProduct -Params @{ expand = 'true'} ).apiProduct |
+          ?{ $_.name.StartsWith('pstest-') } | % { @{ Name = $_.name } } )
 
-            foreach ($expiry in $expiryOptions) {
-                
-                $Params = @{
-                    Name = [string]::Format('pstest-{0}-{1}', $Script:Props.guid.Substring(0,5), $expiry )
-                    Developer = $Developers[0].Email
-                    ApiProducts = @( $Products[0].Name )
-                }
-                if ($expiry) {
-                    Write-Host "expiry: ${expiry}" 
-                    $Params['Expiry'] = $expiry
-                }
-                else {
-                    Write-Host "expiry: -none-" 
-                }
+        $cases = @{ expiry = "48h" },
+                @{ expiry = '86400' }, # default is a number of seconds
+                @{ expiry = '21d' },
+                @{ expiry = (Get-Date).AddDays(60).ToString('yyyy-MM-dd') }
+                @{ expiry = "" }
 
-                $app = Create-EdgeDevApp @Params
-                { $app } | Should Not Throw
-                #TODO : verify expiry?
+        It 'creates Apps with credential expiry <expiry>' -TestCases $cases {
+            param($expiry)
+
+            $Params = @{
+                Name = [string]::Format('pstest-{0}-{1}', $Script:Props.guid.Substring(0,5), $expiry )
+                Developer = $Developers[0].Email
+                ApiProducts = @( $Products[0].Name )
             }
+            if ($expiry) {
+                $Params['Expiry'] = $expiry
+            }
+
+            $app = Create-EdgeDevApp @Params
+            { $app } | Should Not Throw
+            #TODO : verify expiry?
         }
     }
 }
 
+
+Describe "Create-App-Bad-Expiry" {
+    Context 'Strict mode' {
+
+        Set-StrictMode -Version latest
+
+        $Developers = @( @( Get-EdgeDeveloper ) |
+          ?{ $_.StartsWith('pstest-') } | % { @{ Email = $_ } } )
+
+        $Products = @( @( Get-EdgeApiProduct -Params @{ expand = 'true'} ).apiProduct |
+          ?{ $_.name.StartsWith('pstest-') } | % { @{ Name = $_.name } } )
+
+        $cases = @{ expiry = "2016-12-10" }, # in the past
+                @{ expiry = '-43200' }, # negative integer
+                @{ expiry = 'ABCDE' } # invalid
+
+        It 'creates Apps with invalid expiry <expiry>' -TestCases $cases {
+            param($expiry)
+
+            $Params = @{
+                Name = [string]::Format('pstest-{0}-{1}', $Script:Props.guid.Substring(0,5), $expiry )
+                Developer = $Developers[0].Email
+                ApiProducts = @( $Products[0].Name )
+            }
+
+            $Params['Expiry'] = $expiry
+            $app = Create-EdgeDevApp @Params
+            { $app } | Should Throw
+        }
+    }
+}
 
 
 Describe "Get-Apps-1" {

@@ -1,5 +1,4 @@
-function Resolve-Expiry
-{
+function Resolve-Expiry {
     <#
     .SYNOPSIS
         Resolve a string into a number of milliseconds from now.
@@ -15,8 +14,8 @@ function Resolve-Expiry
 
     .EXAMPLE
         Resolve-Expiry 120d
-
     #>
+
     [cmdletbinding()]
     PARAM(
       [Parameter(Mandatory=$True)][string]$Value
