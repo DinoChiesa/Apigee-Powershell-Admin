@@ -66,13 +66,9 @@ Function Create-EdgeKvm {
     }
 
     if (!$PSBoundParameters['Name']) {
-      throw [System.ArgumentNullException] "You must specify the -Name option."
+      throw [System.ArgumentNullException] "Name", "You must specify the -Name option."
     }
     
-    # if (!$PSBoundParameters['Values'] -and !$PSBoundParameters['Source']) {
-    #  throw [System.ArgumentNullException] "You must specify either the -Values or -Source option."
-    # }
-
     $Payload = @{ name = $Name; encrypted = if ($Encrypted) {'true'} else {'false'} } ;
     
     if ($PSBoundParameters['Values']) {

@@ -34,7 +34,7 @@ Function Delete-EdgeDeveloper {
     }
     
     if (!$PSBoundParameters['Name']) {
-      throw [System.ArgumentNullException] 'The -Name parameter is required.'
+      throw [System.ArgumentNullException] "Name", 'The -Name parameter is required.'
     }
     
     $Options = @{ Collection = 'developers'; Name = $Name; }

@@ -59,10 +59,10 @@ Function Create-EdgeDevApp {
     }
     
     if (!$PSBoundParameters['Developer']) {
-      throw [System.ArgumentNullException] "You must specify the -Developer option."
+      throw [System.ArgumentNullException] "Developer", "You must specify the -Developer option."
     }
     if (!$PSBoundParameters['Name']) {
-      throw [System.ArgumentNullException] "You must specify the -Name option."
+      throw [System.ArgumentNullException] "Name", "You must specify the -Name option."
     }
 
     $coll = Join-Parts -Separator '/' -Parts 'developers', $Developer, 'apps'
@@ -79,7 +79,7 @@ Function Create-EdgeDevApp {
     if ($PSBoundParameters['Expiry']) {
         $actualExpiry = $(Resolve-Expiry $Expiry)
         if ( $actualExpiry -lt 0 ) {
-            throw [System.ArgumentOutOfRangeException] "Specify an expiry in the future."
+            throw [System.ArgumentOutOfRangeException] "Expiry", "Specify an expiry in the future."
         }
         $Payload.Add('keyExpiresIn', $actualExpiry )
     }

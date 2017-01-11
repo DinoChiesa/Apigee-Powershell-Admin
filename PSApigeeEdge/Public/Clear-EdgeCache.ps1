@@ -29,10 +29,10 @@ Function Clear-EdgeCache {
     
     
     if (!$PSBoundParameters['Name']) {
-        throw [System.ArgumentNullException] "The -Name parameter is required."
+        throw [System.ArgumentNullException] "Name", "The -Name parameter is required."
     }
     if (!$PSBoundParameters['Env']) {
-        throw [System.ArgumentNullException] "The -Env parameter is required."
+        throw [System.ArgumentNullException] "Env", "The -Env parameter is required."
     }
     
     $Options = @{

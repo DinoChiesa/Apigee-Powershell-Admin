@@ -30,7 +30,7 @@ Function Delete-EdgeApiProduct {
         $DebugPreference = 'Continue'
     }
     if (!$PSBoundParameters['Name']) {
-      throw [System.ArgumentNullException] 'The -Name parameter is required.'
+      throw [System.ArgumentNullException] "Name", 'The -Name parameter is required.'
     }
     
     $Options = @{ Collection = 'apiproducts'; Name = $Name; }

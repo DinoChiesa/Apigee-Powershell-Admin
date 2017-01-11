@@ -64,19 +64,19 @@ Function Update-EdgeAppCredential {
     }
 
     if (!$PSBoundParameters['Developer']) {
-        throw [System.ArgumentNullException] "You must specify the -Developer option."
+        throw [System.ArgumentNullException] "Developer", "You must specify the -Developer option."
     }
     if (!$PSBoundParameters['Name']) {
-      throw [System.ArgumentNullException] "You must specify the -Name option."
+      throw [System.ArgumentNullException] "Name", "You must specify the -Name option."
     }
     if (!$Remove -and ! $Add) {
-      throw [System.ArgumentNullException] "You must specify one of -Remove or -Add."
+      throw [System.ArgumentException] "You must specify one of -Remove or -Add."
     }
     if ($Remove -and $Add) {
-      throw [System.ArgumentNullException] "You must specify one of -Remove or -Add."
+      throw [System.ArgumentException] "You must specify one of -Remove or -Add."
     }
     if (!$PSBoundParameters['ApiProducts']) {
-      throw [System.ArgumentNullException] "You must specify the -ApiProducts option."
+      throw [System.ArgumentNullException] "ApiProducts", "You must specify the -ApiProducts option."
     }
 
     if ($Add) {

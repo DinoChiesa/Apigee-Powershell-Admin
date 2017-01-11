@@ -44,14 +44,13 @@ Function Delete-EdgeKeystore {
     }
     
     if (!$PSBoundParameters['Name']) {
-      throw [System.ArgumentNullException] "You must specify the -Name option."
+      throw [System.ArgumentNullException] "Name", "You must specify the -Name option."
     }
     if (!$PSBoundParameters['Env']) {
-      throw [System.ArgumentNullException] "You must specify the -Env option."
+      throw [System.ArgumentNullException] "Env", "You must specify the -Env option."
     }
     
-    $Options['Collection'] = $(Join-Parts -Separator "/" -Parts 'e', $Env, 'keystores' )
-
+    $Options.Add( 'Collection', $(Join-Parts -Separator "/" -Parts 'e', $Env, 'keystores' ) )
     $Options.Add( 'Name', $Name )
 
     Write-Debug ([string]::Format("Options {0}`n", $(ConvertTo-Json $Options -Compress ) ) )

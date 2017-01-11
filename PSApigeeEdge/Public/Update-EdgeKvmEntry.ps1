@@ -50,13 +50,13 @@ Function Update-EdgeKvmEntry {
     }
 
     if (!$PSBoundParameters['Name']) {
-      throw [System.ArgumentNullException] "You must specify the -Name option."
+      throw [System.ArgumentNullException] "Name", "You must specify the -Name option."
     }
     if (!$PSBoundParameters['Entry']) {
-      throw [System.ArgumentNullException] "You must specify the -Entry option."
+      throw [System.ArgumentNullException] "Entry", "You must specify the -Entry option."
     }
     if (!$PSBoundParameters['NewValue']) {
-      throw [System.ArgumentNullException] "You must specify the -NewValue option."
+      throw [System.ArgumentNullException] "NewValue", "You must specify the -NewValue option."
     }
     
     $basepath = if ($PSBoundParameters['Env']) {

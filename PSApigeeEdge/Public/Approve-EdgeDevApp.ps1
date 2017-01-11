@@ -68,7 +68,7 @@ Function Approve-EdgeDevApp {
     
     if ($PSBoundParameters['Developer']) {
         if (!$PSBoundParameters['Name']) {
-          throw [System.ArgumentNullException] 'use -Name with -Developer'
+          throw [System.ArgumentNullException] "Name", 'use -Name with -Developer'
         }
         if ($PSBoundParameters['Key']) {
             $Options.Add( 'Collection', $( Join-Parts -Separator '/' -Parts 'developers',
@@ -82,7 +82,7 @@ Function Approve-EdgeDevApp {
     }
     else {
         if (!$PSBoundParameters['Id']) {
-          throw [System.ArgumentNullException] 'use -Id if not specifying -Name and -Developer'
+          throw [System.ArgumentNullException] "Id", 'use -Id if not specifying -Name and -Developer'
         }
         if ($PSBoundParameters['Key']) {
             $Options.Add( 'Collection', $( Join-Parts -Separator '/' -Parts 'apps', $Id, 'keys' ) )

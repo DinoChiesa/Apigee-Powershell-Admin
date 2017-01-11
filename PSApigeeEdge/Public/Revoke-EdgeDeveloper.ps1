@@ -28,7 +28,7 @@ Function Revoke-EdgeDeveloper {
     )
     
     if (!$PSBoundParameters['Name']) {
-       throw [System.ArgumentNullException] 'the -Name parameter is required.'
+       throw [System.ArgumentNullException] "Name", 'the -Name parameter is required.'
     }
     
     $Options = @{
