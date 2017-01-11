@@ -9,31 +9,37 @@ $PSVersion = $PSVersionTable.PSVersion.Major
 Import-Module $PSScriptRoot\..\PSApigeeEdge -Force
 
 Function ReadJson {
-  param($filename)
-  $json = Get-Content $filename -Raw | ConvertFrom-JSON
-  $ht = @{}
-  foreach ($prop in $json.psobject.properties.name) {
-    $ht.Add( $prop , $json.$prop )
-  }
-  $ht
+    param($filename)
+    $json = Get-Content $filename -Raw | ConvertFrom-JSON
+    $ht = @{}
+    foreach ($prop in $json.psobject.properties.name) {
+        $ht.Add( $prop , $json.$prop )
+    }
+    $ht
 }
 
 Function ToArrayOfHash {
-  param($a)
+    param($a)
 
-  $list = New-Object System.Collections.Generic.List[System.Object]
-  for ( $i = 0; $i -lt $a.Length; $i++ ) {
-     $list.Add( @{ Name = $a[$i] } )
-  }
-  $list.ToArray()
+    $list = New-Object System.Collections.Generic.List[System.Object]
+    for ( $i = 0; $i -lt $a.Length; $i++ ) {
+        $list.Add( @{ Name = $a[$i] } )
+    }
+    $list.ToArray()
+}
+
+Function FiveMinutesAgoMilliseconds {
+    $NowMilliseconds = [int64](([datetime]::UtcNow)-(get-date "1/1/1970")).TotalMilliseconds
+    $FiveMinsAgo = $NowMilliseconds - (300 * 1000);
+    $FiveMinsAgo
 }
 
 # --- Get data for the tests
 
 $Script:Props = @{
-  guid = $([guid]::NewGuid()).ToString().Replace('-','')
-  StartMilliseconds = [int64](([datetime]::UtcNow)-(get-date "1/1/1970")).TotalMilliseconds
-  OrgIsCps = $False
+    guid = $([guid]::NewGuid()).ToString().Replace('-','')
+    StartMilliseconds = [int64](([datetime]::UtcNow)-(get-date "1/1/1970")).TotalMilliseconds
+    OrgIsCps = $False
 }
 
 $ConnectionData = ReadJson $Connection 
@@ -417,12 +423,12 @@ Describe "Create-Developer-1" {
                      $Script:Props.guid.Substring(9,20))
             }
             $dev = Create-EdgeDeveloper @Params
-            Start-Sleep -Milliseconds 3000
-            $NowMilliseconds = [int64](([datetime]::UtcNow)-(get-date "1/1/1970")).TotalMilliseconds
+            # Start-Sleep -Milliseconds 3000
+            $FiveMinsAgo = FiveMinutesAgoMilliseconds()
             
             # These time comparisons will be valid iff the server time is not skewed from the client time
-            $dev.createdAt | Should BeLessthan $NowMilliseconds
-            $dev.lastModifiedAt | Should BeLessthan $NowMilliseconds
+            $dev.createdAt | Should BeLessthan $FiveMinsAgo
+            $dev.lastModifiedAt | Should BeLessthan $FiveMinsAgo
             $dev.createdAt | Should BeGreaterthan $Script:Props.StartMilliseconds
             $dev.lastModifiedAt | Should BeGreaterthan $Script:Props.StartMilliseconds
             $dev.createdBy | Should Be $ConnectionData.User
@@ -456,13 +462,13 @@ Describe "Get-Developers-1" {
             param($Name)
 
             $dev = @( Get-EdgeDeveloper -Name $Name )
-            Start-Sleep -Milliseconds 3000
+            #Start-Sleep -Milliseconds 3000
             
             # These time comparisons will be valid iff the server time is not skewed from the client time
-            $NowMilliseconds = [int64](([datetime]::UtcNow)-(get-date "1/1/1970")).TotalMilliseconds
+            $FiveMinsAgo = FiveMinutesAgoMilliseconds()
             $dev.email | Should Be $Name
-            $dev.createdAt | Should BeLessthan $NowMilliseconds
-            $dev.lastModifiedAt | Should BeLessthan $NowMilliseconds
+            $dev.createdAt | Should BeLessthan $FiveMinsAgo
+            $dev.lastModifiedAt | Should BeLessthan $FiveMinsAgo
             $dev.organizationName | Should Be $ConnectionData.org 
         }
     }
@@ -471,29 +477,29 @@ Describe "Get-Developers-1" {
 
 Describe "Create-ApiProduct-1" {
     Context 'Strict mode' {
-    
+        
         Set-StrictMode -Version latest
 
         It 'creates a product' {
             # Create-EdgeApiProduct -Name pstest-198191891  -Environments @( 'env1' )
 
             $Params = @{
-              Name = [string]::Format('pstest-{0}', $Script:Props.guid.Substring(3,11))
-              Environments = @( Get-EdgeEnvironment ) # all of them
-              Proxies = @( @( Get-EdgeApi )[0] )
+                Name = [string]::Format('pstest-{0}', $Script:Props.guid.Substring(3,11))
+                Environments = @( Get-EdgeEnvironment ) # all of them
+                Proxies = @( @( Get-EdgeApi )[0] )
             }
             $prod = Create-EdgeApiProduct @Params
             Start-Sleep -Milliseconds 3000
             
             # These time comparisons will be valid iff the server time is not skewed from the client time
-            $NowMilliseconds = [int64](([datetime]::UtcNow)-(get-date "1/1/1970")).TotalMilliseconds
-            $prod.createdAt | Should BeLessthan $NowMilliseconds
-            $prod.lastModifiedAt | Should BeLessthan $NowMilliseconds
+            $FiveMinsAgo = FiveMinutesAgoMilliseconds()
+            $prod.createdAt | Should BeLessthan $FiveMinsAgo
+            $prod.lastModifiedAt | Should BeLessthan $FiveMinsAgo
             $prod.createdAt | Should BeGreaterThan $Script:Props.StartMilliseconds
             $prod.lastModifiedAt | Should BeGreaterThan $Script:Props.StartMilliseconds
             $prod.createdBy | Should Be $ConnectionData.User
         }
-   }
+    }
 }
 
 
@@ -609,7 +615,6 @@ Describe "Create-App-Failures" {
             }
             { Create-EdgeDevApp @Params } | Should Throw
         }
-    
     }
 }
 
@@ -663,12 +668,12 @@ Describe "Get-Apps-1" {
                 # But... instead we will iterate the properties and compare each one, while
                 # excluding properties with non-primitive values.
                 $app2.psobject.properties | % {
-                  $value2 = $_.Value
-                  $name = $_.Name
-                  if ( $excludedProps -notcontains $name ) {
-                      $value1 = $( $app | select -expand $name )
-                      $value2 | Should Be $value1
-                  }
+                    $value2 = $_.Value
+                    $name = $_.Name
+                    if ( $excludedProps -notcontains $name ) {
+                        $value1 = $( $app | select -expand $name )
+                        $value2 | Should Be $value1
+                    }
                 }
             }
         }
