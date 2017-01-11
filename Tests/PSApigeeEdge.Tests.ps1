@@ -238,6 +238,26 @@ Describe "Create-Kvm-1" {
             Write-Host "TODO: validate response (is encrypted)" 
             $( $kvm.entry | where { $_.name -eq 'key1' } ).value | Should Be $Value1
         }
+        
+        It 'creates an encrypted KVM in Environment <Name> with Values' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
+            param($Name)
+            $Value1 = [string]::Format('value1-{0}', $(Get-Random))
+            $Value2 = [string]::Format('value2-{0}', $(Get-Random))
+            $Params = @{
+                Name = [string]::Format('pstest-E-with-values-{0}', $Script:Props.guid.Substring(0,10) )
+                Env = $Name
+                Encrypted = $True
+              Values = @{
+                 key1 = $Value1
+                 key2 = $Value2
+                 key3 = [string]::Format('value3-{0}', $([guid]::NewGuid()).ToString().Replace('-',''))
+              }
+            }
+            $kvm = Create-EdgeKvm @Params
+            { $kvm } | Should Not Throw 
+            $( $kvm.entry | where { $_.name -eq 'key1' } ).value | Should Be '*****'
+            $( $kvm.entry | where { $_.name -eq 'key2' } ).value | Should Be '*****'
+       }
     }
 }
 
@@ -301,7 +321,8 @@ Describe "Crud-KvmEntry-1" {
             $entry = Create-EdgeKvmEntry @Params
             { $entry } | Should Not Throw
             $entry.name | Should Be $EntryName
-            $entry.value | Should Be '*****'
+            # upon first creation, the value is sent back in clear text
+            $entry.value | Should Be $EntryValue
         }
 
         It 'updates an entry in an encrypted KVM in Environment <Name>' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
@@ -318,7 +339,8 @@ Describe "Crud-KvmEntry-1" {
             $entry = Update-EdgeKvmEntry @Params
             { $entry } | Should Not Throw
             $entry.name | Should Be $EntryName
-            $entry.value | Should Be '*****'
+            # upon update, the value is sent back in clear text
+            $entry.value | Should Be $EntryValue
             
             $entry = Get-EdgeKvmEntry -Env $Name -Name $KvmName -Entry $EntryName
             { $entry } | Should Not Throw
@@ -338,8 +360,8 @@ Describe "Crud-KvmEntry-1" {
             $entry = Delete-EdgeKvmEntry @Params
             { $entry } | Should Not Throw
             $kvm = Get-EdgeKvm -Env $Name -Name $KvmName
-            
-            $( $kvm.entry | where { $_.name -eq $EntryName } ).value | Should BeNullOrEmpty
+            # the entry with this name should not be found
+            $( $kvm.entry | where { $_.name -eq $EntryName } ).value | Should Throw
         }
         
         It 'deletes an entry in an encrypted KVM in Environment <Name>' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
@@ -354,9 +376,8 @@ Describe "Crud-KvmEntry-1" {
             $entry = Delete-EdgeKvmEntry @Params
             { $entry } | Should Not Throw
             $kvm = Get-EdgeKvm -Env $Name -Name $KvmName
-            $( $kvm.entry | where { $_.name -eq $EntryName } ).value | Should BeNullOrEmpty
+            $( $kvm.entry | where { $_.name -eq $EntryName } ).value | Should Throw
         }
-
     }
 }
 
