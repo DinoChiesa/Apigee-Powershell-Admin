@@ -530,7 +530,7 @@ Describe "Create-App-1" {
                 @{ expiry = (Get-Date).AddDays(60).ToString('yyyy-MM-dd') }
                 @{ expiry = "" }
 
-        It 'creates Apps with credential expiry <expiry>' -TestCases $cases {
+        It 'creates an App with credential expiry <expiry>' -TestCases $cases {
             param($expiry)
 
             $Params = @{
@@ -550,7 +550,7 @@ Describe "Create-App-1" {
 }
 
 
-Describe "Create-App-Bad-Expiry" {
+Describe "Create-App-Failures" {
     Context 'Strict mode' {
 
         Set-StrictMode -Version latest
@@ -561,23 +561,43 @@ Describe "Create-App-Bad-Expiry" {
         $Products = @( @( Get-EdgeApiProduct -Params @{ expand = 'true'} ).apiProduct |
           ?{ $_.name.StartsWith('pstest-') } | % { @{ Name = $_.name } } )
 
-        $cases = @{ expiry = "2016-12-10" }, # in the past
+        $expiryCases = @{ expiry = "2016-12-10" }, # in the past
                 @{ expiry = '-43200' }, # negative integer
                 @{ expiry = 'ABCDE' } # invalid
 
-        It 'creates Apps with invalid expiry <expiry>' -TestCases $cases {
+        It 'creates an App with invalid expiry <expiry>' -TestCases $expiryCases {
             param($expiry)
 
             $Params = @{
-                Name = [string]::Format('pstest-{0}-{1}', $Script:Props.guid.Substring(0,5), $expiry )
+                Name = [string]::Format('pstest-failure-A-{0}-{1}', $Script:Props.guid.Substring(0,5), $expiry )
                 Developer = $Developers[0].Email
                 ApiProducts = @( $Products[0].Name )
             }
 
             $Params['Expiry'] = $expiry
-            $app = Create-EdgeDevApp @Params
-            { $app } | Should Throw
+            Create-EdgeDevApp @Params | Should Throw
         }
+        
+        It 'creates an App with missing Developer' {
+            $Params = @{
+                Name = [string]::Format('pstest-failure-B-{0}', $Script:Props.guid.Substring(0,5) )
+                ApiProducts = @( $Products[0].Name )
+            }
+
+            $Params['Expiry'] = $expiry
+            Create-EdgeDevApp @Params | Should Throw
+        }
+            
+        It 'creates an App with missing ApiProducts' {
+            $Params = @{
+                Name = [string]::Format('pstest-failure-B-{0}', $Script:Props.guid.Substring(0,5) )
+                Developer = $Developers[0].Email
+            }
+
+            $Params['Expiry'] = $expiry
+            Create-EdgeDevApp @Params | Should Throw
+        }
+    
     }
 }
 
