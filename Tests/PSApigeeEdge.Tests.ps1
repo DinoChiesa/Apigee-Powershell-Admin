@@ -575,7 +575,7 @@ Describe "Create-App-Failures" {
             }
 
             $Params['Expiry'] = $expiry
-            Create-EdgeDevApp @Params | Should Throw
+            { Create-EdgeDevApp @Params } | Should Throw
         }
         
         It 'creates an App with missing Developer' {
@@ -583,9 +583,7 @@ Describe "Create-App-Failures" {
                 Name = [string]::Format('pstest-failure-B-{0}', $Script:Props.guid.Substring(0,5) )
                 ApiProducts = @( $Products[0].Name )
             }
-
-            $Params['Expiry'] = $expiry
-            Create-EdgeDevApp @Params | Should Throw
+            { Create-EdgeDevApp @Params } | Should Throw
         }
             
         It 'creates an App with missing ApiProducts' {
@@ -593,9 +591,7 @@ Describe "Create-App-Failures" {
                 Name = [string]::Format('pstest-failure-B-{0}', $Script:Props.guid.Substring(0,5) )
                 Developer = $Developers[0].Email
             }
-
-            $Params['Expiry'] = $expiry
-            Create-EdgeDevApp @Params | Should Throw
+            { Create-EdgeDevApp @Params } | Should Throw
         }
     
     }
