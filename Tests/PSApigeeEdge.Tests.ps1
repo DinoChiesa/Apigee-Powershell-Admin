@@ -33,6 +33,7 @@ Function ToArrayOfHash {
 $Script:Props = @{
   guid = $([guid]::NewGuid()).ToString().Replace('-','')
   StartMilliseconds = [int64](([datetime]::UtcNow)-(get-date "1/1/1970")).TotalMilliseconds
+  OrgIsCps = $False
 }
 
 $ConnectionData = ReadJson $Connection 
@@ -59,6 +60,22 @@ Describe "Set-EdgeConnection" {
 }
 
 
+Describe "Get-EdgeOrganization-1" {
+
+    Context 'Strict mode' { 
+
+        Set-StrictMode -Version latest
+
+        It 'gets info regarding the default org' {
+            $org = $( Get-EdgeOrganization )
+            $isCps = @( $org.properties.psobject.properties.value | where { $_.name -eq 'features.isCpsEnabled' })
+            if ( $isCps.count -gt 0 ) {
+                $Script:Props.OrgIsCps = $isCps[0].value 
+            }
+        }
+    }
+}
+
 Describe "Get-EdgeEnvironment-1" {
 
     Context 'Strict mode' { 
@@ -81,7 +98,6 @@ Describe "Get-EdgeEnvironment-1" {
         }
     }
 }
-
 
 
 Describe "Get-EdgeApi-1" {
@@ -265,118 +281,119 @@ Describe "Create-Kvm-1" {
 
 Describe "Crud-KvmEntry-1" {
     Context 'Strict mode' {
-    
         Set-StrictMode -Version latest
+        if ( $Script:Props.OrgIsCps ) {
 
-        It 'creates an entry in an unencrypted KVM in Environment <Name>' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
-            param($Name)
-            $KvmName = [string]::Format('pstest-A-{0}', $Script:Props.guid.Substring(0,10) )
-            $EntryName = 'entry1'
-            $EntryValue = [string]::Format('value-unencrypted-{0}', $Script:Props.guid.Substring(0,10) )
-            $Params = @{
-                Env = $Name
-                Name = $KvmName
-                Entry = $EntryName
-                Value = $EntryValue
+            It 'creates an entry in an unencrypted KVM in Environment <Name>' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
+                param($Name)
+                $KvmName = [string]::Format('pstest-A-{0}', $Script:Props.guid.Substring(0,10) )
+                $EntryName = 'entry1'
+                $EntryValue = [string]::Format('value-unencrypted-{0}', $Script:Props.guid.Substring(0,10) )
+                $Params = @{
+                    Env = $Name
+                    Name = $KvmName
+                    Entry = $EntryName
+                    Value = $EntryValue
+                }
+                $entry = Create-EdgeKvmEntry @Params
+                { $entry } | Should Not Throw
+                $entry.name | Should Be $EntryName
+                $entry.value | Should Be $EntryValue
             }
-            $entry = Create-EdgeKvmEntry @Params
-            { $entry } | Should Not Throw
-            $entry.name | Should Be $EntryName
-            $entry.value | Should Be $EntryValue
-        }
 
-        It 'updates an entry in an unencrypted KVM in Environment <Name>' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
-            param($Name)
-            $KvmName = [string]::Format('pstest-A-{0}', $Script:Props.guid.Substring(0,10) )
-            $EntryName = 'entry1'
-            $EntryValue = [string]::Format('updated-value-{0}', $Script:Props.guid.Substring(0,10) )
-            $Params = @{
-                Env = $Name
-                Name = $KvmName
-                Entry = $EntryName
-                NewValue = $EntryValue
+            It 'updates an entry in an unencrypted KVM in Environment <Name>' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
+                param($Name)
+                $KvmName = [string]::Format('pstest-A-{0}', $Script:Props.guid.Substring(0,10) )
+                $EntryName = 'entry1'
+                $EntryValue = [string]::Format('updated-value-{0}', $Script:Props.guid.Substring(0,10) )
+                $Params = @{
+                    Env = $Name
+                    Name = $KvmName
+                    Entry = $EntryName
+                    NewValue = $EntryValue
+                }
+                $entry = Update-EdgeKvmEntry @Params
+                { $entry } | Should Not Throw
+                $entry.name | Should Be $EntryName
+                $entry.value | Should Be $EntryValue
+                
+                $entry = Get-EdgeKvmEntry -Env $Name -Name $KvmName -Entry $EntryName
+                { $entry } | Should Not Throw
+                $entry.name | Should Be $EntryName
+                $entry.value | Should Be $EntryValue
             }
-            $entry = Update-EdgeKvmEntry @Params
-            { $entry } | Should Not Throw
-            $entry.name | Should Be $EntryName
-            $entry.value | Should Be $EntryValue
+
+            It 'creates an entry in an encrypted KVM in Environment <Name>' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
+                param($Name)
+                $KvmName = [string]::Format('pstest-encrypted-{0}', $Script:Props.guid.Substring(0,10) )
+                $EntryName = 'entry1'
+                $EntryValue = [string]::Format('value-encrypted-{0}', $Script:Props.guid.Substring(0,10) )
+                $Params = @{
+                    Env = $Name
+                    Name = $KvmName
+                    Entry = $EntryName
+                    Value = $EntryValue
+                }
+                $entry = Create-EdgeKvmEntry @Params
+                { $entry } | Should Not Throw
+                $entry.name | Should Be $EntryName
+                # upon first creation, the value is sent back in clear text
+                $entry.value | Should Be $EntryValue
+            }
+
+            It 'updates an entry in an encrypted KVM in Environment <Name>' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
+                param($Name)
+                $KvmName = [string]::Format('pstest-encrypted-{0}', $Script:Props.guid.Substring(0,10) )
+                $EntryName = 'entry1'
+                $EntryValue = [string]::Format('updated-value-encrypted-{0}', $Script:Props.guid.Substring(0,10) )
+                $Params = @{
+                    Env = $Name
+                    Name = $KvmName
+                    Entry = $EntryName
+                    NewValue = $EntryValue
+                }
+                $entry = Update-EdgeKvmEntry @Params
+                { $entry } | Should Not Throw
+                $entry.name | Should Be $EntryName
+                # upon update, the value is sent back in clear text
+                $entry.value | Should Be $EntryValue
+                
+                $entry = Get-EdgeKvmEntry -Env $Name -Name $KvmName -Entry $EntryName
+                { $entry } | Should Not Throw
+                $entry.name | Should Be $EntryName
+                $entry.value | Should Be '*****'
+            }
             
-            $entry = Get-EdgeKvmEntry -Env $Name -Name $KvmName -Entry $EntryName
-            { $entry } | Should Not Throw
-            $entry.name | Should Be $EntryName
-            $entry.value | Should Be $EntryValue
-        }
-
-        It 'creates an entry in an encrypted KVM in Environment <Name>' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
-            param($Name)
-            $KvmName = [string]::Format('pstest-encrypted-{0}', $Script:Props.guid.Substring(0,10) )
-            $EntryName = 'entry1'
-            $EntryValue = [string]::Format('value-encrypted-{0}', $Script:Props.guid.Substring(0,10) )
-            $Params = @{
-                Env = $Name
-                Name = $KvmName
-                Entry = $EntryName
-                Value = $EntryValue
+            It 'deletes an entry in an unencrypted KVM in Environment <Name>' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
+                param($Name)
+                $KvmName = [string]::Format('pstest-A-{0}', $Script:Props.guid.Substring(0,10) )
+                $EntryName = 'entry1'
+                $Params = @{
+                    Env = $Name
+                    Name = $KvmName
+                    Entry = $EntryName
+                }
+                $entry = Delete-EdgeKvmEntry @Params
+                { $entry } | Should Not Throw
+                $kvm = Get-EdgeKvm -Env $Name -Name $KvmName
+                # the entry with this name should not be found
+                @( $kvm.entry | where { $_.name -eq $EntryName } ).count | Should Be 0
             }
-            $entry = Create-EdgeKvmEntry @Params
-            { $entry } | Should Not Throw
-            $entry.name | Should Be $EntryName
-            # upon first creation, the value is sent back in clear text
-            $entry.value | Should Be $EntryValue
-        }
-
-        It 'updates an entry in an encrypted KVM in Environment <Name>' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
-            param($Name)
-            $KvmName = [string]::Format('pstest-encrypted-{0}', $Script:Props.guid.Substring(0,10) )
-            $EntryName = 'entry1'
-            $EntryValue = [string]::Format('updated-value-encrypted-{0}', $Script:Props.guid.Substring(0,10) )
-            $Params = @{
-                Env = $Name
-                Name = $KvmName
-                Entry = $EntryName
-                NewValue = $EntryValue
-            }
-            $entry = Update-EdgeKvmEntry @Params
-            { $entry } | Should Not Throw
-            $entry.name | Should Be $EntryName
-            # upon update, the value is sent back in clear text
-            $entry.value | Should Be $EntryValue
             
-            $entry = Get-EdgeKvmEntry -Env $Name -Name $KvmName -Entry $EntryName
-            { $entry } | Should Not Throw
-            $entry.name | Should Be $EntryName
-            $entry.value | Should Be '*****'
-        }
-        
-        It 'deletes an entry in an unencrypted KVM in Environment <Name>' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
-            param($Name)
-            $KvmName = [string]::Format('pstest-A-{0}', $Script:Props.guid.Substring(0,10) )
-            $EntryName = 'entry1'
-            $Params = @{
-                Env = $Name
-                Name = $KvmName
-                Entry = $EntryName
+            It 'deletes an entry in an encrypted KVM in Environment <Name>' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
+                param($Name)
+                $KvmName = [string]::Format('pstest-encrypted-{0}', $Script:Props.guid.Substring(0,10) )
+                $EntryName = 'entry1'
+                $Params = @{
+                    Env = $Name
+                    Name = $KvmName
+                    Entry = $EntryName
+                }
+                $entry = Delete-EdgeKvmEntry @Params
+                { $entry } | Should Not Throw
+                $kvm = Get-EdgeKvm -Env $Name -Name $KvmName
+                @( $kvm.entry | where { $_.name -eq $EntryName } ).count | Should Be 0
             }
-            $entry = Delete-EdgeKvmEntry @Params
-            { $entry } | Should Not Throw
-            $kvm = Get-EdgeKvm -Env $Name -Name $KvmName
-            # the entry with this name should not be found
-            @( $kvm.entry | where { $_.name -eq $EntryName } ).count | Should Be 0
-        }
-        
-        It 'deletes an entry in an encrypted KVM in Environment <Name>' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
-            param($Name)
-            $KvmName = [string]::Format('pstest-encrypted-{0}', $Script:Props.guid.Substring(0,10) )
-            $EntryName = 'entry1'
-            $Params = @{
-                Env = $Name
-                Name = $KvmName
-                Entry = $EntryName
-            }
-            $entry = Delete-EdgeKvmEntry @Params
-            { $entry } | Should Not Throw
-            $kvm = Get-EdgeKvm -Env $Name -Name $KvmName
-            @( $kvm.entry | where { $_.name -eq $EntryName } ).count | Should Be 0
         }
     }
 }
