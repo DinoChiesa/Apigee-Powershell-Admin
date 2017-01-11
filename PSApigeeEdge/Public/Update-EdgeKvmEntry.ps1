@@ -17,8 +17,17 @@ Function Update-EdgeKvmEntry {
         Required. A string value to use for the entry.
           
     .PARAMETER Env
-        Optional. A string, the name of the environment for this key-value map.
-        The default behavior is to create an organization-wide KVM. 
+        Optional. A string, the name of the environment in Apigee Edge with which the keyvalue
+        map is associated. KVMs can be associated to an organization, an environment, or an
+        API Proxy. If you specify neither Env nor Proxy, the default is to resolve the name of
+        the KVM in the list of organization-wide Key-Value Maps.
+
+
+    .PARAMETER Proxy
+        Optional. The API Proxy within Apigee Edge with which the keyvalue map is
+        associated. KVMs can be associated to an organization, an environment, or an API
+        Proxy. If you specify neither Env nor Proxy, the default is to resolve the name of the
+        KVM in the list of organization-wide Key-Value Maps.
 
     .PARAMETER Org
         Optional. The Apigee Edge organization. The default is to use the value from Set-EdgeConnection.
@@ -36,6 +45,7 @@ Function Update-EdgeKvmEntry {
         [Parameter(Mandatory=$True)][string]$Entry,
         [Parameter(Mandatory=$True)][string]$NewValue,
         [string]$Env,
+        [string]$Proxy,
         [string]$Org
     )
     
@@ -49,6 +59,10 @@ Function Update-EdgeKvmEntry {
         $Options.Add( 'Org', $Org )
     }
 
+    if ($PSBoundParameters.ContainsKey('Env') -and $PSBoundParameters.ContainsKey('Proxy')) {
+        throw [System.ArgumentException] "You may specify only one of -Env and -Proxy."    
+    }
+    
     if (!$PSBoundParameters['Name']) {
       throw [System.ArgumentNullException] "Name", "You must specify the -Name option."
     }
@@ -61,6 +75,9 @@ Function Update-EdgeKvmEntry {
     
     $basepath = if ($PSBoundParameters['Env']) {
         $( Join-Parts -Separator '/' -Parts 'e', $Env, 'keyvaluemaps' )
+    }
+    elseif ($PSBoundParameters['Proxy']) {
+        $(Join-Parts -Separator "/" -Parts 'apis', $Proxy, 'keyvaluemaps' )
     }
     else {
         'keyvaluemaps'

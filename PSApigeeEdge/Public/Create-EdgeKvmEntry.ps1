@@ -8,7 +8,7 @@ Function Create-EdgeKvmEntry {
         The KVM must exist, and the entry must not exist. This works only on CPS-enabled organizations.
 
     .PARAMETER Name
-        The name of the key-value map, in which the entry exists. 
+        Required. The name of the key-value map, in which the entry exists. 
 
     .PARAMETER Entry
         Required. The name (or key) of the value to create.
@@ -17,8 +17,16 @@ Function Create-EdgeKvmEntry {
         Required. A string value to use for the entry.
           
     .PARAMETER Env
-        Optional. A string, the name of the environment for this key-value map.
-        The default behavior is to create an organization-wide KVM. 
+        Optional. A string, the name of the environment with which the key-value map is
+        associated. KVMs can be associated to an organization, an environment, or an API Proxy.
+        If you specify neither Env nor Proxy, the Name will be resolved in the list of
+        organization-wide Key-Value Maps.
+
+    .PARAMETER Proxy
+        Optional. A string, the API Proxy within Apigee Edge with which the key-value map is
+        associated. KVMs can be associated to an organization, an environment, or an API Proxy.
+        If you specify neither Env nor Proxy, the Name will be resolved in the list of 
+        organization-wide Key-Value Maps.
 
     .PARAMETER Org
         Optional. The Apigee Edge organization. The default is to use the value from Set-EdgeConnection.
@@ -26,8 +34,14 @@ Function Create-EdgeKvmEntry {
     .EXAMPLE
         Create-EdgeKvmEntry -Name kvm101 -Env test -Entry newkey1 -Value 'newly created value'
 
+    .EXAMPLE
+        Create-EdgeKvmEntry -Name kvm102 -Proxy api1 -Entry key1 -Value 'value for proxy-specific KVM'
+
     .LINK
         Delete-EdgeKvmEntry
+
+    .LINK
+        Update-EdgeKvmEntry
 
     .FUNCTIONALITY
         ApigeeEdge
@@ -39,6 +53,7 @@ Function Create-EdgeKvmEntry {
         [Parameter(Mandatory=$True)][string]$Entry,
         [Parameter(Mandatory=$True)][string]$Value,
         [string]$Env,
+        [string]$Proxy,
         [string]$Org
     )
     
@@ -52,6 +67,10 @@ Function Create-EdgeKvmEntry {
         $Options.Add( 'Org', $Org )
     }
 
+    if ($PSBoundParameters.ContainsKey('Env') -and $PSBoundParameters.ContainsKey('Proxy')) {
+        throw [System.ArgumentException] "You may specify only one of -Env and -Proxy."    
+    }
+    
     if (!$PSBoundParameters['Name']) {
       throw [System.ArgumentNullException] "Name", "You must specify the -Name option."
     }
@@ -64,6 +83,9 @@ Function Create-EdgeKvmEntry {
     
     $basepath = if ($PSBoundParameters['Env']) {
         $( Join-Parts -Separator '/' -Parts 'e', $Env, 'keyvaluemaps' )
+    }
+    elseif ($PSBoundParameters['Proxy']) {
+        $(Join-Parts -Separator "/" -Parts 'apis', $Proxy, 'keyvaluemaps' )
     }
     else {
         'keyvaluemaps'
