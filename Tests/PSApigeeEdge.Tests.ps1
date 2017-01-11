@@ -230,7 +230,7 @@ Describe "Create-Kvm-1" {
             $Params = @{
                 Name = [string]::Format('pstest-encrypted-{0}', $Script:Props.guid.Substring(0,10) )
                 Env = $Name
-                Encrypted = 'true'
+                Encrypted = $True
             }
             $kvm = Create-EdgeKvm @Params
             { $kvm } | Should Not Throw
