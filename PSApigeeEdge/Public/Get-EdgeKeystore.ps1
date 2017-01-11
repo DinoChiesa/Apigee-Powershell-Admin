@@ -39,14 +39,14 @@ Function Get-EdgeKeystore {
     }
 
     if (!$PSBoundParameters['Env']) {
-      throw [System.ArgumentNullException] "You must specify the -Env option."
+      throw [System.ArgumentNullException] "Env", "You must specify the -Env option."
     }
     
     if ($PSBoundParameters['Org']) {
         $Options.Add( 'Org', $Org )
     }
     
-    $Options['Collection'] = $(Join-Parts -Separator "/" -Parts 'e', $Env, 'keystores' )
+    $Options.Add( 'Collection', $(Join-Parts -Separator "/" -Parts 'e', $Env, 'keystores' ) )
     
     if ($PSBoundParameters['Name']) {
         $Options.Add( 'Name', $Name )

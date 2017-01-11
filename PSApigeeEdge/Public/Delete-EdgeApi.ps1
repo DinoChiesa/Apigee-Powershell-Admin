@@ -7,7 +7,7 @@ Function Delete-EdgeApi {
         Delete an apiproxy from Apigee Edge.
 
     .PARAMETER Name
-        The name of the apiproxy to delete.
+        Required. The name of the apiproxy to delete.
         
     .PARAMETER Revision
         Optional. The revision to delete. If not specified, all revisions will be deleted.
@@ -41,15 +41,15 @@ Function Delete-EdgeApi {
     }
     
     if (!$PSBoundParameters['Name']) {
-        throw [System.ArgumentNullException] "The -Name parameter is required."
+        throw [System.ArgumentNullException] "Name", "The -Name parameter is required."
     }
     
     if ($PSBoundParameters['Revision']) {
-        $Options['Collection'] = $(Join-Parts -Separator "/" -Parts 'apis', $Name, 'revisions' )
+        $Options.Add( 'Collection', $(Join-Parts -Separator "/" -Parts 'apis', $Name, 'revisions' ) )
         $Options.Add( 'Name', $Revision )
     }
     else {
-        $Options['Collection'] = 'apis'
+        $Options.Add( 'Collection', 'apis' )
         $Options.Add( 'Name', $Name )
     }
 

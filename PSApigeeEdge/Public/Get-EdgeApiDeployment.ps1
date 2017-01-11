@@ -36,7 +36,7 @@ Function Get-EdgeApiDeployment {
     }
 
     if (!$PSBoundParameters['Name']) {
-      throw [System.ArgumentNullException] "You must specify the -Name option."
+      throw [System.ArgumentNullException] "Name", "You must specify the -Name option."
     }
 
     $Options = @{

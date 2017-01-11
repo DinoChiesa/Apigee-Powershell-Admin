@@ -40,29 +40,29 @@ Function UnDeploy-EdgeApi {
     }
 
     if (!$PSBoundParameters['Name']) {
-      throw [System.ArgumentNullException] "You must specify the -Name option."
+      throw [System.ArgumentNullException] "Name", "You must specify the -Name option."
     }
     if (!$PSBoundParameters['Env']) {
-      throw [System.ArgumentNullException] "You must specify the -Env option."
+      throw [System.ArgumentNullException] "Env", "You must specify the -Env option."
     }
     if (!$PSBoundParameters['Revision']) {
-      throw [System.ArgumentNullException] "You must specify the -Revision option."
+      throw [System.ArgumentNullException] "Revision", "You must specify the -Revision option."
     }
 
     if( ! $PSBoundParameters.ContainsKey('Org')) {
       if( ! $MyInvocation.MyCommand.Module.PrivateData.Connection['Org']) {
-        throw [System.ArgumentNullException] "use the -Org parameter to specify the organization."
+        throw [System.ArgumentNullException] 'Org', "use the -Org parameter to specify the organization."
       }
       $Org = $MyInvocation.MyCommand.Module.PrivateData.Connection['Org']
     }
     
     if( ! $MyInvocation.MyCommand.Module.PrivateData.Connection['MgmtUri']) {
-      throw [System.ArgumentNullException] 'use Set-EdgeConnection to specify the Edge connection information.'
+      throw [System.ArgumentNullException] 'MgmtUri', 'use Set-EdgeConnection to specify the Edge connection information.'
     }
     $MgmtUri = $MyInvocation.MyCommand.Module.PrivateData.Connection['MgmtUri']
 
     if( ! $MyInvocation.MyCommand.Module.PrivateData.Connection['SecurePass']) {
-      throw [System.ArgumentNullException] 'use Set-EdgeConnection to specify the Edge connection information.'
+      throw [System.ArgumentNullException] 'SecurePass', 'use Set-EdgeConnection to specify the Edge connection information.'
     }
 
     $BaseUri = Join-Parts -Separator '/' -Parts $MgmtUri, '/v1/o', $Org, 'apis', $Name, 'revisions', $Revision, 'deployments'

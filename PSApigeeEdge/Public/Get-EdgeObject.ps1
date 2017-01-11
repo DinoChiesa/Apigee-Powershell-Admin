@@ -53,17 +53,17 @@ Function Get-EdgeObject {
     }
 
     if( ! $MyInvocation.MyCommand.Module.PrivateData.Connection['MgmtUri']) {
-      throw [System.ArgumentNullException] "use Set-EdgeConnection to specify the Edge connection information."
+      throw [System.ArgumentNullException] 'MgmtUri', "use Set-EdgeConnection to specify the Edge connection information."
     }
     $MgmtUri = $MyInvocation.MyCommand.Module.PrivateData.Connection['MgmtUri']
 
     if( ! $MyInvocation.MyCommand.Module.PrivateData.Connection['SecurePass']) {
-      throw [System.ArgumentNullException] "use Set-EdgeConnection to specify the Edge connection information."
+      throw [System.ArgumentNullException] 'SecurePass', "use Set-EdgeConnection to specify the Edge connection information."
     }
 
     if( ! $PSBoundParameters.ContainsKey('Org')) {
       if( ! $MyInvocation.MyCommand.Module.PrivateData.Connection['Org']) {
-        throw [System.ArgumentNullException] "use the -Org parameter to specify the organization."
+        throw [System.ArgumentNullException] 'Org', "use the -Org parameter to specify the organization."
       }
       $Org = $MyInvocation.MyCommand.Module.PrivateData.Connection['Org']
     }

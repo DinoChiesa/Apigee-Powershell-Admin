@@ -6,6 +6,7 @@ The goal is to allow Powershell scripts to do these things:
 
 | entity type   | actions             |
 | :------------ | :------------------ |
+| org           | query, update properties |
 | apis          | list, query, inquire revisions, inquire deployment status, import, export, delete, delete revision, deploy, undeploy
 | apiproducts   | list, query, create, delete, change quota, modify public/private, modify description, modify approvalType, modify scopes, add or remove proxy, modify custom attrs
 | developers    | list, query, create, delete, make active or inactive, modify custom attrs
@@ -51,12 +52,13 @@ This project is a work-in-progress. Here's the status:
 
 | entity type   | implemented              | not implemented yet
 | :------------ | :----------------------- | :--------------------
+| org           | query | update properties 
 | apis          | list, query, inquire revisions, inquire deployment status, import, export, delete, delete revision, deploy, undeploy
 | apiproducts   | list, query, create, delete, modify description, modify approvalType, modify scopes, add or remove proxy, add or remove custom attrs, modify public/private, change quota | 
 | developers    | list, query, make active or inactive, create, delete, modify custom attrs | 
 | developer app | list, query, create, delete, revoke, approve, add new credential, remove credential | modify custom attrs
 | credential    | list, revoke, approve, add apiproduct, remove apiproduct |
-| kvm           | list, query, create, delete | get all entries, get entry, add entry, modify entry, remove entry
+| kvm           | list, query, create, delete, get all entries, get entry, add entry, modify entry, remove entry |
 | cache         | list, query, create, delete, clear | 
 | keystore      | list, query, create, delete | import cert
 | virtualhost   | list, query | create, delete 
@@ -605,9 +607,11 @@ You can connect to a different Edge using different Connection files:
 
 This module is available [on the Powershell Gallery](https://www.powershellgallery.com/packages/PSApigeeEdge)
 
-## License
+## License and Copyright
 
-This is licensed under [the Apache 2.0 source license](LICENSE).
+This material is [Copyright (c) 2016 Google Inc.](NOTICE),
+and is licensed under [the Apache 2.0 source license](LICENSE).
+
 
 ## Bugs
 

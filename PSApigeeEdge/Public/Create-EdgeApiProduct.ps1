@@ -72,13 +72,13 @@ Function Create-EdgeApiProduct {
     }
 
     if (!$PSBoundParameters['Name']) {
-      throw [System.ArgumentNullException] "You must specify the -Name option."
+      throw [System.ArgumentNullException] "Name", "You must specify the -Name option."
     }
     if (!$PSBoundParameters['Environments']) {
-      throw [System.ArgumentNullException] "You must specify the -Environments option."
+      throw [System.ArgumentNullException] "Environments", "You must specify the -Environments option."
     }
     if (!$PSBoundParameters['Proxies']) {
-      throw [System.ArgumentNullException] "You must specify the -Proxies option."
+      throw [System.ArgumentNullException] "Proxies", "You must specify the -Proxies option."
     }
 
     $Payload = @{

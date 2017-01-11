@@ -49,16 +49,16 @@ Function Create-EdgeDeveloper {
     }
     
     if (!$PSBoundParameters['Email']) {
-      throw [System.ArgumentNullException] "You must specify the -Email option."
+      throw [System.ArgumentNullException] "Email", "You must specify the -Email option."
     }
     if (!$PSBoundParameters['First']) {
-      throw [System.ArgumentNullException] "You must specify the -First option."
+      throw [System.ArgumentNullException] "First", "You must specify the -First option."
     }
     if (!$PSBoundParameters['Last']) {
-      throw [System.ArgumentNullException] "You must specify the -Last option."
+      throw [System.ArgumentNullException] "Last", "You must specify the -Last option."
     }
     if (!$PSBoundParameters['Name']) {
-      throw [System.ArgumentNullException] "You must specify the -Name option."
+      throw [System.ArgumentNullException] "Name", "You must specify the -Name option."
     }
 
     $Options.Add( 'Collection', 'developers' )

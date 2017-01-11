@@ -56,13 +56,13 @@ Function Remove-EdgeAppCredential {
     }
 
     if (!$PSBoundParameters['Developer']) {
-        throw [System.ArgumentNullException] "You must specify the -Developer option."
+        throw [System.ArgumentNullException] "Developer", "You must specify the -Developer option."
     }
     if (!$PSBoundParameters['Name']) {
-      throw [System.ArgumentNullException] "You must specify the -Name option."
+      throw [System.ArgumentNullException] "Name", "You must specify the -Name option."
     }
     if (!$PSBoundParameters['Key']) {
-      throw [System.ArgumentNullException] "You must specify the -Key option."
+      throw [System.ArgumentNullException] "Key", "You must specify the -Key option."
     }
     
     $Options.Add( 'Collection', $(Join-Parts -Separator '/' -Parts 'developers', $Developer, 'apps', $Name, 'keys' ) )

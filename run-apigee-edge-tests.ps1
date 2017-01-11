@@ -2,10 +2,26 @@
 
 # You can connect to a different Edge using different Connection files
 
-Invoke-Pester -Script @{
-    Path = '.\Tests\PSApigeeEdge.Tests.ps1'
-    Parameters = @{Connection = 'ConnectionData.json'}
- }
+# Invoke-Pester -Script @{
+#     Path = '.\Tests\PSApigeeEdge.Tests.ps1'
+#     Parameters = @{Connection = 'ConnectionData.json'}
+# }
+
+# Trying to run pester non-interactively so as to suppress the prompts for
+# parameters that are marked Mandatory. 
+
+powershell.exe -NonInteractive -Command "Invoke-Pester -Script @{ Path = '.\Tests\PSApigeeEdge.Tests.ps1'; Parameters = @{Connection = 'ConnectionData.json'} }"
+
+
+# $MyPS = [Powershell]::Create()
+# $MyPS.Commands.AddCommand("Invoke-Pester")
+# $MyPS.Commands.AddParameter("Script", @{
+#      Path = '.\Tests\PSApigeeEdge.Tests.ps1'
+#      Parameters = @{Connection = 'ConnectionData.json'}
+# } )
+# $MyPS.Invoke()
+
+
 
 # The connection file ought to look like this:
 # {

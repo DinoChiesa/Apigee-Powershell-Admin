@@ -19,7 +19,9 @@ Function Create-EdgeDevApp {
 
     .PARAMETER Expiry
         Optional. The expiry for the first credential that will be created for this app.
-        This can be a string like '90d' or '120m', or like '2016-12-10'.
+        This is a string representing the number of seconds. Or, it can be a string like '48h',
+        '120m', '30d', or '2016-12-10'; these would represent 48 hours, 120 minutes, 30 days,
+        or a specific date. The date should be in the future.
         The default is no expiry.
 
     .PARAMETER CallbackUrl
@@ -57,10 +59,10 @@ Function Create-EdgeDevApp {
     }
     
     if (!$PSBoundParameters['Developer']) {
-      throw [System.ArgumentNullException] "You must specify the -Developer option."
+      throw [System.ArgumentNullException] "Developer", "You must specify the -Developer option."
     }
     if (!$PSBoundParameters['Name']) {
-      throw [System.ArgumentNullException] "You must specify the -Name option."
+      throw [System.ArgumentNullException] "Name", "You must specify the -Name option."
     }
 
     $coll = Join-Parts -Separator '/' -Parts 'developers', $Developer, 'apps'
@@ -75,7 +77,11 @@ Function Create-EdgeDevApp {
     }
 
     if ($PSBoundParameters['Expiry']) {
-      $Payload.Add('keyExpiresIn', $(Resolve-Expiry $Expiry) )
+        $actualExpiry = $(Resolve-Expiry $Expiry)
+        if ( $actualExpiry -lt 0 ) {
+            throw [System.ArgumentOutOfRangeException] "Expiry", "Specify an expiry in the future."
+        }
+        $Payload.Add('keyExpiresIn', $actualExpiry )
     }
     if ($PSBoundParameters['CallbackUrl']) {
       $Payload.Add('callbackUrl', $CallbackUrl )

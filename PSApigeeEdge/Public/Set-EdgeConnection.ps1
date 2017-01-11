@@ -53,7 +53,7 @@ Function Set-EdgeConnection {
     }
     
     if(! $PSBoundParameters.ContainsKey('User') ) {
-        throw [System.ArgumentNullException] "you must provide the -User parameter."
+       throw [System.ArgumentNullException] "USer", "you must provide the -User parameter."
     }
 
     if (! $PSBoundParameters.ContainsKey('Password') -and ! $PSBoundParameters.ContainsKey('EncryptedPassword')) {

@@ -13,7 +13,7 @@ Function Get-EdgeAppCredential {
         The Apigee Edge organization. The default is to use the value from Set-EdgeConnection.
 
     .EXAMPLE
-        Get-EdgeAppCredential -Id cc631102-80cd-4491-a99a-121cec08e0bb
+        Get-EdgeAppCredential -AppId cc631102-80cd-4491-a99a-121cec08e0bb
 
     .FUNCTIONALITY
         ApigeeEdge
@@ -39,7 +39,7 @@ Function Get-EdgeAppCredential {
         $Options.Add( 'Org', $Org )
     }
     if (! $PSBoundParameters['AppId']) {
-      throw [System.ArgumentNullException] 'missing required parameter -AppId'
+      throw [System.ArgumentNullException] "AppId", 'missing required parameter -AppId'
     }
 
     $Options.Add( 'Collection', 'apps')

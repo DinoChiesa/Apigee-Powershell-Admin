@@ -7,10 +7,10 @@ Function Get-EdgeApiRevision {
         Get the list of revisions for an apiproxy from Apigee Edge.
 
     .PARAMETER Name
-        The name of the apiproxy to retrieve. Required. 
+        Required. The name of the apiproxy to retrieve. Required. 
 
     .PARAMETER Org
-        The Apigee Edge organization. The default is to use the value from Set-EdgeConnection.
+        Optional. The Apigee Edge organization. The default is to use the value from Set-EdgeConnection.
 
     .EXAMPLE
         Get-EdgeApiRevision -Name myapiproxy
@@ -22,31 +22,24 @@ Function Get-EdgeApiRevision {
 
     [cmdletbinding()]
     param(
-        [string]$Org,
-        [Parameter(Mandatory=$True)][string]$Name
+        [Parameter(Mandatory=$True)][string]$Name,
+        [string]$Org
     )
+    
+    $Options = @{ Collection = 'apis' }
     
     if ($PSBoundParameters['Debug']) {
         $DebugPreference = 'Continue'
-    }
-    
-    $Options = @{
-        Collection = 'apis'
-    }
-    
-    if ($PSBoundParameters['Debug']) {
         $Options.Add( 'Debug', $Debug )
     }
     if ($PSBoundParameters['Org']) {
         $Options.Add( 'Org', $Org )
     }
     
-    if ($PSBoundParameters['Name']) {
-        $Options.Add( 'Name', $( Join-Parts -Separator "/" -Parts $Name, 'revisions' ) )
+    if (!$PSBoundParameters['Name']) {
+        throw [System.ArgumentNullException] "Name", 'the -Name parameter is required.'
     }
-    else {
-      throw [System.ArgumentNullException] 'the -Name parameter is required.'
-    }
+    $Options.Add( 'Name', $( Join-Parts -Separator "/" -Parts $Name, 'revisions' ) )
     
     Write-Debug ( "Options @Options`n" )
 

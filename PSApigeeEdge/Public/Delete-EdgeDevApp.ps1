@@ -7,13 +7,13 @@ Function Delete-EdgeDevApp {
         Delete an developer app from Apigee Edge.
 
     .PARAMETER Name
-        The name of the app to delete. Use this with -Developer. 
+        Required. The name of the app to delete. Use this with -Developer. 
         
     .PARAMETER Developer
-        The developer that owns the app to delete. Use this with -Name.
+        Required. The developer that owns the app to delete. Use this with -Name.
 
     .PARAMETER Org
-        The Apigee Edge organization. The default is to use the value from Set-EdgeConnection.
+        Optional. The Apigee Edge organization. The default is to use the value from Set-EdgeConnection.
 
     .EXAMPLE
         Delete-EdgeDevApp -Developer dchiesa@example.org -Name abcdfege-1
@@ -23,7 +23,6 @@ Function Delete-EdgeDevApp {
         
     .FUNCTIONALITY
         ApigeeEdge
-
     #>
 
     [cmdletbinding()]
@@ -40,10 +39,10 @@ Function Delete-EdgeDevApp {
     $Options = @{ }
     
     if (!$PSBoundParameters['Developer']) {
-        throw [System.ArgumentNullException] 'use -Name and -Developer.'
+        throw [System.ArgumentNullException] "Developer", 'use -Name and -Developer.'
     }
     if (!$PSBoundParameters['Name']) {
-        throw [System.ArgumentNullException] 'use -Name and -Developer.'
+        throw [System.ArgumentNullException] "Name", 'use -Name and -Developer.'
     }
 
     $Options.Add( 'Collection', $( Join-Parts -Separator '/' -Parts 'developers', $Developer, 'apps'))
