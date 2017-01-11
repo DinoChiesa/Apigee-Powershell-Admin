@@ -144,8 +144,11 @@ Describe "Get-ApiRevisions-1" {
             $RevisionDetails = Get-EdgeApi -Name $Name -Revision $revisions[-1]
             $RevisionDetails.name | Should Be $Name
             $RevisionDetails.revision | Should Be $revisions[-1]
-            $NowMilliseconds = [int64](([datetime]::UtcNow)-(get-date "1/1/1970")).TotalMilliseconds
-            $RevisionDetails.createdAt | Should BeLessthan $NowMilliseconds
+            # Because of time skew between the server and client, time comparisons may fail
+            # $NowMilliseconds = [int64](([datetime]::UtcNow)-(get-date "1/1/1970")).TotalMilliseconds
+            # $RevisionDetails.createdAt | Should BeLessthan $NowMilliseconds
+            #
+            $RevisionDetails.createdAt | Should BeLessthan $Script:Props.StartMilliseconds
         }
 
 
@@ -414,9 +417,14 @@ Describe "Create-Developer-1" {
                      $Script:Props.guid.Substring(9,20))
             }
             $dev = Create-EdgeDeveloper @Params
+            Start-Sleep -Milliseconds 3000
             $NowMilliseconds = [int64](([datetime]::UtcNow)-(get-date "1/1/1970")).TotalMilliseconds
+            
+            # These time comparisons will be valid iff the server time is not skewed from the client time
             $dev.createdAt | Should BeLessthan $NowMilliseconds
             $dev.lastModifiedAt | Should BeLessthan $NowMilliseconds
+            $dev.createdAt | Should BeGreaterthan $Script:Props.StartMilliseconds
+            $dev.lastModifiedAt | Should BeGreaterthan $Script:Props.StartMilliseconds
             $dev.createdBy | Should Be $ConnectionData.User
             $dev.organizationName | Should Be $ConnectionData.Org
             $dev.email | Should Be $Params['Email']
@@ -448,8 +456,11 @@ Describe "Get-Developers-1" {
             param($Name)
 
             $dev = @( Get-EdgeDeveloper -Name $Name )
-            $dev.email | Should Be $Name
+            Start-Sleep -Milliseconds 3000
+            
+            # These time comparisons will be valid iff the server time is not skewed from the client time
             $NowMilliseconds = [int64](([datetime]::UtcNow)-(get-date "1/1/1970")).TotalMilliseconds
+            $dev.email | Should Be $Name
             $dev.createdAt | Should BeLessthan $NowMilliseconds
             $dev.lastModifiedAt | Should BeLessthan $NowMilliseconds
             $dev.organizationName | Should Be $ConnectionData.org 
@@ -472,9 +483,14 @@ Describe "Create-ApiProduct-1" {
               Proxies = @( @( Get-EdgeApi )[0] )
             }
             $prod = Create-EdgeApiProduct @Params
+            Start-Sleep -Milliseconds 3000
+            
+            # These time comparisons will be valid iff the server time is not skewed from the client time
             $NowMilliseconds = [int64](([datetime]::UtcNow)-(get-date "1/1/1970")).TotalMilliseconds
             $prod.createdAt | Should BeLessthan $NowMilliseconds
             $prod.lastModifiedAt | Should BeLessthan $NowMilliseconds
+            $prod.createdAt | Should BeGreaterThan $Script:Props.StartMilliseconds
+            $prod.lastModifiedAt | Should BeGreaterThan $Script:Props.StartMilliseconds
             $prod.createdBy | Should Be $ConnectionData.User
         }
    }
