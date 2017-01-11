@@ -424,7 +424,7 @@ Describe "Create-Developer-1" {
             }
             $dev = Create-EdgeDeveloper @Params
             # Start-Sleep -Milliseconds 3000
-            $FiveMinsAgo = FiveMinutesAgoMilliseconds()
+            $FiveMinsAgo = FiveMinutesAgoMilliseconds
             
             # These time comparisons will be valid iff the server time is not skewed from the client time
             $dev.createdAt | Should BeLessthan $FiveMinsAgo
@@ -465,7 +465,7 @@ Describe "Get-Developers-1" {
             #Start-Sleep -Milliseconds 3000
             
             # These time comparisons will be valid iff the server time is not skewed from the client time
-            $FiveMinsAgo = FiveMinutesAgoMilliseconds()
+            $FiveMinsAgo = FiveMinutesAgoMilliseconds
             $dev.email | Should Be $Name
             $dev.createdAt | Should BeLessthan $FiveMinsAgo
             $dev.lastModifiedAt | Should BeLessthan $FiveMinsAgo
@@ -492,7 +492,7 @@ Describe "Create-ApiProduct-1" {
             Start-Sleep -Milliseconds 3000
             
             # These time comparisons will be valid iff the server time is not skewed from the client time
-            $FiveMinsAgo = FiveMinutesAgoMilliseconds()
+            $FiveMinsAgo = FiveMinutesAgoMilliseconds
             $prod.createdAt | Should BeLessthan $FiveMinsAgo
             $prod.lastModifiedAt | Should BeLessthan $FiveMinsAgo
             $prod.createdAt | Should BeGreaterThan $Script:Props.StartMilliseconds
