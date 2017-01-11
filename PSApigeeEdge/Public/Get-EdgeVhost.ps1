@@ -8,7 +8,7 @@ Function Get-EdgeVhost {
 
     .PARAMETER Env
         Required. The name of the environment to search for virtualhosts.
-
+        
     .PARAMETER Name
         Optional. The name of the virtualhost to retrieve.
         The default is to list all virtualhosts.
@@ -44,7 +44,7 @@ Function Get-EdgeVhost {
         $Options.Add( 'Org', $Org )
     }
 
-    $Options.Add( 'Collection', $( Join-Parts -Separator '/' -Parts 'e', $Env, 'virtualhosts' ) )
+   $Options.Add( 'Collection', $( Join-Parts -Separator '/' -Parts 'e', $Env, 'virtualhosts' ) )
 
     if ($PSBoundParameters['Name']) {
         $Options.Add( 'Name', $Name )
