@@ -154,22 +154,6 @@ Describe "Create-Kvm-1" {
     
         Set-StrictMode -Version latest
 
-        # It 'creates a KVM specifying values' {
-        #     $Params = @{
-        #       Name = [string]::Format('pstest-A-{0}-{1}', $Script:Props.guid.Substring(0,10), $(Get-Random) )
-        #       Env = $( @( Get-EdgeEnvironment )[0]) # the first environment
-        #       Values = @{
-        #          key1 = 'value1'
-        #          key2 = 'value2'
-        #          key3 = [string]::Format('value3-{0}', $([guid]::NewGuid()).ToString())
-        #       }
-        #     }
-        #     $kvm = Create-EdgeKvm @Params
-        #     { $kvm } | Should Not Throw
-        #     $( $kvm.entry | where { $_.name -eq 'key1' } ).value | Should Be 'value1'
-        #     $( $kvm.entry | where { $_.name -eq 'key2' } ).value | Should Be 'value2'
-        # }
-
         It 'creates a KVM in Environment <Name> specifying values' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
             param($Name)
             $Value1 = [string]::Format('value1-{0}', $(Get-Random))
@@ -185,8 +169,11 @@ Describe "Create-Kvm-1" {
             }
             $kvm = Create-EdgeKvm @Params
             { $kvm } | Should Not Throw
+            @( $kvm.entry | where { $_.name -eq 'key1' } ).count | Should Be 1
             $( $kvm.entry | where { $_.name -eq 'key1' } ).value | Should Be $Value1
+            @( $kvm.entry | where { $_.name -eq 'key2' } ).count | Should Be 1
             $( $kvm.entry | where { $_.name -eq 'key2' } ).value | Should Be $Value2
+            @( $kvm.entry | where { $_.name -eq 'non-existent-key' } ).count | Should Be 0
         }
         
         It 'creates a KVM in Environment <Name> specifying no values' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
@@ -219,7 +206,9 @@ Describe "Create-Kvm-1" {
             $kvm = Create-EdgeKvm @Params
             { $kvm } | Should Not Throw
 
+            @( $kvm.entry | where { $_.name -eq 'key1' } ).count | Should Be 1
             $( $kvm.entry | where { $_.name -eq 'key1' } ).value | Should Be $Value1
+            @( $kvm.entry | where { $_.name -eq 'key2' } ).count | Should Be 1
             $( $kvm.entry | where { $_.name -eq 'key2' } ).value | Should Be $Value2
 
             Remove-Item -path $filename
@@ -234,30 +223,42 @@ Describe "Create-Kvm-1" {
             }
             $kvm = Create-EdgeKvm @Params
             { $kvm } | Should Not Throw
-
-            Write-Host "TODO: validate response (is encrypted)" 
-            $( $kvm.entry | where { $_.name -eq 'key1' } ).value | Should Be $Value1
+            @( $kvm.entry | where { $_.name -eq 'key1' } ).count | Should Be 0
         }
         
         It 'creates an encrypted KVM in Environment <Name> with Values' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
             param($Name)
+            $KvmName = [string]::Format('pstest-E-with-values-{0}', $Script:Props.guid.Substring(0,10) )
             $Value1 = [string]::Format('value1-{0}', $(Get-Random))
             $Value2 = [string]::Format('value2-{0}', $(Get-Random))
             $Params = @{
-                Name = [string]::Format('pstest-E-with-values-{0}', $Script:Props.guid.Substring(0,10) )
+                Name = $KvmName
                 Env = $Name
                 Encrypted = $True
-              Values = @{
-                 key1 = $Value1
-                 key2 = $Value2
-                 key3 = [string]::Format('value3-{0}', $([guid]::NewGuid()).ToString().Replace('-',''))
-              }
+                Values = @{
+                  key1 = $Value1
+                  key2 = $Value2
+                  key3 = [string]::Format('value3-{0}', $([guid]::NewGuid()).ToString().Replace('-',''))
+                }
             }
             $kvm = Create-EdgeKvm @Params
-            { $kvm } | Should Not Throw 
+            { $kvm } | Should Not Throw
+            # values are passed back in cleartext on creation
+            @( $kvm.entry | where { $_.name -eq 'key1' } ).count | Should Be 1
+            $( $kvm.entry | where { $_.name -eq 'key1' } ).value | Should Be $Value1
+            @( $kvm.entry | where { $_.name -eq 'key2' } ).count | Should Be 1
+            $( $kvm.entry | where { $_.name -eq 'key2' } ).value | Should Be $Value2
+            @( $kvm.entry | where { $_.name -eq 'key-not-exist' } ).count | Should Be 0
+
+            $kvm = Get-EdgeKvm -Env $Name -Name $KvmName
+            { $kvm } | Should Not Throw
+            # values are not passed back in cleartext on query
+            @( $kvm.entry | where { $_.name -eq 'key1' } ).count | Should Be 1
             $( $kvm.entry | where { $_.name -eq 'key1' } ).value | Should Be '*****'
+            @( $kvm.entry | where { $_.name -eq 'key2' } ).count | Should Be 1
             $( $kvm.entry | where { $_.name -eq 'key2' } ).value | Should Be '*****'
-       }
+            @( $kvm.entry | where { $_.name -eq 'key-not-exist' } ).count | Should Be 0
+        }
     }
 }
 
@@ -361,7 +362,7 @@ Describe "Crud-KvmEntry-1" {
             { $entry } | Should Not Throw
             $kvm = Get-EdgeKvm -Env $Name -Name $KvmName
             # the entry with this name should not be found
-            $( $kvm.entry | where { $_.name -eq $EntryName } ).value | Should Throw
+            @( $kvm.entry | where { $_.name -eq $EntryName } ).count | Should Be 0
         }
         
         It 'deletes an entry in an encrypted KVM in Environment <Name>' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
@@ -376,7 +377,7 @@ Describe "Crud-KvmEntry-1" {
             $entry = Delete-EdgeKvmEntry @Params
             { $entry } | Should Not Throw
             $kvm = Get-EdgeKvm -Env $Name -Name $KvmName
-            $( $kvm.entry | where { $_.name -eq $EntryName } ).value | Should Throw
+            @( $kvm.entry | where { $_.name -eq $EntryName } ).count | Should Be 0
         }
     }
 }
@@ -600,7 +601,7 @@ Describe "Get-Apps-1" {
 }
 
 
-Describe "Get-EdgeKVM-1" {
+Describe "Get-Kvm-1" {
     Context 'Strict mode' { 
 
         Set-StrictMode -Version latest
