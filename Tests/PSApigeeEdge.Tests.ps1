@@ -28,10 +28,10 @@ Function ToArrayOfHash {
     $list.ToArray()
 }
 
-Function FiveMinutesAgoMilliseconds {
+Function FiveMinutesInTheFutureMilliseconds {
     $NowMilliseconds = [int64](([datetime]::UtcNow)-(get-date "1/1/1970")).TotalMilliseconds
-    $FiveMinsAgo = $NowMilliseconds - (300 * 1000);
-    $FiveMinsAgo
+    $FiveMinsInTheFuture = $NowMilliseconds + (300 * 1000);
+    $FiveMinsInTheFuture
 }
 
 # --- Get data for the tests
@@ -424,11 +424,11 @@ Describe "Create-Developer-1" {
             }
             $dev = Create-EdgeDeveloper @Params
             # Start-Sleep -Milliseconds 3000
-            $FiveMinsAgo = FiveMinutesAgoMilliseconds
+            $FiveMinsInTheFuture = FiveMinutesInTheFutureMilliseconds
             
             # These time comparisons will be valid iff the server time is not skewed from the client time
-            $dev.createdAt | Should BeLessthan $FiveMinsAgo
-            $dev.lastModifiedAt | Should BeLessthan $FiveMinsAgo
+            $dev.createdAt | Should BeLessthan $FiveMinsInTheFuture
+            $dev.lastModifiedAt | Should BeLessthan $FiveMinsInTheFuture
             $dev.createdAt | Should BeGreaterthan $Script:Props.StartMilliseconds
             $dev.lastModifiedAt | Should BeGreaterthan $Script:Props.StartMilliseconds
             $dev.createdBy | Should Be $ConnectionData.User
@@ -465,10 +465,10 @@ Describe "Get-Developers-1" {
             #Start-Sleep -Milliseconds 3000
             
             # These time comparisons will be valid iff the server time is not skewed from the client time
-            $FiveMinsAgo = FiveMinutesAgoMilliseconds
+            $FiveMinsInTheFuture = FiveMinutesInTheFutureMilliseconds
             $dev.email | Should Be $Name
-            $dev.createdAt | Should BeLessthan $FiveMinsAgo
-            $dev.lastModifiedAt | Should BeLessthan $FiveMinsAgo
+            $dev.createdAt | Should BeLessthan $FiveMinsInTheFuture
+            $dev.lastModifiedAt | Should BeLessthan $FiveMinsInTheFuture
             $dev.organizationName | Should Be $ConnectionData.org 
         }
     }
@@ -492,9 +492,9 @@ Describe "Create-ApiProduct-1" {
             Start-Sleep -Milliseconds 3000
             
             # These time comparisons will be valid iff the server time is not skewed from the client time
-            $FiveMinsAgo = FiveMinutesAgoMilliseconds
-            $prod.createdAt | Should BeLessthan $FiveMinsAgo
-            $prod.lastModifiedAt | Should BeLessthan $FiveMinsAgo
+            $FiveMinsInTheFuture = FiveMinutesInTheFutureMilliseconds
+            $prod.createdAt | Should BeLessthan $FiveMinsInTheFuture
+            $prod.lastModifiedAt | Should BeLessthan $FiveMinsInTheFuture
             $prod.createdAt | Should BeGreaterThan $Script:Props.StartMilliseconds
             $prod.lastModifiedAt | Should BeGreaterThan $Script:Props.StartMilliseconds
             $prod.createdBy | Should Be $ConnectionData.User
