@@ -56,7 +56,7 @@ This project is a work-in-progress. Here's the status:
 | developers    | list, query, make active or inactive, create, delete, modify custom attrs | 
 | developer app | list, query, create, delete, revoke, approve, add new credential, remove credential | modify custom attrs
 | credential    | list, revoke, approve, add apiproduct, remove apiproduct |
-| kvm           | list, query, create, delete | get all entries, get entry, add entry, modify entry, remove entry
+| kvm           | list, query, create, delete, get all entries, get entry, add entry, modify entry, remove entry |
 | cache         | list, query, create, delete, clear | 
 | keystore      | list, query, create, delete | import cert
 | virtualhost   | list, query | create, delete 

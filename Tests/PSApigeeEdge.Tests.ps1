@@ -1,20 +1,12 @@
 PARAM([string]$Connection = '.\ConnectionData.json')
 
 $Verbose = @{}
-if($env:APPVEYOR_REPO_BRANCH -and $env:APPVEYOR_REPO_BRANCH -notlike "master")
-{
+if($env:APPVEYOR_REPO_BRANCH -and $env:APPVEYOR_REPO_BRANCH -notlike "master") {
     $Verbose.add("Verbose",$True)
 }
 
 $PSVersion = $PSVersionTable.PSVersion.Major
 Import-Module $PSScriptRoot\..\PSApigeeEdge -Force
-
-# --- Get data for the tests
-
-$Script:Props = @{
-  guid = $([guid]::NewGuid()).ToString().Replace('-','')
-  StartMilliseconds = [int64](([datetime]::UtcNow)-(get-date "1/1/1970")).TotalMilliseconds
-}
 
 Function ReadJson {
   param($filename)
@@ -34,6 +26,13 @@ Function ToArrayOfHash {
      $list.Add( @{ Name = $a[$i] } )
   }
   $list.ToArray()
+}
+
+# --- Get data for the tests
+
+$Script:Props = @{
+  guid = $([guid]::NewGuid()).ToString().Replace('-','')
+  StartMilliseconds = [int64](([datetime]::UtcNow)-(get-date "1/1/1970")).TotalMilliseconds
 }
 
 $ConnectionData = ReadJson $Connection 
@@ -495,7 +494,6 @@ Describe "Get-ApiProduct-1" {
         }
     }
 }
-
 
 
 Describe "Create-App-1" {
