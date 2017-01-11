@@ -6,6 +6,7 @@ The goal is to allow Powershell scripts to do these things:
 
 | entity type   | actions             |
 | :------------ | :------------------ |
+| org           | query, update properties |
 | apis          | list, query, inquire revisions, inquire deployment status, import, export, delete, delete revision, deploy, undeploy
 | apiproducts   | list, query, create, delete, change quota, modify public/private, modify description, modify approvalType, modify scopes, add or remove proxy, modify custom attrs
 | developers    | list, query, create, delete, make active or inactive, modify custom attrs
@@ -51,6 +52,7 @@ This project is a work-in-progress. Here's the status:
 
 | entity type   | implemented              | not implemented yet
 | :------------ | :----------------------- | :--------------------
+| org           | query | update properties 
 | apis          | list, query, inquire revisions, inquire deployment status, import, export, delete, delete revision, deploy, undeploy
 | apiproducts   | list, query, create, delete, modify description, modify approvalType, modify scopes, add or remove proxy, add or remove custom attrs, modify public/private, change quota | 
 | developers    | list, query, make active or inactive, create, delete, modify custom attrs | 
