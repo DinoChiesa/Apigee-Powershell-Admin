@@ -361,8 +361,6 @@ Describe "Crud-KvmEntry-1" {
 }
 
 
-xxx
-
 Describe "Create-Developer-1" {
     Context 'Strict mode' {
     
@@ -655,19 +653,19 @@ Describe "Delete-Kvm-1" {
         Set-StrictMode -Version latest
 
         It 'deletes test KVMs in env <Name>' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
-          param($Name)
-          @( @( Get-EdgeKvm -Env $Name ) | ?{ $_.StartsWith('pstest-') } ) | % { 
-            Delete-EdgeKvm -Env $Name -Name $_
-          }
+            param($Name)
+            $kvms = @( Get-EdgeKvm -Env $Name )
+            @( $kvms | ?{ $_.StartsWith('pstest-') } ).count | Should BeGreaterThan 0
+            @( $kvms | ?{ $_.StartsWith('pstest-') } ) | % { 
+                Delete-EdgeKvm -Env $Name -Name $_
+            }
         }
 
         It 'verifies that the test KVMs for env <Name> have been deleted' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
             param($Name)
             $kvms = @( Get-EdgeKvm -Env $Name )
-            # check that we have removed the test KVMs 
             @( $kvms | ?{ $_.StartsWith('pstest-') } ).count | Should Be 0
         }
-    
     }
 }
 
