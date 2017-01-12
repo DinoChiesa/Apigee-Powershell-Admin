@@ -120,13 +120,14 @@ Describe "Import-EdgeApi-1" {
         Set-StrictMode -Version latest
 
         # get the list of zipfiles
-        $zipfiles = @( Get-ChildItem $(Join-Path $PSScriptRoot "data" -Resolve) ) |
+        $zipfiles = @( Get-ChildItem $(Join-Path -Path $PSScriptRoot -ChildPath "data" -Resolve) ) |
           ?{ $_.Name.EndsWith('.zip') -and $_.Name.StartsWith('apiproxy-') } | %{ @{ Zip = $_.Name } }
         
         It 'imports proxy from ZIP file bundle <Zip>' -TestCases $zipfiles {
             param($Zip)
             $apiproxyname = [string]::Format('{0}-apiproxy', $Script:Props.SpecialPrefix)
-            $zipfile = $(Join-Path $PSScriptRoot "data" $Zip -Resolve)
+            $basepath = [System.IO.Path]::Combine($PSScriptRoot, "data")
+            $zipfile = $(Join-Path -Path $basepath -ChildPath $Zip -Resolve)
             $api = @(Import-EdgeApi -Source $zipfile -Name $apiproxyname)
             ## now, remember the proxy we just imported, so we can deploy and export and delete, later
             $Script:Props.CreatedProxies.Add($apiproxyname)

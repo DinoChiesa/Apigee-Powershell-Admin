@@ -28,7 +28,7 @@ function Zip-ProxyBundleDirectory {
         throw [System.ArgumentException] "The provided Source does not resolve."
     }
 
-    $apiproxyPaths = @(Join-Path $mypath.Path "apiproxy" -Resolve)
+    $apiproxyPaths = @(Join-Path -Path $mypath.Path -ChildPath "apiproxy" -Resolve)
     if ($apiproxyPaths.count -ne 1) {
         throw [System.ArgumentException] "Cannot find apiproxy directory under the Source directory."
     }
