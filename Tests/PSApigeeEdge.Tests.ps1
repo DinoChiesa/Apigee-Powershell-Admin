@@ -152,8 +152,14 @@ Describe "Get-EdgeApi-1" {
             $oneproxy = Get-EdgeApi -Name $Name
             $oneproxy | Should Not BeNullOrEmpty
             $oneproxy.metaData | Should Not BeNullOrEmpty
-            #$oneproxy.metaData.createdAt | Should BeLessthan $NowMilliseconds
-            $oneproxy.metaData.lastModifiedAt | Should BeLessthan $Script:Props.StartMilliseconds
+
+            if ($Name.StartsWith($Script:Props.SpecialPrefix)) {
+                $oneproxy.metaData.lastModifiedAt | Should BeGreaterthan $Script:Props.StartMilliseconds
+            }
+            else {
+                $oneproxy.metaData.lastModifiedAt | Should BeLessthan $Script:Props.StartMilliseconds
+            }
+            
             $oneproxy.metaData.lastModifiedBy | Should Not BeNullOrEmpty
         }
     }
