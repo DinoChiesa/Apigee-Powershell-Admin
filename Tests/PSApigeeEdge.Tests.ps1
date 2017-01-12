@@ -40,6 +40,11 @@ $Script:Props = @{
     guid = $([guid]::NewGuid()).ToString().Replace('-','')
     StartMilliseconds = [int64](([datetime]::UtcNow)-(get-date "1/1/1970")).TotalMilliseconds
     OrgIsCps = $False
+    SpecialPrefix = [string]::Format('pstest-{0}-{1}',
+                                     $([guid]::NewGuid()).ToString().Replace('-','').Substring(0,16),
+                                     $(Get-Random))
+    CreatedProxies = New-Object System.Collections.ArrayList
+    FoundEnvironments = New-Object System.Collections.ArrayList
 }
 
 $ConnectionData = ReadJson $Connection 
@@ -76,6 +81,7 @@ Describe "Get-EdgeOrganization-1" {
             $org = $( Get-EdgeOrganization )
             $isCps = @( $org.properties.psobject.properties.value | where { $_.name -eq 'features.isCpsEnabled' })
             if ( $isCps.count -gt 0 ) {
+                # need to know CPS in order to decide whether to run KVM tests
                 $Script:Props.OrgIsCps = $isCps[0].value 
             }
         }
@@ -101,6 +107,27 @@ Describe "Get-EdgeEnvironment-1" {
             $OneEnv.lastModifiedAt | Should BeLessthan $Script:Props.StartMilliseconds
             $OneEnv.name | Should Be $Name
             $OneEnv.properties | Should Not BeNullOrEmpty
+            $Script:Props.FoundEnvironments.Add($Name)
+        }
+    }
+}
+
+
+Describe "Import-EdgeApi-1" {
+
+    Context 'Strict mode' { 
+
+        Set-StrictMode -Version latest
+
+        $zipfiles = @( Get-ChildItem $(Join-Path $PSScriptRoot "data" -Resolve) ) | ?{ $_.Name.EndsWith('.zip') }
+        
+        It 'imports proxy from ZIP file bundle <Name>' -TestCases $zipfiles {
+            param($Name)
+            $apiproxyname = [string]::Format('{0}-apiproxy', $Script:Props.SpecialPrefix)
+            $zipfile = $(Join-Path $PSScriptRoot "data" $Name -Resolve)
+            $api = @(Import-EdgeApi -Source $zipfile -Name $apiproxyname)
+            ## now, remember the proxy we just imported, so we can deploy and export and delete, later
+            $Script:Props.CreatedProxies.Add($apiproxyname)
         }
     }
 }
@@ -117,7 +144,7 @@ Describe "Get-EdgeApi-1" {
             $proxies.count | Should BeGreaterThan 0
         }
        
-        It 'gets details of apiproxy <Name>'  -TestCases @( ToArrayOfHash @( Get-EdgeApi ) ) {
+        It 'gets details of apiproxy <Name>' -TestCases @( ToArrayOfHash @( Get-EdgeApi ) ) {
             param($Name)
             $oneproxy = Get-EdgeApi -Name $Name
             $oneproxy | Should Not BeNullOrEmpty
@@ -125,6 +152,32 @@ Describe "Get-EdgeApi-1" {
             #$oneproxy.metaData.createdAt | Should BeLessthan $NowMilliseconds
             $oneproxy.metaData.lastModifiedAt | Should BeLessthan $Script:Props.StartMilliseconds
             $oneproxy.metaData.lastModifiedBy | Should Not BeNullOrEmpty
+        }
+    }
+}
+
+
+Describe "Deploy-EdgeApi-1" {
+    Context 'Strict mode' { 
+        Set-StrictMode -Version latest
+
+        # use a unique basepath to prevent conflicts
+        $uniqueBasepath = = [string]::Format('/{0}', $Script:Props.SpecialPrefix);
+        
+        ## produce testcases that will deploy the imported proxies to all environments. 
+        $testcases = $Script:Props.FoundEnvironments | 
+          foreach { $env= $_; $Script:Props.CreatedProxies | foreach { @{ Name = $_; Env = $env; } } }
+        
+        It 'deploys proxy <Name> to <Env>' -TestCases $testcases {
+            param($Name, $Env)
+            $deployment = @( Deploy-EdgeApi -Name $Name -Env $Env -Revision 1 -Basepath $uniqueBasepath )
+            $deployment | Should Not BeNullOrEmpty
+            $deployment.state | Should Be "deployed"
+        }
+        
+        It 'tries again to deploy proxy <Name> to <Env>' -TestCases $testcases {
+            param($Name, $Env)
+            { Deploy-EdgeApi -Name $Name -Env $Env -Revision 1 -Basepath $uniqueBasepath } | Should Throw
         }
     }
 }
@@ -173,6 +226,29 @@ Describe "Get-ApiRevisions-1" {
 }
 
 
+Describe "Undeploy-EdgeApi-1" {
+    Context 'Strict mode' { 
+        Set-StrictMode -Version latest
+
+        ## produce testcases that will deploy the imported proxies to all environments. 
+        $testcases = $Script:Props.FoundEnvironments | 
+          foreach { $env= $_; $Script:Props.CreatedProxies | foreach { @{ Name = $_; Env = $env; } } }
+        
+        It 'undeploys proxy <Name> from <Env>' -TestCases $testcases {
+            param($Name, $Env)
+            $undeployment = @( UnDeploy-EdgeApi -Name $Name -Env $Env -Revision 1 )
+            $undeployment | Should Not BeNullOrEmpty
+            $undeployment.state | Should Be "deployed"
+        }
+        
+        It 'tries again to undeploy proxy <Name> from <Env>' -TestCases $testcases {
+            param($Name, $Env)
+            { UnDeploy-EdgeApi -Name $Name -Env $Env -Revision 1 } | Should Throw
+        }
+    }
+}
+
+ 
 Describe "Create-Kvm-1" {
     Context 'Strict mode' {
     
@@ -183,7 +259,7 @@ Describe "Create-Kvm-1" {
             $Value1 = [string]::Format('value1-{0}', $(Get-Random))
             $Value2 = [string]::Format('value2-{0}', $(Get-Random))
             $Params = @{
-              Name = [string]::Format('pstest-A-{0}', $Script:Props.guid.Substring(0,10) )
+              Name = [string]::Format('{0}-kvm-A', $Script:Props.SpecialPrefix )
               Env = $Name
               Values = @{
                  key1 = $Value1
@@ -203,7 +279,7 @@ Describe "Create-Kvm-1" {
         It 'creates a KVM in Environment <Name> specifying no values' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
             param($Name)
             $Params = @{
-              Name = [string]::Format('pstest-B-{0}-{1}', $Script:Props.guid.Substring(0,10), $(Get-Random))
+              Name = [string]::Format('{0}-kvm-B', $Script:Props.SpecialPrefix )
               Env = $Name
             }
             $kvm = Create-EdgeKvm @Params
@@ -212,7 +288,7 @@ Describe "Create-Kvm-1" {
 
         It 'creates a KVM in Environment <Name> specifying Source file' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
             param($Name)
-            $filename = [string]::Format('{0}\pstest-datafile-{1}.json', $env:temp, $(Get-Random))
+            $filename = [string]::Format('{0}\{1}-datafile.json', $env:temp, $Script:Props.SpecialPrefix )
             $Value1 = [string]::Format('{0}', $(Get-Random) )
             $Value2 = [string]::Format('V2-{0}-{1}', $Script:Props.guid.Substring(0,10), $(Get-Random))
             $object = @{
@@ -223,7 +299,7 @@ Describe "Create-Kvm-1" {
             $object | ConvertTo-Json -depth 10 | Out-File $filename
             
             $Params = @{
-              Name = [string]::Format('pstest-C-{0}-{1}', $Script:Props.guid.Substring(0,10), $(Get-Random))
+              Name = [string]::Format('{0}-kvm-C', $Script:Props.SpecialPrefix )
               Env = $Name
               Source = $filename
             }
@@ -241,7 +317,7 @@ Describe "Create-Kvm-1" {
         It 'creates an encrypted KVM in Environment <Name>' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
             param($Name)
             $Params = @{
-                Name = [string]::Format('pstest-encrypted-{0}', $Script:Props.guid.Substring(0,10) )
+                Name = [string]::Format('{0}-kvm-encrypted', $Script:Props.SpecialPrefix )
                 Env = $Name
                 Encrypted = $True
             }
@@ -252,7 +328,7 @@ Describe "Create-Kvm-1" {
         
         It 'creates an encrypted KVM in Environment <Name> with Values' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
             param($Name)
-            $KvmName = [string]::Format('pstest-E-with-values-{0}', $Script:Props.guid.Substring(0,10) )
+            $KvmName = [string]::Format('{0}-kvm-encrypted-with-values', $Script:Props.SpecialPrefix )
             $Value1 = [string]::Format('value1-{0}', $(Get-Random))
             $Value2 = [string]::Format('value2-{0}', $(Get-Random))
             $Params = @{
@@ -295,7 +371,7 @@ Describe "Crud-KvmEntry-1" {
 
             It 'creates an entry in an unencrypted KVM in Environment <Name>' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
                 param($Name)
-                $KvmName = [string]::Format('pstest-A-{0}', $Script:Props.guid.Substring(0,10) )
+                $KvmName = [string]::Format('{0}-kvm-A', $Script:Props.SpecialPrefix )
                 $EntryName = 'entry1'
                 $EntryValue = [string]::Format('value-unencrypted-{0}', $Script:Props.guid.Substring(0,10) )
                 $Params = @{
@@ -312,7 +388,7 @@ Describe "Crud-KvmEntry-1" {
 
             It 'updates an entry in an unencrypted KVM in Environment <Name>' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
                 param($Name)
-                $KvmName = [string]::Format('pstest-A-{0}', $Script:Props.guid.Substring(0,10) )
+                $KvmName = [string]::Format('{0}-kvm-A', $Script:Props.SpecialPrefix )
                 $EntryName = 'entry1'
                 $EntryValue = [string]::Format('updated-value-{0}', $Script:Props.guid.Substring(0,10) )
                 $Params = @{
@@ -334,7 +410,7 @@ Describe "Crud-KvmEntry-1" {
 
             It 'creates an entry in an encrypted KVM in Environment <Name>' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
                 param($Name)
-                $KvmName = [string]::Format('pstest-encrypted-{0}', $Script:Props.guid.Substring(0,10) )
+                $KvmName = [string]::Format('{0}-kvm-encrypted', $Script:Props.SpecialPrefix )
                 $EntryName = 'entry1'
                 $EntryValue = [string]::Format('value-encrypted-{0}', $Script:Props.guid.Substring(0,10) )
                 $Params = @{
@@ -352,7 +428,7 @@ Describe "Crud-KvmEntry-1" {
 
             It 'updates an entry in an encrypted KVM in Environment <Name>' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
                 param($Name)
-                $KvmName = [string]::Format('pstest-encrypted-{0}', $Script:Props.guid.Substring(0,10) )
+                $KvmName = [string]::Format('{0}-kvm-encrypted', $Script:Props.SpecialPrefix )
                 $EntryName = 'entry1'
                 $EntryValue = [string]::Format('updated-value-encrypted-{0}', $Script:Props.guid.Substring(0,10) )
                 $Params = @{
@@ -375,7 +451,7 @@ Describe "Crud-KvmEntry-1" {
             
             It 'deletes an entry in an unencrypted KVM in Environment <Name>' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
                 param($Name)
-                $KvmName = [string]::Format('pstest-A-{0}', $Script:Props.guid.Substring(0,10) )
+                $KvmName = [string]::Format('{0}-kvm-A', $Script:Props.SpecialPrefix )
                 $EntryName = 'entry1'
                 $Params = @{
                     Env = $Name
@@ -391,7 +467,7 @@ Describe "Crud-KvmEntry-1" {
             
             It 'deletes an entry in an encrypted KVM in Environment <Name>' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
                 param($Name)
-                $KvmName = [string]::Format('pstest-encrypted-{0}', $Script:Props.guid.Substring(0,10) )
+                $KvmName = [string]::Format('{0}-kvm-encrypted', $Script:Props.SpecialPrefix )
                 $EntryName = 'entry1'
                 $Params = @{
                     Env = $Name
@@ -415,12 +491,12 @@ Describe "Create-Developer-1" {
 
         It 'creates a developer' {
             $Params = @{
-              Name = [string]::Format('pstest-{0}', $Script:Props.guid.Substring(0,9))
-              First = $Script:Props.guid.Substring(0,9)
-              Last = $Script:Props.guid.Substring(9,20)
+              Name = [string]::Format('{0}-developer', $Script:Props.SpecialPrefix )
+              First = $Script:Props.guid.Substring(0,6)
+              Last = $Script:Props.guid.Substring(7,15)
               Email = [string]::Format('pstest-{0}.{1}@example.org',
-                     $Script:Props.guid.Substring(0,9),
-                     $Script:Props.guid.Substring(9,20))
+                     $Script:Props.guid.Substring(0,6),
+                     $Script:Props.guid.Substring(7,15))
             }
             $dev = Create-EdgeDeveloper @Params
             # Start-Sleep -Milliseconds 3000
@@ -481,10 +557,8 @@ Describe "Create-ApiProduct-1" {
         Set-StrictMode -Version latest
 
         It 'creates a product' {
-            # Create-EdgeApiProduct -Name pstest-198191891  -Environments @( 'env1' )
-
             $Params = @{
-                Name = [string]::Format('pstest-{0}', $Script:Props.guid.Substring(3,11))
+                Name = [string]::Format('{0}-apiproduct', $Script:Props.SpecialPrefix )
                 Environments = @( Get-EdgeEnvironment ) # all of them
                 Proxies = @( @( Get-EdgeApi )[0] )
             }
@@ -521,9 +595,8 @@ Describe "Get-ApiProduct-1" {
             $prods.count | Should Be $prodsExpanded.count
         }
 
-        It 'gets details for apiproduct <Name>'  -TestCases @( ToArrayOfHash  @( Get-EdgeApiProduct ) ) {
+        It 'gets details for apiproduct <Name>' -TestCases @( ToArrayOfHash  @( Get-EdgeApiProduct ) ) {
             param($Name)
-
             $prod = @( Get-EdgeApiProduct -Name $Name )
             $NowMilliseconds = [int64](([datetime]::UtcNow)-(get-date "1/1/1970")).TotalMilliseconds
             $prod.createdAt | Should BeLessthan $NowMilliseconds
@@ -541,10 +614,10 @@ Describe "Create-App-1" {
         Set-StrictMode -Version latest
 
         $Developers = @( @( Get-EdgeDeveloper ) |
-          ?{ $_.StartsWith('pstest-') } | % { @{ Email = $_ } } )
+          ?{ $_.StartsWith($Script:Props.SpecialPrefix) } | % { @{ Email = $_ } } )
 
         $Products = @( @( Get-EdgeApiProduct -Params @{ expand = 'true'} ).apiProduct |
-          ?{ $_.name.StartsWith('pstest-') } | % { @{ Name = $_.name } } )
+          ?{ $_.name.StartsWith($Script:Props.SpecialPrefix) } | % { @{ Name = $_.name } } )
 
         $cases = @{ expiry = "48h" },
                 @{ expiry = '86400' }, # default is a number of seconds
@@ -556,7 +629,7 @@ Describe "Create-App-1" {
             param($expiry)
 
             $Params = @{
-                Name = [string]::Format('pstest-{0}-{1}', $Script:Props.guid.Substring(0,5), $expiry )
+                Name = [string]::Format('{0}-app-{1}', $Script:Props.SpecialPrefix, $expiry )
                 Developer = $Developers[0].Email
                 ApiProducts = @( $Products[0].Name )
             }
@@ -578,10 +651,10 @@ Describe "Create-App-Failures" {
         Set-StrictMode -Version latest
 
         $Developers = @( @( Get-EdgeDeveloper ) |
-          ?{ $_.StartsWith('pstest-') } | % { @{ Email = $_ } } )
+          ?{ $_.StartsWith($Script:Props.SpecialPrefix) } | % { @{ Email = $_ } } )
 
         $Products = @( @( Get-EdgeApiProduct -Params @{ expand = 'true'} ).apiProduct |
-          ?{ $_.name.StartsWith('pstest-') } | % { @{ Name = $_.name } } )
+          ?{ $_.name.StartsWith($Script:Props.SpecialPrefix) } | % { @{ Name = $_.name } } )
 
         $expiryCases = @{ expiry = "2016-12-10" }, # in the past
                 @{ expiry = '-43200' }, # negative integer
@@ -591,18 +664,18 @@ Describe "Create-App-Failures" {
             param($expiry)
 
             $Params = @{
-                Name = [string]::Format('pstest-failure-A-{0}-{1}', $Script:Props.guid.Substring(0,5), $expiry )
+                Name = [string]::Format('{0}-app-failure-A-{1}', $Script:Props.SpecialPrefix, $expiry )
                 Developer = $Developers[0].Email
                 ApiProducts = @( $Products[0].Name )
+                Expiry = $expiry
             }
 
-            $Params['Expiry'] = $expiry
             { Create-EdgeDevApp @Params } | Should Throw
         }
         
         It 'creates an App with missing Developer' {
             $Params = @{
-                Name = [string]::Format('pstest-failure-B-{0}', $Script:Props.guid.Substring(0,5) )
+                Name = [string]::Format('{0}-app-failure-B-{1}', $Script:Props.SpecialPrefix, $expiry )
                 ApiProducts = @( $Products[0].Name )
             }
             { Create-EdgeDevApp @Params } | Should Throw
@@ -610,7 +683,15 @@ Describe "Create-App-Failures" {
             
         It 'creates an App with missing ApiProducts' {
             $Params = @{
-                Name = [string]::Format('pstest-failure-B-{0}', $Script:Props.guid.Substring(0,5) )
+                Name = [string]::Format('{0}-app-failure-C-{1}', $Script:Props.SpecialPrefix, $expiry )
+                Developer = $Developers[0].Email
+            }
+            { Create-EdgeDevApp @Params } | Should Throw
+        }
+        
+        It 'creates an App with missing Name' {
+            $Params = @{
+                ApiProducts = @( $Products[0].Name )
                 Developer = $Developers[0].Email
             }
             { Create-EdgeDevApp @Params } | Should Throw
@@ -696,7 +777,7 @@ Describe "Get-Kvm-1" {
             $kvms = @( Get-EdgeKvm -Env $Name )
             $kvms.count | Should BeGreaterThan 0
             # check that we have one or more KVMs created by this script
-            @( $kvms | ?{ $_.StartsWith('pstest-') } ).count | Should BeGreaterThan 0
+            @( $kvms | ?{ $_.StartsWith($Script:Props.SpecialPrefix) } ).count | Should BeGreaterThan 0
         }
     }
 }
@@ -706,7 +787,7 @@ Describe "Delete-DevApp-1" {
     Context 'Strict mode' {
         Set-StrictMode -Version latest
         $DevApps = @( @( Get-EdgeDevApp -Params @{ expand = 'true'} ).app |
-            ?{ $_.name.StartsWith('pstest-') } | % { @{ Dev = $_.developerId; Name = $_.name } } )
+          ?{ $_.name.StartsWith($Script:Props.SpecialPrefix) } | %{ @{ Dev = $_.developerId; Name = $_.name } } )
 
         It 'deletes devapp <Name>' -TestCases $DevApps {
             param($Dev, $Name)
@@ -722,9 +803,8 @@ Describe "Delete-ApiProduct-1" {
         Set-StrictMode -Version latest
 
         # get apiproducts with our special name prefix 
-
         $Products = @( @( Get-EdgeApiProduct -Params @{ expand = 'true'} ).apiProduct |
-            ?{ $_.name.StartsWith('pstest-') } | % { @{ Name = $_.name } } )
+            ?{ $_.name.StartsWith($Script:Props.SpecialPrefix) } | % { @{ Name = $_.name } } )
 
         It 'deletes product <Name>' -TestCases $Products  {
             param($Name)
@@ -740,7 +820,7 @@ Describe "Delete-Developer-1" {
         Set-StrictMode -Version latest
 
         $Developers = @( @( Get-EdgeDeveloper ) |
-          ?{ $_.StartsWith('pstest-') } | % { @{ Email = $_ } } )
+          ?{ $_.StartsWith($Script:Props.SpecialPrefix) } | % { @{ Email = $_ } } )
                  
         It 'deletes developer <Email>' -TestCases $Developers {
             param($Email)
@@ -757,8 +837,8 @@ Describe "Delete-Kvm-1" {
         It 'deletes test KVMs in env <Name>' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
             param($Name)
             $kvms = @( Get-EdgeKvm -Env $Name )
-            @( $kvms | ?{ $_.StartsWith('pstest-') } ).count | Should BeGreaterThan 0
-            @( $kvms | ?{ $_.StartsWith('pstest-') } ) | % { 
+            @( $kvms | ?{ $_.StartsWith($Script:Props.SpecialPrefix) } ).count | Should BeGreaterThan 0
+            @( $kvms | ?{ $_.StartsWith($Script:Props.SpecialPrefix) } ) | % { 
                 Delete-EdgeKvm -Env $Name -Name $_
             }
         }
@@ -766,7 +846,7 @@ Describe "Delete-Kvm-1" {
         It 'verifies that the test KVMs for env <Name> have been deleted' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
             param($Name)
             $kvms = @( Get-EdgeKvm -Env $Name )
-            @( $kvms | ?{ $_.StartsWith('pstest-') } ).count | Should Be 0
+            @( $kvms | ?{ $_.StartsWith($Script:Props.SpecialPrefix) } ).count | Should Be 0
         }
     }
 }
@@ -781,8 +861,8 @@ Describe "Create-Keystore-1" {
         It 'creates a keystore in Environment <Name>' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
             param($Name)
             $Params = @{
-              Name = [string]::Format('pstest-{0}{1}', $Script:Props.guid.Substring(0,10), $(Get-Random))
-              Env = $Name
+                Name = [string]::Format('{0}-keystore', $Script:Props.SpecialPrefix )
+                Env = $Name
             }
             $keystore = Create-EdgeKeystore @Params
             { $keystore } | Should Not Throw
@@ -802,7 +882,7 @@ Describe "Get-Keystore-1" {
             # check that we have one or more keystores
             $keystores.count | Should BeGreaterThan 0
             # check that we have one or more keystores created by this script
-            @( $keystores | ?{ $_.StartsWith('pstest-') } ).count | Should BeGreaterThan 0
+            @( $keystores | ?{ $_.StartsWith($Script:Props.SpecialPrefix) } ).count | Should BeGreaterThan 0
         }
 
         It 'gets specific info on each keystore for Environment <Name>' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
@@ -824,8 +904,15 @@ Describe "Delete-Keystore-1" {
 
         It 'deletes the test keystores in Env <Name>' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
             param($Name)
-            @( @( Get-EdgeKeystore -Env $Name ) | ?{ $_.StartsWith('pstest-') } ) | % { 
+
+            $keystores = @( Get-EdgeKeystore -Env $Name )            
+            @( $keystores | ?{ $_.StartsWith($Script:Props.SpecialPrefix) } ).count | Should BeGreaterThan 0
+
+            @( $keystores | ?{ $_.StartsWith($Script:Props.SpecialPrefix) } ) | % { 
                 Delete-EdgeKeystore -Env $Name -Name $_
+            }
+            @( $keystores | ?{ $_.StartsWith($Script:Props.SpecialPrefix) } ) | % { 
+                { Delete-EdgeKeystore -Env $Name -Name $_ } | Should Throw
             }
         }
 
@@ -835,11 +922,26 @@ Describe "Delete-Keystore-1" {
             # check that we have one or more keystores
             $keystores.count | Should BeGreaterThan 0
             # check that we now have zero keystores created by this script
-            @( $keystores | ?{ $_.StartsWith('pstest-') } ).count | Should Be 0
+            @( $keystores | ?{ $_.StartsWith($Script:Props.SpecialPrefix) } ).count | Should Be 0
         }
     }
 }
 
+
+Describe "Delete-EdgeApi-1" {
+    Context 'Strict mode' {
+        Set-StrictMode -Version latest
+
+        It 'deletes the API <Name>' -TestCases @( ToArrayOfHash @( $Script:Props.CreatedProxies ) ) {
+            param($Name)
+            $deleted = @( Delete-EdgeApi -Name $Name )
+        }
+        It 'tries again to delete the API <Name>' -TestCases @( ToArrayOfHash @( $Script:Props.CreatedProxies ) ) {
+            param($Name)
+            { Delete-EdgeApi -Name $Name } | Should Throw
+        }
+    }
+}
 
 
 Describe "Get-Vhost-1" {
