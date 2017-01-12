@@ -122,10 +122,12 @@ Describe "Import-EdgeApi-1" {
         # get the list of zipfiles
         $zipfiles = @( Get-ChildItem $(Join-Path -Path $PSScriptRoot -ChildPath "data" -Resolve) ) |
           ?{ $_.Name.EndsWith('.zip') -and $_.Name.StartsWith('apiproxy-') } | %{ @{ Zip = $_.Name } }
-        
+
+        $i = 0
         It 'imports proxy from ZIP file bundle <Zip>' -TestCases $zipfiles {
             param($Zip)
-            $apiproxyname = [string]::Format('{0}-apiproxy', $Script:Props.SpecialPrefix)
+            $apiproxyname = [string]::Format('{0}-apiproxy-{1}', $Script:Props.SpecialPrefix, $i)
+            $i++
             $basepath = [System.IO.Path]::Combine($PSScriptRoot, "data")
             $zipfile = $(Join-Path -Path $basepath -ChildPath $Zip -Resolve)
             $api = @(Import-EdgeApi -Source $zipfile -Name $apiproxyname)
