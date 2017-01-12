@@ -75,12 +75,13 @@ Function Import-EdgeApi {
         Write-Debug ([string]::Format("Source is file {0}`n", $ZipFile))
     }
     elseif ([System.IO.Directory]::Exists($mypath.Path)) {
+        # Validate that there is an apiproxy directory
         $apiproxyPaths = @(Join-Path -Path $mypath -ChildPath "apiproxy" -Resolve)
         if ($apiproxyPaths.count -ne 1) {
             throw [System.ArgumentException] "Cannot find apiproxy directory under the Source directory."
         }
-        Write-Debug ([string]::Format("Source is directory {0}`n", $mypath.PathZipFile))
-        $ZipFile = Zip-ProxyBundleDirectory $mypath.PathZipFile
+        Write-Debug ([string]::Format("Source is directory {0}`n", $mypath.Path))
+        $ZipFile = Zip-DirectoryEx -SourceDir $mypath.Path
         Write-Debug ([string]::Format("Zipfile {0}`n", $ZipFile))
     }
     else {
