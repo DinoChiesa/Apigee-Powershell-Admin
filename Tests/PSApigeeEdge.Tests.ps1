@@ -177,7 +177,7 @@ Describe "Get-EdgeApi-1" {
             $proxies.count | Should BeGreaterThan 0
         }
 
-        $testcases = Get-EdgeApi | Select-Object -first 22 | foreach { @{ Proxy = $_ } }
+        $testcases = Get-EdgeApi | Sort-Object {Get-Random} | Select-Object -first 22 | foreach { @{ Proxy = $_ } }
           
         It 'gets details of apiproxy <Proxy>' -TestCases $testcases {
             param($Proxy)
@@ -231,7 +231,7 @@ Describe "Export-EdgeApi-1" {
         Set-StrictMode -Version latest
 
         $i = 0;
-        $testcases = Get-EdgeApi | Select-Object -first 22 | foreach { @{ Proxy = $_ ; Index = $i++ } }
+        $testcases = Get-EdgeApi | Sort-Object {Get-Random} | Select-Object -first 22 | foreach { @{ Proxy = $_ ; Index = $i++ } }
           
         It 'exports apiproxy <Proxy> with destination' -TestCases $testcases {
             param($Proxy, $Index)
@@ -246,8 +246,10 @@ Describe "Export-EdgeApi-1" {
             [System.IO.File]::delete($filename)
         }
         
-        It 'exports apiproxy <Proxy> without destination' -TestCases $testcases {
-            param($Proxy, $Index)
+        $testcases = Get-EdgeApi | Sort-Object {Get-Random} | Select-Object -first 18 | foreach { @{ Proxy = $_ } }
+
+        It 'exports apiproxy <Proxy>' -TestCases $testcases {
+            param($Proxy)
             
             $revisions = @( Get-EdgeApiRevision -Name $Proxy )
             $revisions.count | Should BeGreaterThan 0
@@ -266,7 +268,7 @@ Describe "Get-ApiRevisions-1" {
     
         Set-StrictMode -Version latest
 
-        $testcases = Get-EdgeApi | Select-Object -first 28 | foreach { @{ Proxy = $_ } }
+        $testcases = Get-EdgeApi | Sort-Object {Get-Random} | Select-Object -first 28 | foreach { @{ Proxy = $_ } }
 
         It 'gets a list of revisions for apiproxy <Proxy>' -TestCases $testcases {
             param($Proxy)
@@ -715,25 +717,30 @@ Describe "Get-ApiProduct-1" {
             $prods.count | Should Be $prodsExpanded.count
         }
 
-        It 'gets details for apiproduct <Name>' -TestCases @( ToArrayOfHash  @( Get-EdgeApiProduct ) ) {
-            param($Name)
-            $prod = @( Get-EdgeApiProduct -Name $Name )
+        $testcases = Get-EdgeApiProduct |
+          Sort-Object {Get-Random} |
+          Select-Object -first 13 |
+          foreach { @{ Product = $_ } }
+
+        It 'gets details for apiproduct <Product>' -TestCases $testcases {
+            param($Product)
+            $entity = @( Get-EdgeApiProduct -Name $Product )
             $NowMilliseconds = [int64](([datetime]::UtcNow)-(get-date "1/1/1970")).TotalMilliseconds
             
-            $prod.createdAt | Should BeLessthan $NowMilliseconds
-            $prod.lastModifiedAt | Should BeLessthan $NowMilliseconds
+            $entity.createdAt | Should BeLessthan $NowMilliseconds
+            $entity.lastModifiedAt | Should BeLessthan $NowMilliseconds
             
-            if ($Name.StartsWith($Script:Props.SpecialPrefix)) {
-                $prod.createdAt | Should BeGreaterThan $Script:Props.StartMilliseconds
-                $prod.lastModifiedAt | Should BeGreaterThan $Script:Props.StartMilliseconds
+            if ($Product.StartsWith($Script:Props.SpecialPrefix)) {
+                $entity.createdAt | Should BeGreaterThan $Script:Props.StartMilliseconds
+                $entity.lastModifiedAt | Should BeGreaterThan $Script:Props.StartMilliseconds
             }
             else {
-                $prod.createdAt | Should BeLessThan $Script:Props.StartMilliseconds
-                $prod.lastModifiedAt | Should BeLessThan $Script:Props.StartMilliseconds
+                $entity.createdAt | Should BeLessThan $Script:Props.StartMilliseconds
+                $entity.lastModifiedAt | Should BeLessThan $Script:Props.StartMilliseconds
             }
             
-            $prod.approvalType | Should Not BeNullOrEmpty
-            $prod.lastModifiedBy | Should Not BeNullOrEmpty
+            $entity.approvalType | Should Not BeNullOrEmpty
+            $entity.lastModifiedBy | Should Not BeNullOrEmpty
         }
     }
 }
@@ -925,6 +932,7 @@ Describe "Get-Kvm-1" {
         }
         
         $testcases = Get-EdgeApi | where { ! $_.StartsWith($Script:Props.SpecialPrefix) } |
+          Sort-Object {Get-Random} |
           Select-Object -first 10  |
           foreach { @{ Proxy =$_ } }
         
@@ -1129,9 +1137,9 @@ Describe "Get-Vhost-1" {
 }
 
 
-## TODO: insert more tests here 
+## TODO: insert more tests here:
+# eg,
+# - Add-EdgeAppCredential - add a new credential to an app
+# - Update-EdgeAppCredential.ps1 - revoke or approve a credential, or change products list
+# - {Create,Get,Update,Delete} for KvmEntry at proxy scope (iff CPS)
 
-# Add-EdgeAppCredential - add a new credential to an app
-# Update-EdgeAppCredential.ps1 - revoke or approve a credential, or change products list
-# - CRUD for KvmEntry at proxy scope
-# - Export-EdgeApi
