@@ -154,10 +154,10 @@ Describe "Get-EdgeApi-1" {
             $oneproxy.metaData | Should Not BeNullOrEmpty
 
             if ($Name.StartsWith($Script:Props.SpecialPrefix)) {
-                $oneproxy.metaData.lastModifiedAt | Should BeGreaterthan $Script:Props.StartMilliseconds
+                $oneproxy.metaData.lastModifiedAt | Should BeGreaterThan $Script:Props.StartMilliseconds
             }
             else {
-                $oneproxy.metaData.lastModifiedAt | Should BeLessthan $Script:Props.StartMilliseconds
+                $oneproxy.metaData.lastModifiedAt | Should BeLessThan $Script:Props.StartMilliseconds
             }
             
             $oneproxy.metaData.lastModifiedBy | Should Not BeNullOrEmpty
@@ -216,7 +216,13 @@ Describe "Get-ApiRevisions-1" {
             # $NowMilliseconds = [int64](([datetime]::UtcNow)-(get-date "1/1/1970")).TotalMilliseconds
             # $RevisionDetails.createdAt | Should BeLessthan $NowMilliseconds
             #
-            $RevisionDetails.createdAt | Should BeLessthan $Script:Props.StartMilliseconds
+
+            if ($Name.StartsWith($Script:Props.SpecialPrefix)) {
+                $RevisionDetails.createdAt | Should BeGreaterThan $Script:Props.StartMilliseconds
+            }
+            else {
+                $RevisionDetails.createdAt | Should BeLessThan $Script:Props.StartMilliseconds
+            }
         }
 
 
@@ -550,10 +556,18 @@ Describe "Get-Developers-1" {
             #Start-Sleep -Milliseconds 3000
             
             # These time comparisons will be valid iff the server time is not skewed from the client time
-            $FiveMinsInTheFuture = FiveMinutesInTheFutureMilliseconds
+            # $FiveMinsInTheFuture = FiveMinutesInTheFutureMilliseconds
             $dev.email | Should Be $Name
-            $dev.createdAt | Should BeLessthan $FiveMinsInTheFuture
-            $dev.lastModifiedAt | Should BeLessthan $FiveMinsInTheFuture
+            
+            if ($Name.StartsWith($Script:Props.SpecialPrefix)) {
+                $dev.createdAt | Should BeGreaterThan $Script:Props.StartMilliseconds
+                $dev.lastModifiedAt | Should BeGreaterThan $Script:Props.StartMilliseconds
+            }
+            else {
+                $dev.createdAt | Should BeLessThan $Script:Props.StartMilliseconds
+                $dev.lastModifiedAt | Should BeLessThan $Script:Props.StartMilliseconds
+            }
+            
             $dev.organizationName | Should Be $ConnectionData.org 
         }
     }
@@ -608,8 +622,19 @@ Describe "Get-ApiProduct-1" {
             param($Name)
             $prod = @( Get-EdgeApiProduct -Name $Name )
             $NowMilliseconds = [int64](([datetime]::UtcNow)-(get-date "1/1/1970")).TotalMilliseconds
+            
             $prod.createdAt | Should BeLessthan $NowMilliseconds
             $prod.lastModifiedAt | Should BeLessthan $NowMilliseconds
+            
+            if ($Name.StartsWith($Script:Props.SpecialPrefix)) {
+                $prod.createdAt | Should BeGreaterThan $Script:Props.StartMilliseconds
+                $prod.lastModifiedAt | Should BeGreaterThan $Script:Props.StartMilliseconds
+            }
+            else {
+                $prod.createdAt | Should BeLessThan $Script:Props.StartMilliseconds
+                $prod.lastModifiedAt | Should BeLessThan $Script:Props.StartMilliseconds
+            }
+            
             $prod.approvalType | Should Not BeNullOrEmpty
             $prod.lastModifiedBy | Should Not BeNullOrEmpty
         }
