@@ -226,6 +226,39 @@ Describe "Deploy-EdgeApi-1" {
     }
 }
 
+Describe "Deploy-EdgeApi-1" {
+    Context 'Strict mode' { 
+        Set-StrictMode -Version latest
+
+        $i = 0;
+        $testcases = Get-EdgeApi | Select-Object -first 22 | foreach { @{ Proxy = $_ ; Index = $i++ } }
+          
+        It 'exports apiproxy <Proxy> with destination' -TestCases $testcases {
+            param($Proxy, $Index)
+            $filename = [string]::Format('{0}\{1}-export-{2}.zip',
+                                         $env:temp, $Script:Props.SpecialPrefix, $Index )
+            
+            $revisions = @( Get-EdgeApiRevision -Name $Proxy )
+            $revisions.count | Should BeGreaterThan 0
+
+            Export-EdgeApi -Name $Proxy -Revision $revisions[-1] -Dest $filename
+            [System.IO.File]::Exists($filename) | Should Be $True
+            [System.IO.File]::delete($filename)
+        }
+        
+        It 'exports apiproxy <Proxy> without destination' -TestCases $testcases {
+            param($Proxy, $Index)
+            
+            $revisions = @( Get-EdgeApiRevision -Name $Proxy )
+            $revisions.count | Should BeGreaterThan 0
+            $filename = $(Export-EdgeApi -Name $Proxy -Revision $revisions[-1] )
+            [System.IO.File]::Exists($filename) | Should Be $True
+            [System.IO.File]::delete($filename)
+        }
+    }
+}
+
+
 
 Describe "Get-ApiRevisions-1" {
     
