@@ -73,7 +73,7 @@ Function Import-EdgeApi {
         $isFile = $True
         $ZipFile = $mypath.Path
     }
-    else if ([System.IO.Directory]::Exists($mypath.Path)) {
+    elseif ([System.IO.Directory]::Exists($mypath.Path)) {
         $apiproxyPaths = @(Join-Path $mypath "apiproxy" -Resolve)
         if ($apiproxyPaths.count -ne 1) {
             throw [System.ArgumentException] "Cannot find apiproxy directory under the Source directory."
