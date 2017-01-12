@@ -1093,15 +1093,6 @@ Describe "Delete-Keystore-1" {
             # check that we now have zero keystores created by this script
             @( $keystores | ?{ $_.StartsWith($Script:Props.SpecialPrefix) } ).count | Should Be 0
         }
-
-        It 'verifies that the test keystores for Environment <Name> have been removed' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
-            param($Name)
-            $keystores = @( Get-EdgeKeystore -Env $Name )
-            # check that we have one or more keystores
-            $keystores.count | Should BeGreaterThan 0
-            # check that we now have zero keystores created by this script
-            @( $keystores | ?{ $_.StartsWith('pstest-') } ).count | Should Be 0
-        }
     }
 }
 
