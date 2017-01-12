@@ -161,12 +161,13 @@ Set-EdgeConnection -Org $Connection.org -User $Connection.User -EncryptedPasswor
 Or, of course you can splat the connection information, like this:
 
 ```
-Set-EdgeConnection @{
+$connection = @{
    Org = 'myorg'
    User = 'dino@example.com'
    MgmtUri = 'http://192.168.56.10:8080'
    EncryptedPassword = '003093039039...xx'
    }
+Set-EdgeConnection @connection
 ```
 
 To get the encrypted password, for safe storage on the machine, you can do this:
@@ -357,7 +358,7 @@ state         : undeployed
 
 ### Export an API Proxy
 
-This creates a zip file.
+This creates a zip file with the contents of the API Proxy.
 
 ```
 PS C:\dev\ps> Export-EdgeApi -Name oauth2-pwd-cc -Revision 8
@@ -367,7 +368,9 @@ oauth2-pwd-cc-r8-20160805-175438.zip
 
 ### Import an API Proxy
 
-Note: I have seen situations in which an access denied error prevents this command from succeeding, if the source ZIP file is Read-only. Needs further investigation. Until that is resolved, make sure your zip file is writeable. The command does not modify the zip, but for now it appears that the zip needs to be writable.
+You can use a zipfile as a source, or a directory that contains an "Exploded" apiproxy tree.
+
+#### Import a Proxy from a ZipFile
 
 ```
 PS C:\dev\ps> Import-EdgeApi -Name dino-test-6 -Source oauth2-pwd-cc-r8-20160805-175438.zip
@@ -393,6 +396,14 @@ type                 : Application
 
 ```
 
+Note: I have seen situations in which an access denied error prevents this command from succeeding, if the source ZIP file is Read-only. Needs further investigation. Until that is resolved, make sure your zip file is writeable. The command does not modify the zip, but for now it appears that the zip needs to be writable.
+
+#### Import a Proxy from a Directory
+
+```
+PS C:\dev\ps> Import-EdgeApi -Name dino-test-6 -Source c:\my\directory
+
+```
 
 ### Delete an API Proxy
 

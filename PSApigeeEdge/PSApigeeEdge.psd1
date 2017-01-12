@@ -1,7 +1,7 @@
 #
 # Module manifest for module 'PSApigeeEdge'
 #
-# Generated on: 20160805-1154
+# Generated on: 20170111-2307
 #
 
 @{
@@ -10,7 +10,7 @@
 RootModule = 'PSApigeeEdge.psm1'
 
 # Version number of this module.
-ModuleVersion = '0.2.11'
+ModuleVersion = '0.2.12'
 
 # ID used to uniquely identify this module
 GUID = '73EDCAEA-0965-419D-9E47-F7DACC5C9011'
