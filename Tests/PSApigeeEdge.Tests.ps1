@@ -171,7 +171,7 @@ Describe "Deploy-EdgeApi-1" {
         Set-StrictMode -Version latest
 
         # use a unique basepath to prevent conflicts
-        $uniqueBasepath = = [string]::Format('/{0}', $Script:Props.SpecialPrefix);
+        $uniqueBasepath = [string]::Format('/{0}', $Script:Props.SpecialPrefix);
         
         ## produce testcases that will deploy the imported proxies to all environments. 
         $testcases = $Script:Props.FoundEnvironments | 
