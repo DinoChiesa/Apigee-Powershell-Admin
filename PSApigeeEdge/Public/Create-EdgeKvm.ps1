@@ -23,8 +23,16 @@ Function Create-EdgeKvm {
         lieu of the -Values option. 
 
     .PARAMETER Env
-        Optional. A string, the name of the environment for this key-value map.
-        The default behavior is to create an organization-wide KVM. 
+        Optional. A string, the name of the environment within Apigee Edge with which to associate
+        this keyvaluemap. KVMs can be associated to an organization, an environment, or an API
+        Proxy. If you specify neither Env nor Proxy, the default is to associate the KVM with 
+        the organization.
+
+    .PARAMETER Proxy
+        Optional. A string, the name of the API Proxy within Apigee Edge with which to associate
+        this keyvaluemap. KVMs can be associated to an organization, an environment, or an API
+        Proxy. If you specify neither Env nor Proxy, the default is to associate the KVM with 
+        the organization.
 
     .PARAMETER Org
         Optional. The Apigee Edge organization. The default is to use the value from Set-EdgeConnection.
@@ -39,7 +47,10 @@ Function Create-EdgeKvm {
         Create-EdgeKvm -Name kvm102 -Env test -Encrypted
 
     .EXAMPLE
-        Create-EdgeKvm -Name kvm102 -Env test -Source .\myfile.json
+        Create-EdgeKvm -Name proxy-specific-kvm -Proxy api101 -Encrypted
+
+    .EXAMPLE
+        Create-EdgeKvm -Name kvm104 -Env test -Source .\myfile.json
 
     .FUNCTIONALITY
         ApigeeEdge
@@ -51,6 +62,7 @@ Function Create-EdgeKvm {
         [hashtable]$Values,
         [string]$Source,
         [string]$Env,
+        [string]$Proxy,
         [string]$Org,
         [switch]$Encrypted
     )
@@ -65,6 +77,10 @@ Function Create-EdgeKvm {
         $Options.Add( 'Org', $Org )
     }
 
+    if ($PSBoundParameters.ContainsKey('Env') -and $PSBoundParameters.ContainsKey('Proxy')) {
+        throw [System.ArgumentException] "You may specify only one of -Env and -Proxy."    
+    }
+    
     if (!$PSBoundParameters['Name']) {
       throw [System.ArgumentNullException] "Name", "You must specify the -Name option."
     }
@@ -92,6 +108,9 @@ Function Create-EdgeKvm {
     
     if ($PSBoundParameters['Env']) {
       $Options['Collection'] = $( Join-Parts -Separator '/' -Parts 'e', $Env, 'keyvaluemaps' )
+    }
+    elseif ($PSBoundParameters['Proxy']) {
+        $Options['Collection'] = $(Join-Parts -Separator "/" -Parts 'apis', $Proxy, 'keyvaluemaps' )
     }
     else {
       $Options['Collection'] = 'keyvaluemaps'

@@ -7,16 +7,19 @@ Function Deploy-EdgeApi {
         Deploy a revision of an API proxy that is not yet deployed. 
 
     .PARAMETER Name
-        The name of the apiproxy to deploy.
+        Required. The name of the apiproxy to deploy.
 
     .PARAMETER Env
-        The name of the environment to which to deploy the api proxy.
+        Required. The name of the environment to which to deploy the api proxy.
 
     .PARAMETER Revision
-        The revision of the apiproxy. 
+        Required. The revision of the apiproxy. 
+
+    .PARAMETER Basepath
+        Optional. The basepath to prepend to the proxy endpoints in the API proxy bundle. 
 
     .PARAMETER Org
-        The Apigee Edge organization. The default is to use the value from Set-EdgeConnection.
+        Optional. The Apigee Edge organization. The default is to use the value from Set-EdgeConnection.
 
     .EXAMPLE
         Deploy-EdgeApi -Name oauth2-pwd-cc -Env test -Revision 8
@@ -32,6 +35,7 @@ Function Deploy-EdgeApi {
         [Parameter(Mandatory=$True)][string]$Env,
         [Parameter(Mandatory=$True)][string]$Revision,
         [string]$Org,
+        [string]$Basepath,
         [Hashtable]$Params
     )
     
@@ -68,7 +72,17 @@ Function Deploy-EdgeApi {
 
     $BaseUri = Join-Parts -Separator '/' -Parts $MgmtUri, '/v1/o', $Org, 'apis', $Name, 'revisions', $Revision, 'deployments'
 
-
+    $RequestBody = @{
+          action = 'deploy'
+          env = $Env
+          override = 'true'
+          delay = 30
+    }
+    
+    if ($PSBoundParameters['Basepath']) {
+        $RequestBody['basepath'] = $Basepath
+    }
+    
     $IRMParams = @{
         Uri = $BaseUri
         Method = 'POST'
@@ -77,13 +91,8 @@ Function Deploy-EdgeApi {
             'content-type' = 'application/x-www-form-urlencoded'
             Authorization = 'Basic ' + $( Get-EdgeBasicAuth )
         }
-        # these will transform into query params?  postbody? 
-        Body = @{
-          action = 'deploy'
-          env = $Env
-          override = 'true'
-          delay = 30
-        }
+        # this hash will transform into query params?  postbody? 
+        Body = $RequestBody
     }
 
     Try {

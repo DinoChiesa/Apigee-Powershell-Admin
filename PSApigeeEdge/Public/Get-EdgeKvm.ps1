@@ -11,8 +11,14 @@ Function Get-EdgeKvm {
         The default is to list all KVMs in scope (org or environment).
 
     .PARAMETER Env
-        Optional. The Apigee Edge environment. The default is to use the organization-wide
-        Key-Value Map.
+        Optional. The Apigee Edge environment. KVMs can be associated to an organization, 
+        an environment, or an API Proxy.  If you specify neither Env nor Proxy, the default 
+        is to list or query the organization-wide Key-Value Maps.
+
+    .PARAMETER Proxy
+        Optional. The API Proxy within Apigee Edge. KVMs can be associated to an organization, 
+        an environment, or an API Proxy.  If you specify neither Env nor Proxy, the default 
+        is to list or query the organization-wide Key-Value Maps.
 
     .PARAMETER Org
         Optional. The Apigee Edge organization. The default is to use the value from Set-EdgeConnection.
@@ -29,6 +35,7 @@ Function Get-EdgeKvm {
     param(
         [string]$Name,
         [string]$Env,
+        [string]$Proxy,
         [string]$Org
         )
     
@@ -41,9 +48,16 @@ Function Get-EdgeKvm {
     if ($PSBoundParameters['Org']) {
         $Options.Add( 'Org', $Org )
     }
+
+    if ($PSBoundParameters.ContainsKey('Env') -and $PSBoundParameters.ContainsKey('Proxy')) {
+        throw [System.ArgumentException] "You may specify only one of -Env and -Proxy."    
+    }
     
     if ($PSBoundParameters['Env']) {
         $Options['Collection'] = $(Join-Parts -Separator "/" -Parts 'e', $Env, 'keyvaluemaps' )
+    }
+    elseif ($PSBoundParameters['Proxy']) {
+        $Options['Collection'] = $(Join-Parts -Separator "/" -Parts 'apis', $Proxy, 'keyvaluemaps' )
     }
     else {
          $Options['Collection'] = 'keyvaluemaps'

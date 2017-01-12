@@ -7,30 +7,41 @@ Function Delete-EdgeKvm {
         Delete a key-value map from Apigee Edge.
 
     .PARAMETER Name
-        The name of the kvm to delete.
+        Required. The name of the kvm to delete.
         
     .PARAMETER Env
-        Optional. The environment in which the KVM is found. If not specified, it operates
-        on an organization-scoped KVM.
+        Optional. The environment within Apigee Edge with which the keyvaluemap is
+        associated. KVMs can be associated to an organization, an environment, or an API
+        Proxy. If you specify neither Env nor Proxy, the default is to find the named KVM in
+        the list of organization-wide Key-Value Maps.
+
+    .PARAMETER Proxy
+        Optional. The API Proxy within Apigee Edge with which the keyvaluemap is
+        associated. KVMs can be associated to an organization, an environment, or an API
+        Proxy. If you specify neither Env nor Proxy, the default is to find the named KVM in
+        the list of organization-wide Key-Value Maps.
 
     .PARAMETER Org
-        The Apigee Edge organization. The default is to use the value from Set-EdgeConnection.
+        Optional. The Apigee Edge organization. The default is to use the value from Set-EdgeConnection.
 
     .EXAMPLE
         Delete-EdgeKvm dino-test-2
+
+    .EXAMPLE
+        Delete-EdgeKvm -Proxy apiproxy1 -Name dino-test-3
 
     .LINK
         Create-EdgeKvm
 
     .FUNCTIONALITY
         ApigeeEdge
-
     #>
 
     [cmdletbinding()]
     PARAM(
         [Parameter(Mandatory=$True)][string]$Name,
         [string]$Env,
+        [string]$Proxy,
         [string]$Org
     )
     
@@ -47,9 +58,16 @@ Function Delete-EdgeKvm {
     if (!$PSBoundParameters['Name']) {
         throw [System.ArgumentNullException] "Name", "The -Name parameter is required."
     }
-    
+
+    if ($PSBoundParameters.ContainsKey('Env') -and $PSBoundParameters.ContainsKey('Proxy')) {
+        throw [System.ArgumentException] "You may specify only one of -Env and -Proxy."    
+    }
+
     if ($PSBoundParameters['Env']) {
         $Options['Collection'] = $(Join-Parts -Separator "/" -Parts 'e', $Env, 'keyvaluemaps' )
+    }
+    elseif ($PSBoundParameters['Proxy']) {
+        $Options['Collection'] = $(Join-Parts -Separator "/" -Parts 'apis', $Proxy, 'keyvaluemaps' )
     }
     else {
         $Options['Collection'] = 'keyvaluemaps'

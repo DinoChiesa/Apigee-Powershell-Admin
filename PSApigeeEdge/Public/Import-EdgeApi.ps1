@@ -4,32 +4,39 @@ Function Import-EdgeApi {
         Import an apiproxy from a zip file into Apigee Edge.
 
     .DESCRIPTION
-        Import an apiproxy from a zip file into Apigee Edge.
-        You will need to produce the zipfile, probably with something
-        like this:
-
-        function ZipFiles( $zipfilename, $sourcedir )
-        {
-           Add-Type -Assembly System.IO.Compression.FileSystem
-           $compressionLevel = [System.IO.Compression.CompressionLevel]::Optimal
-           [System.IO.Compression.ZipFile]::CreateFromDirectory($sourcedir,
-                $zipfilename, $compressionLevel, $false)
-        }
+        Import an apiproxy from a zip file or directory into Apigee Edge.
 
     .PARAMETER Name
-        The name to use for the apiproxy, once imported.
+        Required. The name to use for the apiproxy, once imported.
 
     .PARAMETER Source
-        The source of the apiproxy bundle to import.
+        Required. A string, repreenting the source of the apiproxy bundle to import. This
+        can be the name of a file, in zip format; or it can be the name of a directory, which 
+        this cmdlet will zip itself. In either case, the structure must be like so: 
+
+            .\apiproxy 
+            .\apiproxy\proxies 
+            .\apiproxy\proxies\proxy1.xml
+            .\apiproxy\policies 
+            .\apiproxy\policies\Policy1.xml
+            .\apiproxy\policies\...
+            .\apiproxy\targets
+            .\apiproxy\resources
+            ...
 
     .PARAMETER Org
-        The Apigee Edge organization. The default is to use the value from Set-EdgeConnection.
+        Optional. The Apigee Edge organization. The default is to use the value from Set-EdgeConnection.
 
     .EXAMPLE
         Import-EdgeApi -Name oauth2-pwd-cc -Source bundle.zip
 
+    .EXAMPLE
+        Import-EdgeApi -Name oauth2-pwd-cc -Source .\mydirectory
+
     .LINK
        Deploy-EdgeApi
+
+    .LINK
        Export-EdgeApi
 
     .FUNCTIONALITY
@@ -40,7 +47,7 @@ Function Import-EdgeApi {
     [cmdletbinding()]
     param(
         [Parameter(Mandatory=$True)][string]$Name,
-        [Parameter(Mandatory=$True)][string]$Source,
+        [string]$Source,
         [string]$Org
     )
     
@@ -55,6 +62,32 @@ Function Import-EdgeApi {
       throw [System.ArgumentNullException] "Source", "You must specify the -Source option."
     }
 
+    $ZipFile = ""
+    $isFile = $False
+    $mypath = $(Resolve-Path $Source)
+    if ($mypath.count -ne 1) {
+        throw [System.ArgumentException] "The provided Source does not resolve."
+    }
+    
+    if([System.IO.File]::Exists($mypath.Path)){
+        $isFile = $True
+        $ZipFile = $mypath.Path
+        Write-Debug ([string]::Format("Source is file {0}`n", $ZipFile))
+    }
+    elseif ([System.IO.Directory]::Exists($mypath.Path)) {
+        # Validate that there is an apiproxy directory
+        $apiproxyPaths = @(Join-Path -Path $mypath -ChildPath "apiproxy" -Resolve)
+        if ($apiproxyPaths.count -ne 1) {
+            throw [System.ArgumentException] "Cannot find apiproxy directory under the Source directory."
+        }
+        Write-Debug ([string]::Format("Source is directory {0}`n", $mypath.Path))
+        $ZipFile = Zip-DirectoryEx -SourceDir $mypath.Path
+        Write-Debug ([string]::Format("Zipfile {0}`n", $ZipFile))
+    }
+    else {
+      throw [System.ArgumentException] "Source does not refer to a readable file or directory."
+    }
+    
     if( ! $PSBoundParameters.ContainsKey('Org')) {
       if( ! $MyInvocation.MyCommand.Module.PrivateData.Connection['Org']) {
         throw [System.ArgumentNullException] 'Org', "use the -Org parameter to specify the organization."
@@ -80,8 +113,10 @@ Function Import-EdgeApi {
             'content-type' = 'application/octet-stream'
             Authorization = 'Basic ' + $( Get-EdgeBasicAuth )
         }
-        InFile = $Source
+        InFile = $ZipFile
     }
+
+    Write-Debug ([string]::Format("Params {0}`n", $(ConvertTo-Json $IRMParams -Compress ) ) )
 
     Try {
         $TempResult = Invoke-WebRequest @IRMParams -UseBasicParsing 
@@ -93,6 +128,10 @@ Function Import-EdgeApi {
     }
     Finally {
         Remove-Variable IRMParams
+        if (! $isFile ) {
+            # Source was a dir, the zipfile is a temp file. Clean it up.
+            [System.IO.File]::Delete($ZipFile)
+        }
     }
     if ($TempResult.StatusCode -eq 201) {
       ConvertFrom-Json $TempResult.Content
