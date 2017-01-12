@@ -34,14 +34,19 @@ Function FiveMinutesInTheFutureMilliseconds {
     $FiveMinsInTheFuture
 }
 
+function New-TemporaryDirectory {
+    $parent = [System.IO.Path]::GetTempPath()
+    [string] $name = [System.Guid]::NewGuid().ToString().Replace('-','')
+    New-Item -ItemType Directory -Path (Join-Path $parent $name)
+}
 # --- Get data for the tests
 
 $Script:Props = @{
-    guid = $([guid]::NewGuid()).ToString().Replace('-','')
+    guid = $([System.Guid]::NewGuid()).ToString().Replace('-','')
     StartMilliseconds = [int64](([datetime]::UtcNow)-(get-date "1/1/1970")).TotalMilliseconds
     OrgIsCps = $False
     SpecialPrefix = [string]::Format('pstest-{0}-{1}',
-                                     $([guid]::NewGuid()).ToString().Replace('-','').Substring(0,16),
+                                     $([System.Guid]::NewGuid()).ToString().Replace('-','').Substring(0,12),
                                      $(Get-Random))
     CreatedProxies = New-Object System.Collections.ArrayList
     FoundEnvironments = New-Object System.Collections.ArrayList
@@ -118,19 +123,34 @@ Describe "Import-EdgeApi-1" {
     Context 'Strict mode' { 
 
         Set-StrictMode -Version latest
+        Add-Type -assembly "system.io.compression.filesystem"
+        $datapath = [System.IO.Path]::Combine($PSScriptRoot, "data")
 
         # get the list of zipfiles
-        $zipfiles = @( Get-ChildItem $(Join-Path -Path $PSScriptRoot -ChildPath "data" -Resolve) ) |
-          ?{ $_.Name.EndsWith('.zip') -and $_.Name.StartsWith('apiproxy-') } | %{ @{ Zip = $_.Name } }
-
         $i = 0
+        $zipfiles = @( Get-ChildItem $(Join-Path -Path $PSScriptRoot -ChildPath "data" -Resolve) ) |
+          ?{ $_.Name.EndsWith('.zip') -and $_.Name.StartsWith('apiproxy-') } | %{ @{ Zip = $_.Name; Index=$i++ } }
+
         It 'imports proxy from ZIP file bundle <Zip>' -TestCases $zipfiles {
-            param($Zip)
-            $apiproxyname = [string]::Format('{0}-apiproxy-{1}', $Script:Props.SpecialPrefix, $i)
-            $i++
-            $basepath = [System.IO.Path]::Combine($PSScriptRoot, "data")
-            $zipfile = $(Join-Path -Path $basepath -ChildPath $Zip -Resolve)
+            param($Zip, $Index)
+            $zipfile = $(Join-Path -Path $datapath -ChildPath $Zip -Resolve)
+            
+            $apiproxyname = [string]::Format('{0}-apiproxy-{1}', $Script:Props.SpecialPrefix, $Index)
+            #write-host $([string]::Format("APIProxy name: {0}", $apiproxyname))
             $api = @(Import-EdgeApi -Source $zipfile -Name $apiproxyname)
+            ## now, remember the proxy we just imported, so we can deploy and export and delete, later
+            $Script:Props.CreatedProxies.Add($apiproxyname)
+        }
+
+        It 'imports proxy from exploded dir for <Zip>' -TestCases $zipfiles {
+            param($Zip, $Index)
+            $zipfile = $(Join-Path -Path $datapath -ChildPath $Zip -Resolve)
+            $destination = New-TemporaryDirectory
+            [System.IO.Compression.Zipfile]::ExtractToDirectory($zipfile, $destination)
+            $apiproxyname = [string]::Format('{0}-apiproxy-exploded-{1}', $Script:Props.SpecialPrefix, $Index)
+            write-host $([string]::Format("APIProxy dir: {0}", $destination))
+            $api = @(Import-EdgeApi -Source $destination -Name $apiproxyname)
+            Write-host $api
             ## now, remember the proxy we just imported, so we can deploy and export and delete, later
             $Script:Props.CreatedProxies.Add($apiproxyname)
         }
@@ -172,23 +192,25 @@ Describe "Deploy-EdgeApi-1" {
     Context 'Strict mode' { 
         Set-StrictMode -Version latest
 
-        # use a unique basepath to prevent conflicts
-        $uniqueBasepath = [string]::Format('/{0}', $Script:Props.SpecialPrefix);
-        
         ## produce testcases that will deploy the imported proxies to all environments. 
+        $i=0
         $testcases = $Script:Props.FoundEnvironments | 
-          foreach { $env= $_; $Script:Props.CreatedProxies | foreach { @{ Name = $_; Env = $env; } } }
+          foreach { $env= $_; $Script:Props.CreatedProxies | foreach { @{ Name = $_; Env = $env; Index=$i++ } } }
         
         It 'deploys proxy <Name> to <Env>' -TestCases $testcases {
-            param($Name, $Env)
-            $deployment = @( Deploy-EdgeApi -Name $Name -Env $Env -Revision 1 -Basepath $uniqueBasepath )
+            param($Name, $Env, $Index)
+            # use a unique basepath to prevent conflicts
+            $basepath = [string]::Format('/{0}-{1}',  $Script:Props.SpecialPrefix, $Index);
+            $deployment = @( Deploy-EdgeApi -Name $Name -Env $Env -Revision 1 -Basepath $basepath )
             $deployment | Should Not BeNullOrEmpty
             $deployment.state | Should Be "deployed"
         }
         
         It 'tries again to deploy proxy <Name> to <Env>' -TestCases $testcases {
-            param($Name, $Env)
-            { Deploy-EdgeApi -Name $Name -Env $Env -Revision 1 -Basepath $uniqueBasepath } | Should Throw
+            param($Name, $Env, $Index)
+            # use the same basepath; should receive a conflict
+            $basepath = [string]::Format('/{0}-{1}',  $Script:Props.SpecialPrefix, $Index);
+            { Deploy-EdgeApi -Name $Name -Env $Env -Revision 1 -Basepath $basepath } | Should Throw
         }
     }
 }
@@ -255,7 +277,7 @@ Describe "Undeploy-EdgeApi-1" {
             param($Name, $Env)
             $undeployment = @( UnDeploy-EdgeApi -Name $Name -Env $Env -Revision 1 )
             $undeployment | Should Not BeNullOrEmpty
-            $undeployment.state | Should Be "deployed"
+            $undeployment.state | Should Be "undeployed"
         }
         
         It 'tries again to undeploy proxy <Name> from <Env>' -TestCases $testcases {
@@ -511,9 +533,7 @@ Describe "Create-Developer-1" {
               Name = [string]::Format('{0}-developer', $Script:Props.SpecialPrefix )
               First = $Script:Props.guid.Substring(0,6)
               Last = $Script:Props.guid.Substring(7,15)
-              Email = [string]::Format('pstest-{0}.{1}@example.org',
-                     $Script:Props.guid.Substring(0,6),
-                     $Script:Props.guid.Substring(7,15))
+              Email = [string]::Format('{0}@example.org', $Script:Props.SpecialPrefix )
             }
             $dev = Create-EdgeDeveloper @Params
             # Start-Sleep -Milliseconds 3000
@@ -669,7 +689,7 @@ Describe "Create-App-1" {
                 Developer = $Developers[0].Email
                 ApiProducts = @( $Products[0].Name )
             }
-            if ($expiry) {
+            if (![string]::IsNullOrEmpty($expiry)) {
                 $Params['Expiry'] = $expiry
             }
 
