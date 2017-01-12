@@ -153,6 +153,8 @@ Describe "Import-EdgeApi-1" {
             Write-host $api
             ## now, remember the proxy we just imported, so we can deploy and export and delete, later
             $Script:Props.CreatedProxies.Add($apiproxyname)
+            Write-host "TODO: delete the temporary exploded directory"
+            # [System.IO.Directory]::delete($destination)
         }
     }
 }

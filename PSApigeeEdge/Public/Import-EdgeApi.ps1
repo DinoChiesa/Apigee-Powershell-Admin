@@ -72,13 +72,16 @@ Function Import-EdgeApi {
     if([System.IO.File]::Exists($mypath.Path)){
         $isFile = $True
         $ZipFile = $mypath.Path
+        Write-Debug ([string]::Format("Source is file {0}`n", $ZipFile))
     }
     elseif ([System.IO.Directory]::Exists($mypath.Path)) {
         $apiproxyPaths = @(Join-Path -Path $mypath -ChildPath "apiproxy" -Resolve)
         if ($apiproxyPaths.count -ne 1) {
             throw [System.ArgumentException] "Cannot find apiproxy directory under the Source directory."
         }
-        $ZipFile = Zip-ProxyBundleDirectory $Source
+        Write-Debug ([string]::Format("Source is directory {0}`n", $mypath.PathZipFile))
+        $ZipFile = Zip-ProxyBundleDirectory $mypath.PathZipFile
+        Write-Debug ([string]::Format("Zipfile {0}`n", $ZipFile))
     }
     else {
       throw [System.ArgumentException] "Source does not refer to a readable file or directory."
@@ -112,6 +115,8 @@ Function Import-EdgeApi {
         InFile = $ZipFile
     }
 
+    Write-Debug ([string]::Format("Params {0}`n", $(ConvertTo-Json $IRMParams -Compress ) ) )
+
     Try {
         $TempResult = Invoke-WebRequest @IRMParams -UseBasicParsing 
 
@@ -123,7 +128,7 @@ Function Import-EdgeApi {
     Finally {
         Remove-Variable IRMParams
         if (! $isFile ) {
-            # Source was a dir, the zipfile is a temp file
+            # Source was a dir, the zipfile is a temp file. Clean it up.
             [System.IO.File]::Delete($ZipFile)
         }
     }
