@@ -84,7 +84,9 @@ Describe "Get-EdgeOrganization-1" {
 
         It 'gets info regarding the default org' {
             $org = $( Get-EdgeOrganization )
-            $isCps = @( $org.properties.psobject.properties.value | where { $_.name -eq 'features.isCpsEnabled' })
+            $isCps = @( $org.properties.psobject.properties.value |
+              where { $_.name -eq 'features.isCpsEnabled' })
+            
             if ( $isCps.count -gt 0 ) {
                 # need to know CPS in order to decide whether to run KVM tests
                 $Script:Props.OrgIsCps = $isCps[0].value 
@@ -92,6 +94,7 @@ Describe "Get-EdgeOrganization-1" {
         }
     }
 }
+
 
 Describe "Get-EdgeEnvironment-1" {
 
@@ -138,7 +141,9 @@ Describe "Import-EdgeApi-1" {
             $apiproxyname = [string]::Format('{0}-apiproxy-{1}', $Script:Props.SpecialPrefix, $Index)
             #write-host $([string]::Format("APIProxy name: {0}", $apiproxyname))
             $api = @(Import-EdgeApi -Source $zipfile -Name $apiproxyname)
-            ## now, remember the proxy we just imported, so we can deploy and export and delete, later
+            $api.revision | Should Be 1
+            $api.name | Should Be $apiproxyname
+            ## remember the proxy we just imported, so we can deploy and export and delete, later
             $Script:Props.CreatedProxies.Add($apiproxyname)
         }
 
@@ -149,11 +154,13 @@ Describe "Import-EdgeApi-1" {
             [System.IO.Compression.Zipfile]::ExtractToDirectory($zipfile, $destination)
             $apiproxyname = [string]::Format('{0}-apiproxy-exploded-{1}', $Script:Props.SpecialPrefix, $Index)
             $api = @(Import-EdgeApi -Source $destination -Name $apiproxyname)
-            Write-host $api
-            ## now, remember the proxy we just imported, so we can deploy and export and delete, later
+            $api.revision | Should Be 1
+            $api.name | Should Be $apiproxyname
+            
+            ## remember the proxy we just imported, so we can deploy and export and delete, later
             $Script:Props.CreatedProxies.Add($apiproxyname)
-
-            [System.IO.Directory]::delete($destination)
+            # and delete the temporary directory
+            [System.IO.Directory]::delete($destination, true)
         }
     }
 }
@@ -432,7 +439,6 @@ Describe "Create-Kvm-1" {
     
     }
 }
-
 
 
 Describe "Crud-KvmEntry-1" {
@@ -761,7 +767,7 @@ Describe "Create-App-Failures" {
             { Create-EdgeDevApp @Params } | Should Throw
         }
         
-        It 'creates an App with missing Developer' {
+        It 'tries to create an App with missing Developer' {
             $expiry = '28d'
             $Params = @{
                 Name = [string]::Format('{0}-app-failure-B-{1}', $Script:Props.SpecialPrefix, $expiry )
@@ -771,7 +777,7 @@ Describe "Create-App-Failures" {
             { Create-EdgeDevApp @Params } | Should Throw
         }
             
-        It 'creates an App with missing ApiProducts' {
+        It 'tries to create an App with missing ApiProducts' {
             $expiry = '120d'
             $Params = @{
                 Name = [string]::Format('{0}-app-failure-C-{1}', $Script:Props.SpecialPrefix, $expiry )
@@ -781,7 +787,7 @@ Describe "Create-App-Failures" {
             { Create-EdgeDevApp @Params } | Should Throw
         }
         
-        It 'creates an App with missing Name' {
+        It 'tries to create an App with missing Name' {
             $Params = @{
                 ApiProducts = @( $Products[0].Name )
                 Developer = $Developers[0].Email
@@ -871,6 +877,25 @@ Describe "Get-Kvm-1" {
             # check that we have one or more KVMs created by this script
             @( $kvms | ?{ $_.StartsWith($Script:Props.SpecialPrefix) } ).count | Should BeGreaterThan 0
         }
+
+        $i=0
+        $testcases = $Script:Props.CreatedProxies | foreach { @{ Proxy = $_; Index=$i++ } } 
+        
+        It 'lists kvms for proxy <Proxy>' -TestCases $testcases {
+            param($Proxy, $Index)
+            $kvms = @( Get-EdgeKvm -Proxy $Proxy )
+            $kvms.count | Should Be 1
+        }
+        
+        $testcases = Get-EdgeApi | where { ! $_.StartsWith($Script:Props.SpecialPrefix) } |
+          Select-Object -first 10  |
+          foreach { @{ Proxy =$_ } }
+        
+        It 'lists kvms for proxy <Proxy>' -TestCases $testcases {
+            param($Proxy)
+            $kvms = @( Get-EdgeKvm -Proxy $Proxy )
+            # Not sure how many KVMs to expect for each proxy. Most will be zero. 
+        }
     }
 }
 
@@ -951,7 +976,6 @@ Describe "Delete-Kvm-1" {
         }
     }
 }
-
 
 
 Describe "Create-Keystore-1" {
