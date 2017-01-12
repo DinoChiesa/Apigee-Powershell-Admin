@@ -226,7 +226,7 @@ Describe "Deploy-EdgeApi-1" {
     }
 }
 
-Describe "Deploy-EdgeApi-1" {
+Describe "Export-EdgeApi-1" {
     Context 'Strict mode' { 
         Set-StrictMode -Version latest
 
