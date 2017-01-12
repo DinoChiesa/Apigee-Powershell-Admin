@@ -176,14 +176,16 @@ Describe "Get-EdgeApi-1" {
             $proxies = @( Get-EdgeApi )
             $proxies.count | Should BeGreaterThan 0
         }
-       
-        It 'gets details of apiproxy <Name>' -TestCases @( ToArrayOfHash @( Get-EdgeApi ) ) {
-            param($Name)
-            $oneproxy = Get-EdgeApi -Name $Name
+
+        $testcases = Get-EdgeApi | Select-Object -first 22 | foreach { @{ Proxy = $_ } }
+          
+        It 'gets details of apiproxy <Proxy>' -TestCases $testcases {
+            param($Proxy)
+            $oneproxy = Get-EdgeApi -Name $Proxy
             $oneproxy | Should Not BeNullOrEmpty
             $oneproxy.metaData | Should Not BeNullOrEmpty
 
-            if ($Name.StartsWith($Script:Props.SpecialPrefix)) {
+            if ($Proxy.StartsWith($Script:Props.SpecialPrefix)) {
                 $oneproxy.metaData.lastModifiedAt | Should BeGreaterThan $Script:Props.StartMilliseconds
             }
             else {
@@ -231,26 +233,28 @@ Describe "Get-ApiRevisions-1" {
     
         Set-StrictMode -Version latest
 
-        It 'gets a list of revisions for apiproxy <Name>' -TestCases @( ToArrayOfHash @( Get-EdgeApi ) ) {
-            param($Name)
-            $revisions = @( Get-EdgeApiRevision -Name $Name )
+        $testcases = Get-EdgeApi | Select-Object -first 28 | foreach { @{ Proxy = $_ } }
+
+        It 'gets a list of revisions for apiproxy <Proxy>' -TestCases $testcases {
+            param($Proxy)
+            $revisions = @( Get-EdgeApiRevision -Name $Proxy )
             $revisions.count | Should BeGreaterThan 0
         }
 
-        It 'gets details for latest revision of <Name>'  -TestCases @( ToArrayOfHash @( Get-EdgeApi ) ) {
-            param($Name)
+        It 'gets details for latest revision of <Proxy>' -TestCases $testcases {
+            param($Proxy)
 
-            $revisions = @( Get-EdgeApiRevision -Name $Name )
+            $revisions = @( Get-EdgeApiRevision -Name $Proxy )
             $revisions.count | Should BeGreaterThan 0
-            $RevisionDetails = Get-EdgeApi -Name $Name -Revision $revisions[-1]
-            $RevisionDetails.name | Should Be $Name
+            $RevisionDetails = Get-EdgeApi -Name $Proxy -Revision $revisions[-1]
+            $RevisionDetails.name | Should Be $Proxy
             $RevisionDetails.revision | Should Be $revisions[-1]
             # Because of time skew between the server and client, time comparisons may fail
             # $NowMilliseconds = [int64](([datetime]::UtcNow)-(get-date "1/1/1970")).TotalMilliseconds
             # $RevisionDetails.createdAt | Should BeLessthan $NowMilliseconds
             #
 
-            if ($Name.StartsWith($Script:Props.SpecialPrefix)) {
+            if ($Proxy.StartsWith($Script:Props.SpecialPrefix)) {
                 $RevisionDetails.createdAt | Should BeGreaterThan $Script:Props.StartMilliseconds
             }
             else {
@@ -266,7 +270,7 @@ Describe "Get-ApiRevisions-1" {
             $revisions.count | Should BeGreaterThan 0
 
             foreach ($rev in $revisions) {
-                $DeploymentStatus = Get-EdgeApiDeployment -Name $Name -Revision $revisions[-1]
+                $DeploymentStatus = Get-EdgeApiDeployment -Name $Name -Revision $rev
                 # TODO: insert validation here
             }
         }
