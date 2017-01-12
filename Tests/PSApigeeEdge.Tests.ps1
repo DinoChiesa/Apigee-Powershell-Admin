@@ -148,13 +148,12 @@ Describe "Import-EdgeApi-1" {
             $destination = New-TemporaryDirectory
             [System.IO.Compression.Zipfile]::ExtractToDirectory($zipfile, $destination)
             $apiproxyname = [string]::Format('{0}-apiproxy-exploded-{1}', $Script:Props.SpecialPrefix, $Index)
-            write-host $([string]::Format("APIProxy dir: {0}", $destination))
             $api = @(Import-EdgeApi -Source $destination -Name $apiproxyname)
             Write-host $api
             ## now, remember the proxy we just imported, so we can deploy and export and delete, later
             $Script:Props.CreatedProxies.Add($apiproxyname)
-            Write-host "TODO: delete the temporary exploded directory"
-            # [System.IO.Directory]::delete($destination)
+
+            [System.IO.Directory]::delete($destination)
         }
     }
 }
@@ -197,7 +196,8 @@ Describe "Deploy-EdgeApi-1" {
         ## produce testcases that will deploy the imported proxies to all environments. 
         $i=0
         $testcases = $Script:Props.FoundEnvironments | 
-          foreach { $env= $_; $Script:Props.CreatedProxies | foreach { @{ Name = $_; Env = $env; Index=$i++ } } }
+          foreach { $env= $_; $Script:Props.CreatedProxies |
+            foreach { @{ Name = $_; Env = $env; Index=$i++ } } }
         
         It 'deploys proxy <Name> to <Env>' -TestCases $testcases {
             param($Name, $Env, $Index)
@@ -400,6 +400,36 @@ Describe "Create-Kvm-1" {
             $( $kvm.entry | where { $_.name -eq 'key2' } ).value | Should Be '*****'
             @( $kvm.entry | where { $_.name -eq 'key-not-exist' } ).count | Should Be 0
         }
+
+        $i=0
+        $testcases = $Script:Props.CreatedProxies | foreach { @{ Name = $_; Index=$i++ } } 
+        
+        It 'creates an encrypted KVM in Proxy Scope <Name>' -TestCases $testcases {
+            param($Name, $Index)
+            $Params = @{
+                Name = [string]::Format('{0}-kvm-proxyscope-{1}', $Script:Props.SpecialPrefix, $Index )
+                Proxy = $Name
+                Encrypted = $True
+            }
+            $kvm = Create-EdgeKvm @Params
+            @( $kvm.entry | where { $_.name -eq 'key1' } ).count | Should Be 0
+        }
+
+        $i=0
+        $testcases = $Script:Props.FoundEnvironments | 
+          foreach { $env= $_; $Script:Props.CreatedProxies |
+            foreach { @{ Name = $_; Env = $env; Index=$i++ } } }
+        
+        It 'tries to create a KVM specifying both Proxy <Name> and Env <Env>' -TestCases $testcases {
+            param($Name, $Env, $Index)
+            $Params = @{
+                Name = [string]::Format('{0}-kvm-fail-{1}', $Script:Props.SpecialPrefix, $Index )
+                Proxy = $Name
+                Env = $Env
+            }
+            { Create-EdgeKvm @Params } | Should Throw
+        }
+    
     }
 }
 
@@ -732,17 +762,21 @@ Describe "Create-App-Failures" {
         }
         
         It 'creates an App with missing Developer' {
+            $expiry = '28d'
             $Params = @{
                 Name = [string]::Format('{0}-app-failure-B-{1}', $Script:Props.SpecialPrefix, $expiry )
                 ApiProducts = @( $Products[0].Name )
+                Expiry = $expiry
             }
             { Create-EdgeDevApp @Params } | Should Throw
         }
             
         It 'creates an App with missing ApiProducts' {
+            $expiry = '120d'
             $Params = @{
                 Name = [string]::Format('{0}-app-failure-C-{1}', $Script:Props.SpecialPrefix, $expiry )
                 Developer = $Developers[0].Email
+                Expiry = $expiry
             }
             { Create-EdgeDevApp @Params } | Should Throw
         }
@@ -892,6 +926,15 @@ Describe "Delete-Kvm-1" {
     Context 'Strict mode' {
         Set-StrictMode -Version latest
 
+        $i=0
+        $testcases = $Script:Props.CreatedProxies | foreach { @{ Proxy = $_; Index=$i++ } } 
+        
+        It 'deletes the KVM for Proxy <Proxy>' -TestCases $testcases {
+            param($Proxy, $Index)
+            $Name = [string]::Format('{0}-kvm-proxyscope-{1}', $Script:Props.SpecialPrefix, $Index )
+            Delete-EdgeKvm -Proxy $Proxy -Name $Name
+        }
+        
         It 'deletes test KVMs in env <Name>' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
             param($Name)
             $kvms = @( Get-EdgeKvm -Env $Name )
@@ -1029,4 +1072,5 @@ Describe "Get-Vhost-1" {
 
 # Add-EdgeAppCredential - add a new credential to an app
 # Update-EdgeAppCredential.ps1 - revoke or approve a credential, or change products list
-
+# - CRUD for KvmEntry at proxy scope
+# - Export-EdgeApi
