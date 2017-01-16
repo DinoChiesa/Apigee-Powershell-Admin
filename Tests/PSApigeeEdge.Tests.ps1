@@ -261,7 +261,6 @@ Describe "Export-EdgeApi-1" {
 }
 
 
-
 Describe "Get-ApiRevisions-1" {
     
     Context 'Strict mode' {
@@ -335,7 +334,7 @@ Describe "Undeploy-EdgeApi-1" {
     }
 }
 
- 
+
 Describe "Create-Kvm-1" {
     Context 'Strict mode' {
     
@@ -788,7 +787,7 @@ Describe "Create-App-1" {
 }
 
 
-Describe "Add-App-Credential" {
+Describe "CRUD-App-Credential" {
     Context 'Strict mode' {
         Set-StrictMode -Version latest
 
@@ -869,7 +868,6 @@ Describe "Add-App-Credential" {
             $UpdatedCreds = @( Get-EdgeAppCredential -AppName $NewAppName -Developer $Developers[0].Email )
             $UpdatedCreds.count | Should Be 1
             $UpdatedCreds[0].status | Should Be "revoked"
-        
         }
         
         It 'approves a credential on the just-created App' {
@@ -1009,7 +1007,7 @@ Describe "Get-Apps-1" {
 
 
 Describe "Get-Kvm-1" {
-    Context 'Strict mode' { 
+    Context 'Strict mode' {
 
         Set-StrictMode -Version latest
 
@@ -1057,7 +1055,7 @@ Describe "Delete-DevApp-1" {
 
         It 'deletes devapp <Name>' -TestCases $DevApps {
             param($Dev, $Name)
-            Delete-EdgeDevApp -Developer $Dev -Name $Name
+            Delete-EdgeDevApp -Developer $Dev -AppName $Name
         }
     }
 }

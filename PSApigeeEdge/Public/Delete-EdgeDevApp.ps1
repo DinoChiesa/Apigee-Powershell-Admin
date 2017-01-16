@@ -6,17 +6,20 @@ Function Delete-EdgeDevApp {
     .DESCRIPTION
         Delete an developer app from Apigee Edge.
 
+    .PARAMETER AppName
+        Required. The name of the developer app to delete.
+
     .PARAMETER Name
-        Required. The name of the app to delete. Use this with -Developer. 
+        A synonym for AppName.
         
     .PARAMETER Developer
-        Required. The developer that owns the app to delete. Use this with -Name.
+        Required. The developer that owns the app to delete.
 
     .PARAMETER Org
         Optional. The Apigee Edge organization. The default is to use the value from Set-EdgeConnection.
 
     .EXAMPLE
-        Delete-EdgeDevApp -Developer dchiesa@example.org -Name abcdfege-1
+        Delete-EdgeDevApp -Developer dchiesa@example.org -AppName abcdfege-1
 
     .LINK
         Create-EdgeDevApp
@@ -27,35 +30,32 @@ Function Delete-EdgeDevApp {
 
     [cmdletbinding()]
     param(
-        [Parameter(Mandatory=$True)][string]$Name,
+        [string]$Name,
+        [string]$AppName,
         [Parameter(Mandatory=$True)][string]$Developer,
         [string]$Org
     )
-    
+
+    $Options = @{ }
+
     if ($PSBoundParameters['Debug']) {
         $DebugPreference = 'Continue'
-    }
-    
-    $Options = @{ }
-    
-    if (!$PSBoundParameters['Developer']) {
-        throw [System.ArgumentNullException] "Developer", 'use -Name and -Developer.'
-    }
-    if (!$PSBoundParameters['Name']) {
-        throw [System.ArgumentNullException] "Name", 'use -Name and -Developer.'
-    }
-
-    $Options.Add( 'Collection', $( Join-Parts -Separator '/' -Parts 'developers', $Developer, 'apps'))
-    $Options.Add( 'Name', $Name)
-
-    if ($PSBoundParameters['Debug']) {
         $Options.Add( 'Debug', $Debug )
     }
+    if (!$PSBoundParameters['Developer']) {
+        throw [System.ArgumentNullException] "Developer", 'use -AppName and -Developer.'
+    }
+    if (!$PSBoundParameters['Name'] -and !$PSBoundParameters['AppName']) {
+        throw [System.ArgumentNullException] "AppName", 'use -AppName and -Developer.'
+    }
+    $RealAppName = if ($PSBoundParameters['AppName']) { $AppName } else { $Name }
+    $Options.Add( 'Collection', $( Join-Parts -Separator '/' -Parts 'developers', $Developer, 'apps' ))
+    $Options.Add( 'Name', $AppName )
+
     if ($PSBoundParameters['Org']) {
         $Options.Add( 'Org', $Org )
     }
     
     Write-Debug ([string]::Format("Options {0}`n", $(ConvertTo-Json $Options -Compress ) ) )
-
     Delete-EdgeObject @Options
 }
