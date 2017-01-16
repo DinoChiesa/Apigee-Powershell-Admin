@@ -1,10 +1,10 @@
 Function Send-EdgeRequest {
     <#
     .SYNOPSIS
-        Send a request to Apigee Edge admin endpoint.
+        Send a POST request to Apigee Edge admin endpoint.
         
     .DESCRIPTION
-        Send a request to Apigee Edge admin endpoint. This can be used to create
+        Send a POST request to Apigee Edge admin endpoint. This can be used to create
         an object in Apigee Edge, to Update an object, Revoke a key, etc. 
 
     .PARAMETER Collection

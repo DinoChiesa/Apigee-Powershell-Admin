@@ -5,6 +5,8 @@ Function Update-EdgeAppCredential {
 
     .DESCRIPTION
         Update a credential in Apigee Edge, by adding or removing API Products. 
+        If you want to update the status of the credential see Revoke-EdgeAppCredential or 
+        Approve-EdgeAppCredential .
 
     .PARAMETER Remove
         A flag parameter to request the removal of API products from the credential.
@@ -14,14 +16,17 @@ Function Update-EdgeAppCredential {
         A flag parameter to request the aditionof API products to the credential.
         Use one of -Remove or -Add, not both. 
 
+    .PARAMETER AppName
+        The name of the developer app to update.
+
     .PARAMETER Name
-        The name of the developer app from which the credential will be removed.
+        A synonym for AppName.
 
     .PARAMETER Developer
-        The id or email of the developer that owns the app from which the credential will be removed.
+        Required. The id or email of the developer that owns the app to be updated.
 
     .PARAMETER Key
-        The consumer key for the credential to be removed.
+        The consumer key for the credential to be updated.
 
     .PARAMETER ApiProducts
         An array of strings, the names of API Products that should be added or removed from this credential.
@@ -30,7 +35,10 @@ Function Update-EdgeAppCredential {
         The Apigee Edge organization. The default is to use the value from Set-EdgeConnection.
 
     .EXAMPLE
-        Update-EdgeAppCredential -Name DPC6 -Developer dchiesa@example.org -Key iQGvTYtUWcWAdJ6WAJebedgLSKaVQidZ -Add -ApiProducts @( 'Product-1971' )
+        Update-EdgeAppCredential -AppName DPC6 -Developer dchiesa@example.org -Key iQGvTYtUWcWAdJ6WAJebedgLSKaVQidZ -Add -ApiProducts @( 'Product-1971' )
+
+    .LINK
+       Revoke-EdgeDevApp
 
     .FUNCTIONALITY
         ApigeeEdge
@@ -39,13 +47,13 @@ Function Update-EdgeAppCredential {
 
     [cmdletbinding()]
     PARAM(
-         [Parameter(Mandatory=$False)] 
-         [switch]$Remove,
+        [Parameter(Mandatory=$False)] 
+        [switch]$Remove,
 
-         [Parameter(Mandatory=$False)] 
-         [switch]$Add,
-
-        [Parameter(Mandatory=$True)][string]$Name,
+        [Parameter(Mandatory=$False)] 
+        [switch]$Add,
+        [string]$AppName,
+        [string]$Name,
         [Parameter(Mandatory=$True)][string]$Developer,
         [Parameter(Mandatory=$True)][string]$Key,
         
@@ -66,21 +74,20 @@ Function Update-EdgeAppCredential {
     if (!$PSBoundParameters['Developer']) {
         throw [System.ArgumentNullException] "Developer", "You must specify the -Developer option."
     }
-    if (!$PSBoundParameters['Name']) {
-      throw [System.ArgumentNullException] "Name", "You must specify the -Name option."
+    if (!$PSBoundParameters['AppName'] -and !$PSBoundParameters['Name']) {
+      throw [System.ArgumentNullException] "AppName", "You must specify the -AppName option."
     }
-    if (!$Remove -and ! $Add) {
-      throw [System.ArgumentException] "You must specify one of -Remove or -Add."
-    }
-    if ($Remove -and $Add) {
-      throw [System.ArgumentException] "You must specify one of -Remove or -Add."
+    $RealAppName = if ($PSBoundParameters['AppName']) { $AppName } else { $Name }
+
+    if ((!$Remove -and ! $Add) -or ($Remove -and $Add)) {
+      throw [System.ArgumentException] "You must specify exactly one of -Remove or -Add."
     }
     if (!$PSBoundParameters['ApiProducts']) {
       throw [System.ArgumentNullException] "ApiProducts", "You must specify the -ApiProducts option."
     }
 
     if ($Add) {
-        $Options.Add( 'Collection', $(Join-Parts -Separator '/' -Parts 'developers', $Developer, 'apps', $Name, keys ) )
+        $Options.Add( 'Collection', $(Join-Parts -Separator '/' -Parts 'developers', $Developer, 'apps', $RealAppName, keys ) )
         $Options.Add( 'Name', $Key )
 
         $Payload = @{
@@ -89,12 +96,13 @@ Function Update-EdgeAppCredential {
 
         $Options.Add( 'Payload', $Payload )
 
+        Write-Debug ( "Options @Options`n" )
         Send-EdgeRequest @Options
     }
     else {
         # Remove, each one in series
         $ApiProducts | Foreach-Object {
-          $Options['Collection'] = $(Join-Parts -Separator '/' -Parts 'developers', $Developer, 'apps', $Name, keys, $Key, 'apiproducts' )
+          $Options['Collection'] = $(Join-Parts -Separator '/' -Parts 'developers', $Developer, 'apps', $RealAppName, keys, $Key, 'apiproducts' )
           $Options['Name'] = $_
           
           Write-Debug ( "Options @Options`n" )

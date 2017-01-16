@@ -828,6 +828,9 @@ Describe "Add-App-Credential" {
 
             $app = $( Add-EdgeAppCredential @Params )
             $app.credentials.count | Should Be 2
+
+            $UpdatedCreds = @( Get-EdgeAppCredential -AppName $NewAppName -Developer $Developers[0].Email )
+            $UpdatedCreds.count | Should Be 2
             
             $NowMilliseconds = [int64](([datetime]::UtcNow)-(get-date "1/1/1970")).TotalMilliseconds
             
@@ -841,9 +844,44 @@ Describe "Add-App-Credential" {
                     $Delta | Should Be 96
                 }
             }
+        }
+
+        It 'tries to remove a credential that does not exist' {
+            Remove-EdgeAppCredential -AppName $NewAppName -Developer $Developers[0].Email -Key pd0mg1FuedmfCpY9gWZonQmR2fGD3Osw | Should Throw
+        }
+
+        It 'removes a credential on the just-created App' {
+            $OriginalCreds = @( Get-EdgeAppCredential -AppName $NewAppName -Developer $Developers[0].Email )
+            $OriginalCreds.count | Should Be 2
+            $app = $( Remove-EdgeAppCredential -AppName $NewAppName -Developer $Developers[0].Email -Key $OriginalCreds[0].consumerKey )
 
             $UpdatedCreds = @( Get-EdgeAppCredential -AppName $NewAppName -Developer $Developers[0].Email )
-            $UpdatedCreds.count | Should Be 2
+            $UpdatedCreds.count | Should Be 1
+        }
+        
+        It 'revokes a credential on the just-created App' {
+            $OriginalCreds = @( Get-EdgeAppCredential -AppName $NewAppName -Developer $Developers[0].Email )
+            $OriginalCreds.count | Should Be 1
+            $OriginalCreds[0].status | Should Be "approved"
+            
+            Revoke-EdgeAppCredential -AppName $NewAppName -Developer $Developers[0].Email -key $OriginalCreds[0].consumerKey 
+
+            $UpdatedCreds = @( Get-EdgeAppCredential -AppName $NewAppName -Developer $Developers[0].Email )
+            $UpdatedCreds.count | Should Be 1
+            $UpdatedCreds[0].status | Should Be "revoked"
+        
+        }
+        
+        It 'approves a credential on the just-created App' {
+            $OriginalCreds = @( Get-EdgeAppCredential -AppName $NewAppName -Developer $Developers[0].Email )
+            $OriginalCreds.count | Should Be 1
+            $OriginalCreds[0].status | Should Be "revoked"
+            
+            Approve-EdgeAppCredential -AppName $NewAppName -Developer $Developers[0].Email -key $OriginalCreds[0].consumerKey 
+
+            $UpdatedCreds = @( Get-EdgeAppCredential -AppName $NewAppName -Developer $Developers[0].Email )
+            $UpdatedCreds.count | Should Be 1
+            $UpdatedCreds[0].status | Should Be "approved"
         }
     }
 }
