@@ -61,7 +61,7 @@ Function Add-EdgeAppCredential {
         throw [System.ArgumentNullException] "Developer", "You must specify the -Developer option."
     }
 
-    if (!$PSBoundParameters['AppName'] && !$PSBoundParameters['Name']) {
+    if (!$PSBoundParameters['AppName'] -and !$PSBoundParameters['Name']) {
       throw [System.ArgumentNullException] "AppName", "You must specify the -AppName option."
     }
     $RealAppName = if ($PSBoundParameters['AppName']) { $AppName } else { $Name }

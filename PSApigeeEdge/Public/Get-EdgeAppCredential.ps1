@@ -63,8 +63,8 @@ Function Get-EdgeAppCredential {
         $Options.Add( 'Org', $Org )
     }
 
-    if ((!$PSBoundParameters['AppName'] && !$PSBoundParameters['Name'] && ! $PSBoundParameters['AppId']) ||
-      (($PSBoundParameters['AppName'] || $PSBoundParameters['Name']) && $PSBoundParameters['AppId'])) {
+    if ((!$PSBoundParameters['AppName'] -and !$PSBoundParameters['Name'] -and ! $PSBoundParameters['AppId']) ||
+      (($PSBoundParameters['AppName'] -or $PSBoundParameters['Name']) -and $PSBoundParameters['AppId'])) {
       throw [System.ArgumentNullException] "AppName", "You must specify exactly one of -AppName or -AppId."
     }
     
