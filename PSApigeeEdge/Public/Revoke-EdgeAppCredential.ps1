@@ -63,7 +63,7 @@ Function Revoke-EdgeAppCredential {
     
     $Options.Add( 'Collection', $(Join-Parts -Separator '/' -Parts 'developers', $Developer, 'apps', $AppName, 'keys' ) )
     $Options.Add( 'Name', $Key )
-    $Options.Add( 'Params', { action  = 'revoke' } )
+    $Options.Add( 'QParams', { action  = 'revoke' } )
     
     Write-Debug ( "Options @Options`n" )
     Send-EdgeRequest @Options
