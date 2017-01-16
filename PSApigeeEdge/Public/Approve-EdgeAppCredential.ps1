@@ -60,7 +60,7 @@ Function Approve-EdgeAppCredential {
     
     $Options.Add( 'Collection', $(Join-Parts -Separator '/' -Parts 'developers', $Developer, 'apps', $AppName, 'keys' ) )
     $Options.Add( 'Name', $Key )
-    $Options.Add( 'Params', { action  = 'approve' } )
+    $Options.Add( 'QParams', $( ConvertFrom-HashtableToQueryString @{ action = 'approve' } ))
     
     Write-Debug ( "Options @Options`n" )
     Send-EdgeRequest @Options

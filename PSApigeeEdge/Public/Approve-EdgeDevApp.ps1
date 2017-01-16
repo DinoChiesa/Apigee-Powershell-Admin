@@ -8,11 +8,14 @@ Function Approve-EdgeDevApp {
         will be treated as valid, at runtime. Or, alternatively, approve a single
         credential within a developer app. 
 
-    .PARAMETER Name
-        The name of the app. You must specify the -Developer option if you use -Name. 
+    .PARAMETER AppName
+        The name of the app. You must specify the -Developer option if you use -AppName. 
 
-    .PARAMETER Id
-        The id of the app. Use this in lieu of -Name and -Developer. 
+    .PARAMETER Name
+        Synonum for AppName.
+
+    .PARAMETER AppId
+        The id of the app. Use this in lieu of -AppName and -Developer. 
 
     .PARAMETER Developer
         The id or email of the developer that owns the app.
@@ -36,24 +39,10 @@ Function Approve-EdgeDevApp {
 
     [cmdletbinding()]
     PARAM(
-        [Parameter(Position=0,
-         Mandatory=$True,
-         ParameterSetName="byName",
-         ValueFromPipeline=$True)]
         [string]$Name,
-        
-        [Parameter(Position=1,
-         Mandatory=$True,
-         ParameterSetName="byName",
-         ValueFromPipeline=$True)]
+        [string]$AppName,
         [string]$Developer,
-        
-        [Parameter(Position=0,
-         Mandatory=$True,
-         ParameterSetName="byId",
-         ValueFromPipeline=$True)]
-        [string]$Id,
-        
+        [string]$AppId,
         [string]$Key,
         [string]$Org
     )
@@ -67,30 +56,32 @@ Function Approve-EdgeDevApp {
     }
     
     if ($PSBoundParameters['Developer']) {
-        if (!$PSBoundParameters['Name']) {
-          throw [System.ArgumentNullException] "Name", 'use -Name with -Developer'
+        if (!$PSBoundParameters['Name'] -and !$PSBoundParameters['AppName']) {
+            throw [System.ArgumentNullException] "AppName", 'use -AppName and -Developer.'
         }
+        $RealAppName = if ($PSBoundParameters['AppName']) { $AppName } else { $Name }
+        # also handle key approval?   Not sure I like this option. 
         if ($PSBoundParameters['Key']) {
             $Options.Add( 'Collection', $( Join-Parts -Separator '/' -Parts 'developers',
-                                            $Developer, 'apps', $Name, 'keys' ) )
+                                            $Developer, 'apps', $RealAppName, 'keys' ) )
             $Options.Add( 'Name', $Key)
         }
         else {
             $Options.Add( 'Collection', $( Join-Parts -Separator '/' -Parts 'developers', $Developer, 'apps' ) )
-            $Options.Add( 'Name', $Name)
+            $Options.Add( 'Name', $RealAppName)
         }
     }
     else {
-        if (!$PSBoundParameters['Id']) {
-          throw [System.ArgumentNullException] "Id", 'use -Id if not specifying -Name and -Developer'
+        if (!$PSBoundParameters['AppId']) {
+          throw [System.ArgumentNullException] "AppId", 'use -AppId if not specifying -AppName and -Developer'
         }
         if ($PSBoundParameters['Key']) {
-            $Options.Add( 'Collection', $( Join-Parts -Separator '/' -Parts 'apps', $Id, 'keys' ) )
+            $Options.Add( 'Collection', $( Join-Parts -Separator '/' -Parts 'apps', $AppId, 'keys' ) )
             $Options.Add( 'Name', $Key)
         }
         else {
           $Options.Add( 'Collection', 'apps')
-          $Options.Add( 'Name', $Id)
+          $Options.Add( 'Name', $AppId)
         }
     }
 
@@ -98,5 +89,6 @@ Function Approve-EdgeDevApp {
         $Options.Add( 'Org', $Org )
     }
 
+    Write-Debug ([string]::Format("Options {0}`n", $(ConvertTo-Json $Options -Compress ) ) )
     Send-EdgeRequest @Options
 }
