@@ -6,8 +6,11 @@ Function Add-EdgeAppCredential {
     .DESCRIPTION
         Add a new credential to an existing developer app.
 
-    .PARAMETER Name
+    .PARAMETER AppName
         The name of the developer app to which the credential will be added.
+
+    .PARAMETER Name
+        Synonym for AppName.
 
     .PARAMETER Developer
         The id or email of the developer that owns the app to which the credential will be added.
@@ -26,6 +29,9 @@ Function Add-EdgeAppCredential {
     .EXAMPLE
         Add-EdgeAppCredential -Name DPC6 -Developer dchiesa@example.org -Expiry '2016-12-10' -ApiProducts @( 'Product-7' )
 
+    .LINK
+        Get-EdgeAppCredential
+
     .FUNCTIONALITY
         ApigeeEdge
 
@@ -33,14 +39,8 @@ Function Add-EdgeAppCredential {
 
     [cmdletbinding()]
     PARAM(
-        [Parameter(Position=0,
-         Mandatory=$True,
-         ValueFromPipeline=$True)]
+        [string]$AppName,
         [string]$Name,
-        
-        [Parameter(Position=1,
-         Mandatory=$True,
-         ValueFromPipeline=$True)]
         [string]$Developer,
 
         [Parameter(Mandatory=$True)][string[]]$ApiProducts,
@@ -61,15 +61,15 @@ Function Add-EdgeAppCredential {
         throw [System.ArgumentNullException] "Developer", "You must specify the -Developer option."
     }
 
-    if (!$PSBoundParameters['Name']) {
-      throw [System.ArgumentNullException] "Name", "You must specify the -Name option."
+    if (!$PSBoundParameters['AppName'] && !$PSBoundParameters['Name']) {
+      throw [System.ArgumentNullException] "AppName", "You must specify the -AppName option."
     }
-
+    $RealAppName = if ($PSBoundParameters['AppName']) { $AppName } else { $Name }
     $Options.Add( 'Collection', $(Join-Parts -Separator '/' -Parts 'developers', $Developer, 'apps' ) )
-    $Options.Add( 'Name', $Name )
+    $Options.Add( 'Name', $RealAppName )
 
     $Payload = @{
-      name = $Name
+      name = $RealAppName
       apiProducts = $ApiProducts
     }
 

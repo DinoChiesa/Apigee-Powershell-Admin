@@ -757,14 +757,14 @@ Describe "Create-App-1" {
         $Products = @( @( Get-EdgeApiProduct -Params @{ expand = 'true'} ).apiProduct |
           ?{ $_.name.StartsWith($Script:Props.SpecialPrefix) } | % { @{ Name = $_.name } } )
 
-        $cases = @{ expiry = "48h" },
-                @{ expiry = '86400' }, # default is a number of seconds
-                @{ expiry = '21d' },
-                @{ expiry = (Get-Date).AddDays(60).ToString('yyyy-MM-dd') }
-                @{ expiry = "" }
+        $cases = @{ Expiry = "48h", Hours = 48 },
+                @{ Expiry = '86400', Hours = 24 }, # default is a number of seconds
+                @{ Expiry = '21d', Hours = 21*24 },
+                @{ Expiry = (Get-Date).AddDays(60).ToString('yyyy-MM-dd'), Hours = 60*24 }
+                @{ Expiry = "" }
 
-        It 'creates an App with credential expiry <expiry>' -TestCases $cases {
-            param($expiry)
+        It 'creates an App with credential expiry <Expiry>' -TestCases $cases {
+            param($Expiry, $Hours)
 
             $Params = @{
                 Name = [string]::Format('{0}-app-{1}', $Script:Props.SpecialPrefix, $expiry )
@@ -776,9 +776,71 @@ Describe "Create-App-1" {
             }
 
             $app = Create-EdgeDevApp @Params
-            { $app } | Should Not Throw
-            #TODO : verify expiry?
+            
+            # verify expiry
+            if (![string]::IsNullOrEmpty($expiry)) {
+                $NowMilliseconds = [int64](([datetime]::UtcNow)-(get-date "1/1/1970")).TotalMilliseconds
+                $Delta = [int][Math]::Ceiling(($app.credentials[0].expiresAt - $NowMilliseconds)/1000/3600)
+                $Delta | Should Be $Hours
+            }
         }
+    }
+}
+
+
+Describe "Add-App-Credential" {
+    Context 'Strict mode' {
+        Set-StrictMode -Version latest
+
+        $NewAppName = [string]::Format('{0}-app-{1}', $Script:Props.SpecialPrefix, "credtest" )
+        $Developers = @( @( Get-EdgeDeveloper ) |
+          ?{ $_.StartsWith($Script:Props.SpecialPrefix) } | % { @{ Email = $_ } } )
+
+        $Products = @( @( Get-EdgeApiProduct -Params @{ expand = 'true'} ).apiProduct |
+          ?{ $_.name.StartsWith($Script:Props.SpecialPrefix) } | % { @{ Name = $_.name } } )
+
+        It 'creates an App' {
+            $Params = @{
+                Name = $NewAppName
+                Developer = $Developers[0].Email
+                ApiProducts = @( $Products[0].Name )
+                Expiry = '72h'
+            }
+
+            $app = Create-EdgeDevApp @Params
+            $app.credentials.count | Should Be 1
+            
+            # verify expiry
+            $NowMilliseconds = [int64](([datetime]::UtcNow)-(get-date "1/1/1970")).TotalMilliseconds
+            $Delta = [int][Math]::Ceiling(($app.credentials[0].expiresAt - $NowMilliseconds)/1000/3600)
+            $Delta | Should Be 72
+        }
+
+        It 'gets the credentials on the just-created App' {
+            $creds = Get-EdgeAppCredential -AppName $NewAppName -Developer $Developers[0].Email
+            $creds.count | Should Be 1
+        }
+
+        It 'adds a credential on the just-created App' {
+            $Params = @{
+                Name = $NewAppName
+                Developer = $Developers[0].Email
+                ApiProducts = @( $Products[0].Name )
+                Expiry = '96h'
+            }
+
+            $app = Add-EdgeAppCredential @Params
+            $app.credentials.count | Should Be 2
+            
+            $NowMilliseconds = [int64](([datetime]::UtcNow)-(get-date "1/1/1970")).TotalMilliseconds
+            # verify expiry credential #0
+            $Delta = [int][Math]::Ceiling(($app.credentials[0].expiresAt - $NowMilliseconds)/1000/3600)
+            $Delta | Should Be 72
+            # verify expiry credential #1
+            $Delta = [int][Math]::Ceiling(($app.credentials[1].expiresAt - $NowMilliseconds)/1000/3600)
+            $Delta | Should Be 96
+        }
+    
     }
 }
 
@@ -1139,7 +1201,7 @@ Describe "Get-Vhost-1" {
 
 ## TODO: insert more tests here:
 # eg,
-# - Add-EdgeAppCredential - add a new credential to an app
+# - CRUD for EdgeAppCredential - add a new credential to an app
 # - Update-EdgeAppCredential.ps1 - revoke or approve a credential, or change products list
 # - {Create,Get,Update,Delete} for KvmEntry at proxy scope (iff CPS)
 
