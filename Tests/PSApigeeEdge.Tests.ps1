@@ -902,14 +902,12 @@ Describe "Create-App-Failures" {
 
         It 'creates an App with invalid expiry <expiry>' -TestCases $expiryCases {
             param($expiry)
-
             $Params = @{
                 AppName = [string]::Format('{0}-app-failure-A-{1}', $Script:Props.SpecialPrefix, $expiry )
                 Developer = $Developers[0].Email
                 ApiProducts = @( $Products[0].Name )
                 Expiry = $expiry
             }
-
             { Create-EdgeDevApp @Params } | Should Throw
         }
         
@@ -934,23 +932,23 @@ Describe "Create-App-Failures" {
         }
         
         It 'tries to create an App with missing Name' {
-            $Params = @{
-                ApiProducts = @( $Products[0].Name )
-                Developer = $Developers[0].Email
-            }
-            { Create-EdgeDevApp @Params } | Should Throw
+            #$Params = @{
+            #    ApiProducts = @( $Products[0].Name )
+            #    Developer = $Developers[0].Email
+            #}
+            { Create-EdgeDevApp -ApiProducts @( $Products[0].Name ) -Developer $Developers[0].Email } | Should Throw
         }
     }
 }
 
 
 Describe "Get-Apps-1" {
-    
     Context 'Strict mode' {
         
         Set-StrictMode -Version latest
         
-        $appids = @( Get-EdgeDevApp )
+        $appids = @( Get-EdgeDevApp | %{ @{ Id = $_ } } )
+        $emails = @( Get-EdgeDeveloper | %{ @{ Email = $_ } } )
         
         It 'gets a list of apps' {
             $appids.count | Should BeGreaterThan 0
@@ -961,19 +959,17 @@ Describe "Get-Apps-1" {
             $getresponse.app.count | Should BeGreaterThan 0
         }
         
-        It 'gets a list of apps for developer <Name>'  -TestCases @( ToArrayOfHash  @( Get-EdgeDeveloper ) ) {
-            param($Name)
+        It 'gets a list of apps for developer <Email>'  -TestCases $emails {
+            param($Email)
             
-            $apps = @( Get-EdgeDevApp -Developer $Name )
+            $apps = @( Get-EdgeDevApp -Developer $Email )
             $apps.count | Should Not BeNullOrEmpty
-            $appsExpanded = @(( Get-EdgeDevApp -Developer $Name -Params @{ expand = 'true' } ).app)
+            $appsExpanded = @( ( Get-EdgeDevApp -Developer $Email -Params @{ expand = 'true' } ).app )
             $apps.count | Should Be $appsExpanded.count
         }
-
         
-        It 'gets details of app <Id>'  -TestCases @( $appids | % {  @{ Id = $_ } }   {
+        It 'gets details of app <Id>' -TestCases $appids {
             param($Id)
-            
             $app = Get-EdgeDevApp -AppId $Id
             $app.appId | Should Be $Id
             $NowMilliseconds = [int64](([datetime]::UtcNow)-(get-date "1/1/1970")).TotalMilliseconds
@@ -982,10 +978,10 @@ Describe "Get-Apps-1" {
             $app.status | Should Not BeNullOrEmpty
         }
         
-        It 'gets a list of apps by ID per developer <Name>'  -TestCases @( ToArrayOfHash  @( Get-EdgeDeveloper ) ) {
-            param($Name)
+        It 'gets a list of apps by ID per developer <Email>' -TestCases $emails {
+            param($Email)
             
-            $appsExpanded = @(( Get-EdgeDevApp -Developer $Name -Params @{ expand = 'true' } ).app)
+            $appsExpanded = @(( Get-EdgeDevApp -Developer $Email -Params @{ expand = 'true' } ).app)
             $excludedProps = @( 'attributes', 'apiProducts', 'credentials' )
             foreach ($app in $appsExpanded) {
                 $app2 = Get-EdgeDevApp -AppId $app.appId 
@@ -995,11 +991,9 @@ Describe "Get-Apps-1" {
                 # But... instead we will iterate the properties and compare each one, while
                 # excluding properties with non-primitive values.
                 $app2.psobject.properties | % {
-                    $value2 = $_.Value
-                    $name = $_.Name
-                    if ( $excludedProps -notcontains $name ) {
-                        $value1 = $( $app | select -expand $name )
-                        $value2 | Should Be $value1
+                    if ( $excludedProps -notcontains $_.Name ) {
+                        $value1 = $( $app | select -expand $_.Name )
+                        $_.Value | Should Be $value1
                     }
                 }
             }
