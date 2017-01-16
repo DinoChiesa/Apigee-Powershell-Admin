@@ -766,7 +766,7 @@ Describe "Create-App-1" {
             param($Expiry, $Hours)
 
             $Params = @{
-                Name = [string]::Format('{0}-app-{1}', $Script:Props.SpecialPrefix, $expiry )
+                AppName = [string]::Format('{0}-app-{1}', $Script:Props.SpecialPrefix, $expiry )
                 Developer = $Developers[0].Email
                 ApiProducts = @( $Products[0].Name )
             }
@@ -800,7 +800,7 @@ Describe "CRUD-App-Credential" {
 
         It 'creates an App' {
             $Params = @{
-                Name = $NewAppName
+                AppName = $NewAppName
                 Developer = $Developers[0].Email
                 ApiProducts = @( $Products[0].Name )
                 Expiry = '72h'
@@ -863,7 +863,7 @@ Describe "CRUD-App-Credential" {
             $OriginalCreds.count | Should Be 1
             $OriginalCreds[0].status | Should Be "approved"
             
-            Revoke-EdgeAppCredential -AppName $NewAppName -Developer $Developers[0].Email -key $OriginalCreds[0].consumerKey -Debug
+            Revoke-EdgeAppCredential -AppName $NewAppName -Developer $Developers[0].Email -key $OriginalCreds[0].consumerKey
 
             $UpdatedCreds = @( Get-EdgeAppCredential -AppName $NewAppName -Developer $Developers[0].Email )
             $UpdatedCreds.count | Should Be 1
@@ -897,14 +897,14 @@ Describe "Create-App-Failures" {
           ?{ $_.name.StartsWith($Script:Props.SpecialPrefix) } | % { @{ Name = $_.name } } )
 
         $expiryCases = @{ expiry = "2016-12-10" }, # in the past
-                @{ expiry = '-43200' }, # negative integer
-                @{ expiry = 'ABCDE' } # invalid
+        @{ expiry = '-43200' }, # negative integer
+        @{ expiry = 'ABCDE' } # invalid
 
         It 'creates an App with invalid expiry <expiry>' -TestCases $expiryCases {
             param($expiry)
 
             $Params = @{
-                Name = [string]::Format('{0}-app-failure-A-{1}', $Script:Props.SpecialPrefix, $expiry )
+                AppName = [string]::Format('{0}-app-failure-A-{1}', $Script:Props.SpecialPrefix, $expiry )
                 Developer = $Developers[0].Email
                 ApiProducts = @( $Products[0].Name )
                 Expiry = $expiry
@@ -916,17 +916,17 @@ Describe "Create-App-Failures" {
         It 'tries to create an App with missing Developer' {
             $expiry = '28d'
             $Params = @{
-                Name = [string]::Format('{0}-app-failure-B-{1}', $Script:Props.SpecialPrefix, $expiry )
+                AppName = [string]::Format('{0}-app-failure-B-{1}', $Script:Props.SpecialPrefix, $expiry )
                 ApiProducts = @( $Products[0].Name )
                 Expiry = $expiry
             }
             { Create-EdgeDevApp @Params } | Should Throw
         }
-            
+        
         It 'tries to create an App with missing ApiProducts' {
             $expiry = '120d'
             $Params = @{
-                Name = [string]::Format('{0}-app-failure-C-{1}', $Script:Props.SpecialPrefix, $expiry )
+                AppName = [string]::Format('{0}-app-failure-C-{1}', $Script:Props.SpecialPrefix, $expiry )
                 Developer = $Developers[0].Email
                 Expiry = $expiry
             }
@@ -947,33 +947,35 @@ Describe "Create-App-Failures" {
 Describe "Get-Apps-1" {
     
     Context 'Strict mode' {
-    
+        
         Set-StrictMode -Version latest
-
+        
+        $appids = @( Get-EdgeDevApp )
+        
         It 'gets a list of apps' {
-            $apps = @( get-edgeDevApp )
-            $apps.count | Should BeGreaterThan 0
+            $appids.count | Should BeGreaterThan 0
         }
         
         It 'gets a list of apps with expansion' {
-            $apps = @( get-edgeDevApp -Params @{ expand = 'true' } )
-            $apps.count | Should BeGreaterThan 0
+            $getresponse = @( Get-EdgeDevApp -Params @{ expand = 'true' } )
+            $getresponse.app.count | Should BeGreaterThan 0
         }
         
         It 'gets a list of apps for developer <Name>'  -TestCases @( ToArrayOfHash  @( Get-EdgeDeveloper ) ) {
             param($Name)
-        
+            
             $apps = @( Get-EdgeDevApp -Developer $Name )
             $apps.count | Should Not BeNullOrEmpty
             $appsExpanded = @(( Get-EdgeDevApp -Developer $Name -Params @{ expand = 'true' } ).app)
             $apps.count | Should Be $appsExpanded.count
         }
+
         
-        It 'gets details of app <Name>'  -TestCases @( ToArrayOfHash  @( Get-EdgeDevApp ) ) {
-            param($Name)
-        
-            $app = Get-EdgeDevApp -Id $Name
-            $app.appId | Should Be $Name
+        It 'gets details of app <Id>'  -TestCases @( $appids | % {  @{ Id = $_ } }   {
+            param($Id)
+            
+            $app = Get-EdgeDevApp -AppId $Id
+            $app.appId | Should Be $Id
             $NowMilliseconds = [int64](([datetime]::UtcNow)-(get-date "1/1/1970")).TotalMilliseconds
             $app.createdAt | Should BeLessthan $NowMilliseconds
             $app.lastModifiedAt | Should BeLessthan $NowMilliseconds
@@ -982,11 +984,11 @@ Describe "Get-Apps-1" {
         
         It 'gets a list of apps by ID per developer <Name>'  -TestCases @( ToArrayOfHash  @( Get-EdgeDeveloper ) ) {
             param($Name)
-        
+            
             $appsExpanded = @(( Get-EdgeDevApp -Developer $Name -Params @{ expand = 'true' } ).app)
             $excludedProps = @( 'attributes', 'apiProducts', 'credentials' )
             foreach ($app in $appsExpanded) {
-                $app2 = Get-EdgeDevApp -Id $app.appId 
+                $app2 = Get-EdgeDevApp -AppId $app.appId 
                 # $app2 | Should Be $app  # No.
 
                 # I think it might be possible to do something smart with Compare-Object
@@ -1001,6 +1003,41 @@ Describe "Get-Apps-1" {
                     }
                 }
             }
+        }
+    }
+}
+
+
+Describe "Revoke-Approve-Apps-1" {
+    Context 'Strict mode' {
+        Set-StrictMode -Version latest
+
+        $AppList = @( @( Get-EdgeDevApp -Params @{ expand = $True } ).app |
+          ?{ $_.name.StartsWith($Script:Props.SpecialPrefix) } | %{ @{ Name = $_.name; Id = $_.appid } })
+
+        # $DevList = @( @( Get-EdgeDeveloper -Params @{ expand = $True } ).developer |
+        #  ?{ $_.email.StartsWith($Script:Props.SpecialPrefix) } | %{ @{ Apps = $_.apps; Email = $_.email } })
+
+        It 'verifies the count of apps created previously in this test run' {
+            $AppList.count | Should BeGreaterThan 0
+        }
+        
+        It 'revokes app <Id> (<Name>)' -TestCases $$AppList {
+            param($Name, $Id)
+            $app = Get-EdgeDevApp -AppId $Id
+            $app.status | Should Be 'approved'
+            Revoke-EdgeDevApp -AppId $Id
+            $app = Get-EdgeDevApp -AppId $Id
+            $app.status | Should Be 'revoked'
+        }
+    
+        It 'approves app <Id> (<Name>)' -TestCases $$AppList {
+            param($Name, $Id)
+            $app = Get-EdgeDevApp -AppId $Id
+            $app.status | Should Be 'revoked'
+            Revoke-EdgeDevApp -AppId $Id
+            $app = Get-EdgeDevApp -AppId $Id
+            $app.status | Should Be 'approved'
         }
     }
 }
