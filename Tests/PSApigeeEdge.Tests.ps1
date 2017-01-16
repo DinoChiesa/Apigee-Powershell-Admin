@@ -757,10 +757,10 @@ Describe "Create-App-1" {
         $Products = @( @( Get-EdgeApiProduct -Params @{ expand = 'true'} ).apiProduct |
           ?{ $_.name.StartsWith($Script:Props.SpecialPrefix) } | % { @{ Name = $_.name } } )
 
-        $cases = @{ Expiry = "48h", Hours = 48 },
-                @{ Expiry = '86400', Hours = 24 }, # default is a number of seconds
-                @{ Expiry = '21d', Hours = 21*24 },
-                @{ Expiry = (Get-Date).AddDays(60).ToString('yyyy-MM-dd'), Hours = 60*24 }
+        $cases = @{ Expiry = "48h"; Hours = 48 },
+                @{ Expiry = '86400'; Hours = 24 }, # default is a number of seconds
+                @{ Expiry = '21d'; Hours = 21*24 },
+                @{ Expiry = (Get-Date).AddDays(60).ToString('yyyy-MM-dd'); Hours = 60*24 }
                 @{ Expiry = "" }
 
         It 'creates an App with credential expiry <Expiry>' -TestCases $cases {
