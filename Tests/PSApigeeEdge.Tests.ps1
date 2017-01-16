@@ -805,45 +805,46 @@ Describe "Add-App-Credential" {
                 Developer = $Developers[0].Email
                 ApiProducts = @( $Products[0].Name )
                 Expiry = '72h'
-
-                $app = Create-EdgeDevApp @Params
-                $app.credentials.count | Should Be 1
-                
-                # verify expiry
-                $NowMilliseconds = [int64](([datetime]::UtcNow)-(get-date "1/1/1970")).TotalMilliseconds
-                $Delta = [int][Math]::Ceiling(($app.credentials[0].expiresAt - $NowMilliseconds)/1000/3600)
-                $Delta | Should Be 72
             }
-
-            It 'adds a credential on the just-created App' {
-                $OriginalCreds = @( Get-EdgeAppCredential -AppName $NewAppName -Developer $Developers[0].Email )
-                $OriginalCreds.count | Should Be 1
-                
-                $Params = @{
-                    Name = $NewAppName
-                    Developer = $Developers[0].Email
-                    ApiProducts = @( $Products[0].Name )
-                    Expiry = '96h'
-                }
-
-                $app = Add-EdgeAppCredential @Params
-                $app.credentials.count | Should Be 2
-                
-                $NowMilliseconds = [int64](([datetime]::UtcNow)-(get-date "1/1/1970")).TotalMilliseconds
-                
-                # verify credential expiry
-                $app.credentials | foreach {
-                    $Delta = [int][Math]::Ceiling(($_.expiresAt - $NowMilliseconds)/1000/3600)
-                    if ($_.consumerKey -eq $OriginalCreds[0].consumerKey) {
-                        $Delta | Should Be 72
-                    }
-                    else {
-                        $Delta | Should Be 96
-                    }
-                }
-            }
+            $app = $( Create-EdgeDevApp @Params )
+            $app.credentials.count | Should Be 1
+            
+            # verify expiry
+            $NowMilliseconds = [int64](([datetime]::UtcNow)-(get-date "1/1/1970")).TotalMilliseconds
+            $Delta = [int][Math]::Ceiling(($app.credentials[0].expiresAt - $NowMilliseconds)/1000/3600)
+            $Delta | Should Be 72
         }
-    
+
+        It 'adds a credential on the just-created App' {
+            $OriginalCreds = @( Get-EdgeAppCredential -AppName $NewAppName -Developer $Developers[0].Email )
+            $OriginalCreds.count | Should Be 1
+
+            $Params = @{
+                Name = $NewAppName
+                Developer = $Developers[0].Email
+                ApiProducts = @( $Products[0].Name )
+                Expiry = '96h'
+            }
+
+            $app = $( Add-EdgeAppCredential @Params )
+            $app.credentials.count | Should Be 2
+            
+            $NowMilliseconds = [int64](([datetime]::UtcNow)-(get-date "1/1/1970")).TotalMilliseconds
+            
+            # verify credential expiry
+            $app.credentials | foreach {
+                $Delta = [int][Math]::Ceiling(($_.expiresAt - $NowMilliseconds)/1000/3600)
+                if ($_.consumerKey -eq $OriginalCreds[0].consumerKey) {
+                    $Delta | Should Be 72
+                }
+                else {
+                    $Delta | Should Be 96
+                }
+            }
+
+            $UpdatedCreds = @( Get-EdgeAppCredential -AppName $NewAppName -Developer $Developers[0].Email )
+            $UpdatedCreds.count | Should Be 2
+        }
     }
 }
 
