@@ -44,6 +44,7 @@ Function Revoke-EdgeAppCredential {
     $Options = @{ }
     
     if ($PSBoundParameters['Debug']) {
+        $DebugPreference = 'Continue'
         $Options.Add( 'Debug', $Debug )
     }
     if ($PSBoundParameters['Org']) {
@@ -56,7 +57,6 @@ Function Revoke-EdgeAppCredential {
     if (!$PSBoundParameters['AppName']) {
       throw [System.ArgumentNullException] "AppName", "You must specify the -AppName option."
     }
-
     if (!$PSBoundParameters['Key']) {
       throw [System.ArgumentNullException] "Key", "You must specify the -Key option."
     }
@@ -65,6 +65,6 @@ Function Revoke-EdgeAppCredential {
     $Options.Add( 'Name', $Key )
     $Options.Add( 'QParams', { action  = 'revoke' } )
     
-    Write-Debug ( "Options @Options`n" )
+    Write-Debug ([string]::Format("Options {0}`n", $(ConvertTo-Json $Options -Compress ) ) )
     Send-EdgeRequest @Options
 }

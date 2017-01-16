@@ -864,7 +864,7 @@ Describe "Add-App-Credential" {
             $OriginalCreds.count | Should Be 1
             $OriginalCreds[0].status | Should Be "approved"
             
-            Revoke-EdgeAppCredential -AppName $NewAppName -Developer $Developers[0].Email -key $OriginalCreds[0].consumerKey 
+            Revoke-EdgeAppCredential -AppName $NewAppName -Developer $Developers[0].Email -key $OriginalCreds[0].consumerKey -Debug
 
             $UpdatedCreds = @( Get-EdgeAppCredential -AppName $NewAppName -Developer $Developers[0].Email )
             $UpdatedCreds.count | Should Be 1
