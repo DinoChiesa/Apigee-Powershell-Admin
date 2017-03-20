@@ -1,9 +1,8 @@
-# Import-Module $PSScriptRoot\..\PSApigeeEdge -Force
 Write-Output "Find API Product for a given API Proxy"
 
 $Org = Read-Host "Edge org?"
 $User = Read-Host "Edge admin user?"  # eg, 'dchiesa@google.com'
-$SecurePass = Read-Host -assecurestring "Password"
+$SecurePass = Read-Host -assecurestring "Password for $User"
 $EncryptedPassword = ConvertFrom-SecureString $SecurePass
 
 $connection = @{
@@ -22,5 +21,3 @@ Write-Output ("Total Products: " + $prods.count)
 $filteredProds = $prods |? { $_.proxies -contains $proxyToFind }
 
 Write-Output ([string]::Format('Products: {0}', (ConvertTo-Json $filteredProds) ) )
-
-
