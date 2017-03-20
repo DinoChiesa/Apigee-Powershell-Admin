@@ -75,7 +75,6 @@ Describe "Set-EdgeConnection" {
     }
 }
 
-
 Describe "Get-EdgeOrganization-1" {
 
     Context 'Strict mode' { 
@@ -94,7 +93,6 @@ Describe "Get-EdgeOrganization-1" {
         }
     }
 }
-
 
 Describe "Get-EdgeEnvironment-1" {
 
@@ -119,7 +117,6 @@ Describe "Get-EdgeEnvironment-1" {
         }
     }
 }
-
 
 Describe "Import-EdgeApi-1" {
 
@@ -165,7 +162,6 @@ Describe "Import-EdgeApi-1" {
     }
 }
 
-
 Describe "Get-EdgeApi-1" {
 
     Context 'Strict mode' { 
@@ -196,7 +192,6 @@ Describe "Get-EdgeApi-1" {
         }
     }
 }
-
 
 Describe "Deploy-EdgeApi-1" {
     Context 'Strict mode' { 
@@ -260,7 +255,6 @@ Describe "Export-EdgeApi-1" {
     }
 }
 
-
 Describe "Get-ApiRevisions-1" {
     
     Context 'Strict mode' {
@@ -311,7 +305,6 @@ Describe "Get-ApiRevisions-1" {
     }
 }
 
-
 Describe "Undeploy-EdgeApi-1" {
     Context 'Strict mode' { 
         Set-StrictMode -Version latest
@@ -333,7 +326,6 @@ Describe "Undeploy-EdgeApi-1" {
         }
     }
 }
-
 
 Describe "Create-Kvm-1" {
     Context 'Strict mode' {
@@ -478,7 +470,6 @@ Describe "Create-Kvm-1" {
     }
 }
 
-
 Describe "Crud-KvmEntry-1" {
     Context 'Strict mode' {
         Set-StrictMode -Version latest
@@ -598,7 +589,6 @@ Describe "Crud-KvmEntry-1" {
     }
 }
 
-
 Describe "Create-Developer-1" {
     Context 'Strict mode' {
     
@@ -626,7 +616,6 @@ Describe "Create-Developer-1" {
         }
     }
 }
-
 
 Describe "Get-Developers-1" {
     
@@ -671,7 +660,6 @@ Describe "Get-Developers-1" {
     }
 }
 
-
 Describe "Create-ApiProduct-1" {
     Context 'Strict mode' {
         
@@ -696,7 +684,6 @@ Describe "Create-ApiProduct-1" {
         }
     }
 }
-
 
 Describe "Get-ApiProduct-1" {
     
@@ -744,7 +731,6 @@ Describe "Get-ApiProduct-1" {
     }
 }
 
-
 Describe "Create-App-1" {
     Context 'Strict mode' {
 
@@ -785,7 +771,6 @@ Describe "Create-App-1" {
         }
     }
 }
-
 
 Describe "CRUD-App-Credential" {
     Context 'Strict mode' {
@@ -846,7 +831,7 @@ Describe "CRUD-App-Credential" {
         }
 
         It 'tries to remove a credential that does not exist' {
-            { Remove-EdgeAppCredential -AppName $NewAppName -Developer $Developers[0].Email -Key pd0mg1FuedmfCpY9gWZonQmR2fGD3Osw } | Should Throw
+            { Remove-EdgeAppCredential -AppName $NewAppName -Developer $Developers[0].Email -Key pd0mg1FuedmfCpY9gWZonQmR2fGD3Osw -Debug } | Should Throw
         }
 
         It 'removes a credential on the just-created App' {
@@ -941,7 +926,6 @@ Describe "Create-App-Failures" {
     }
 }
 
-
 Describe "Get-Apps-1" {
     Context 'Strict mode' {
         
@@ -1001,7 +985,6 @@ Describe "Get-Apps-1" {
     }
 }
 
-
 Describe "Revoke-Approve-Apps-1" {
     Context 'Strict mode' {
         Set-StrictMode -Version latest
@@ -1016,7 +999,7 @@ Describe "Revoke-Approve-Apps-1" {
             $AppList.count | Should BeGreaterThan 0
         }
         
-        It 'revokes app <Id> (<Name>)' -TestCases $$AppList {
+        It 'revokes app <Id> (<Name>)' -TestCases $AppList {
             param($Name, $Id)
             $app = Get-EdgeDevApp -AppId $Id
             $app.status | Should Be 'approved'
@@ -1025,7 +1008,7 @@ Describe "Revoke-Approve-Apps-1" {
             $app.status | Should Be 'revoked'
         }
     
-        It 'approves app <Id> (<Name>)' -TestCases $$AppList {
+        It 'approves app <Id> (<Name>)' -TestCases $AppList {
             param($Name, $Id)
             $app = Get-EdgeDevApp -AppId $Id
             $app.status | Should Be 'revoked'
@@ -1035,7 +1018,6 @@ Describe "Revoke-Approve-Apps-1" {
         }
     }
 }
-
 
 Describe "Get-Kvm-1" {
     Context 'Strict mode' {
@@ -1077,7 +1059,6 @@ Describe "Get-Kvm-1" {
     }
 }
 
-
 Describe "Delete-DevApp-1" {
     Context 'Strict mode' {
         Set-StrictMode -Version latest
@@ -1090,7 +1071,6 @@ Describe "Delete-DevApp-1" {
         }
     }
 }
-
 
 Describe "Delete-ApiProduct-1" {
     Context 'Strict mode' {
@@ -1108,7 +1088,6 @@ Describe "Delete-ApiProduct-1" {
     }
 }
 
-
 Describe "Delete-Developer-1" {
     Context 'Strict mode' {
     
@@ -1123,7 +1102,6 @@ Describe "Delete-Developer-1" {
         }
     }
 }
-
 
 Describe "Delete-Kvm-1" {
     Context 'Strict mode' {
@@ -1155,7 +1133,6 @@ Describe "Delete-Kvm-1" {
     }
 }
 
-
 Describe "Create-Keystore-1" {
     Context 'Strict mode' {
     
@@ -1173,7 +1150,6 @@ Describe "Create-Keystore-1" {
         }
     }
 }
-
 
 Describe "Get-Keystore-1" {
     Context 'Strict mode' {
@@ -1199,7 +1175,6 @@ Describe "Get-Keystore-1" {
         }
     }
 }
-
 
 Describe "Delete-Keystore-1" {
     Context 'Strict mode' {
@@ -1230,7 +1205,6 @@ Describe "Delete-Keystore-1" {
     }
 }
 
-
 Describe "Delete-EdgeApi-1" {
     Context 'Strict mode' {
         Set-StrictMode -Version latest
@@ -1245,7 +1219,6 @@ Describe "Delete-EdgeApi-1" {
         }
     }
 }
-
 
 Describe "Get-Vhost-1" {
     Context 'Strict mode' {
