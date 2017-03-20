@@ -21,7 +21,7 @@ Function Set-EdgeConnection {
         alternative to the Password parameter. To get the encrypted password, you can do this:
 
          $SecurePass = Read-Host -assecurestring "Please enter the password"
-         ConvertFrom-SecureString $SecurePass
+         $EncryptedString = ConvertFrom-SecureString $SecurePass
 
     .PARAMETER MgmtUri
         The base Uri for the Edge API Management server.
