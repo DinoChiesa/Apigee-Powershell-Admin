@@ -25,7 +25,7 @@ function ConvertFrom-AttrListToHashtable {
   PROCESS {
       $Values = @{}
       foreach($item in $List) {
-          $Values[$List['name']] = $List['value']
+          $Values[$item['name']] = $item['value']
       }
       $Values
   }
