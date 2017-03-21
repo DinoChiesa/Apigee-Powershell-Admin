@@ -48,8 +48,8 @@ Function Put-EdgeAppCredential {
         [string]$Developer,
         [string]$Key,
         [string]$Secret,
-        [hashtable]$Attributes
-        [string]$Org,
+        [hashtable]$Attributes,
+        [string]$Org
     )
     
     $Options = @{ }
