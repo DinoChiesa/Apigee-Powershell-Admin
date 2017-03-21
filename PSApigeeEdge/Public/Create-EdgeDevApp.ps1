@@ -88,8 +88,8 @@ Function Create-EdgeDevApp {
       $Payload.Add('callbackUrl', $CallbackUrl )
     }
     if ($PSBoundParameters['Attributes']) {
-      $a = @(ConvertFrom-HashtableToAttrList -Values $Attributes)
-      $Payload.Add('attributes', $a )
+        $a = @(ConvertFrom-HashtableToAttrList -Values $Attributes)
+        $Payload.Add('attributes', $a )
     }
     $Options.Add( 'Payload', $Payload )
 
