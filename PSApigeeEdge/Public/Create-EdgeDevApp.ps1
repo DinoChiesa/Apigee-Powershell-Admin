@@ -10,6 +10,10 @@ Function Create-EdgeDevApp {
     .PARAMETER AppName
         Required. The name of the app. It must be unique for this developer. 
 
+    .PARAMETER DisplayName
+        Optional. The displayName of the app. If omitted, the AppName will be used
+        for the DisplayName.
+
     .PARAMETER Developer
         Required. The id or email of the developer for which to create the app.
 
@@ -44,6 +48,7 @@ Function Create-EdgeDevApp {
     param(
         [string]$Name,
         [string]$AppName,
+        [string]$DisplayName,
         [Parameter(Mandatory=$True)][string]$Developer,
         [Parameter(Mandatory=$True)][string[]]$ApiProducts,
         [string]$Expiry,
@@ -74,6 +79,7 @@ Function Create-EdgeDevApp {
 
     $Payload = @{
       name = $RealAppName
+      displayName = if ($PSBoundParameters['DisplayName']) { $DisplayName } else { $RealAppName }
       apiProducts = $ApiProducts
     }
 
