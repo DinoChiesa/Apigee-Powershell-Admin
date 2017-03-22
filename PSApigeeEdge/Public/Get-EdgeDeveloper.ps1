@@ -9,7 +9,7 @@ Function Get-EdgeDeveloper {
     .PARAMETER Name
         Optional. The name of the developer to retrieve. This can be either the
         email address or the developerId. If you do specify this parameter, you'll
-        get a developer entity. If you do not specify it, the return value is a list 
+        get a developer entity. If you do not specify it, the return value is a list
         of email addresses for all developers.
 
     .PARAMETER Org
@@ -46,11 +46,14 @@ Function Get-EdgeDeveloper {
         [string]$Org,
         [Hashtable]$Params
     )
-    
+
     $Options = @{
         Collection = 'developers'
     }
-    
+    if ($PSBoundParameters['Org']) {
+        $Options.Add( 'Org', $Org )
+    }
+
     if ($PSBoundParameters['Debug']) {
         $Options.Add( 'Debug', $Debug )
     }
