@@ -16,14 +16,14 @@ Function Set-EdgeConnection {
             }
 
     .PARAMETER Org
-        Optional. Required if File is not specified. This is the Apigee Edge organization. 
+        Optional. Required if File is not specified. This is the Apigee Edge organization.
 
     .PARAMETER User
-        Required. The Apigee Edge administrative user. 
+        Required. The Apigee Edge administrative user.
 
     .PARAMETER Password
         Optional. The plaintext password for the Apigee Edge administrative user. Specify this
-        or the EncryptedPassword. 
+        or the EncryptedPassword.
 
     .PARAMETER EncryptedPassword
         Optional. The encrypted password for the Apigee Edge administrative user. Use this as an
@@ -48,7 +48,7 @@ Function Set-EdgeConnection {
     [cmdletbinding()]
     [Diagnostics.CodeAnalysis.SuppressMessage("PSAvoidUsingUserNameAndPassWordParams","")]
     [Diagnostics.CodeAnalysis.SuppressMessage("PSAvoidUsingConvertToSecureStringWithPlainText","")]
-    
+
     param(
         [string]$File,
         [string]$Org,
@@ -57,14 +57,14 @@ Function Set-EdgeConnection {
         [string]$EncryptedPassword,
         [string]$MgmtUri = 'https://api.enterprise.apigee.com'
     )
-    
+
     if ($PSBoundParameters.ContainsKey('File')) {
         Function ReadJson {
             param($filename)
             $json = Get-Content $filename -Raw | ConvertFrom-JSON
             $ht = @{}
             foreach ($prop in $json.psobject.properties.name) {
-                $ht.Add( $prop , $json.$prop )
+                $ht[$prop] = $json.$prop
             }
             $ht
         }
@@ -78,7 +78,7 @@ Function Set-EdgeConnection {
             if ($key -ne "File") {
                 $var = Get-Variable -Name $key -ErrorAction SilentlyContinue
                 if ($var) {
-                    $ConnectionData.Set( $var.name, $var.value )
+                    $ConnectionData[$var.name] = $var.value
                 }
             }
         }
@@ -99,7 +99,7 @@ Function Set-EdgeConnection {
             $SecurePass = ConvertTo-SecureString -String $Password -AsPlainText -Force
         }
         else {
-            $SecurePass = ConvertTo-SecureString -String $EncryptedPassword 
+            $SecurePass = ConvertTo-SecureString -String $EncryptedPassword
         }
 
         $MyInvocation.MyCommand.Module.PrivateData.Connection['Org'] = $Org
