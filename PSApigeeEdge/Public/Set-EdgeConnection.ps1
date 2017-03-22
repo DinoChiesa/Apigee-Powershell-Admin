@@ -74,8 +74,6 @@ Function Set-EdgeConnection {
         }
 
         # override the params from the file with any that are specified on the command line
-        # $ParameterList = (Get-Command -Name $MyInvocation.InvocationName).Parameters
-        # foreach ($key in $ParameterList.keys) {
         foreach ($key in $MyInvocation.BoundParameters.keys) {
             if ($key -ne "File") {
                 $var = Get-Variable -Name $key -ErrorAction SilentlyContinue
@@ -90,10 +88,8 @@ Function Set-EdgeConnection {
         if (! $PSBoundParameters.ContainsKey('Org')) {
             throw [System.ArgumentNullException] "Org", "you must provide the -Org parameter."
         }
-        $MyInvocation.MyCommand.Module.PrivateData.Connection['Org'] = $Org
-        
         if (! $PSBoundParameters.ContainsKey('User') ) {
-            throw [System.ArgumentNullException] "USer", "you must provide the -User parameter."
+            throw [System.ArgumentNullException] "User", "you must provide the -User parameter."
         }
 
         if (! $PSBoundParameters.ContainsKey('Password') -and ! $PSBoundParameters.ContainsKey('EncryptedPassword')) {
@@ -106,6 +102,7 @@ Function Set-EdgeConnection {
             $SecurePass = ConvertTo-SecureString -String $EncryptedPassword 
         }
 
+        $MyInvocation.MyCommand.Module.PrivateData.Connection['Org'] = $Org
         $MyInvocation.MyCommand.Module.PrivateData.Connection['MgmtUri'] = $MgmtUri
         $MyInvocation.MyCommand.Module.PrivateData.Connection['User'] = $User
         $MyInvocation.MyCommand.Module.PrivateData.Connection['SecurePass'] = $SecurePass
