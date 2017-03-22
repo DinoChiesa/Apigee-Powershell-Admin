@@ -115,6 +115,8 @@ You will need to run steps 2 and 3, for every powershell instance that uses PSAp
 
 ## Usage Examples
 
+Following are some examples. This is not a complete list!  Check the contents of the Public directory for the full list of functions available in this module. Each one is documented. 
+
 ### List commands provided by the module
 
 ```
@@ -130,7 +132,6 @@ Function        Export-EdgeApi                                     0.0.1      PS
 ```
 
 NB: The above list is not complete.
-
 
 ### Set Connection information
 
@@ -277,6 +278,25 @@ scopes         : {read, write, delete}
   ...
 
 ```
+
+
+### List API Products Succinctly
+
+```
+PS C:\dev\ps> get-edgeapiproduct
+Reservations
+ooxa-proxy-1-Product
+mcp_Hospitality Basic Product
+ApiTechForum
+oauthtest3
+Aircraft Maintenance
+verifyapikey1-Product
+Stock Quote Product
+Loyalty
+Offers1
+DPC Hospitality Basic Product
+```
+
 
 ### List API Proxies
 
@@ -469,6 +489,8 @@ type                 : Application
 
 ```
 
+
+
 ### List Environments
 
 ```
@@ -530,6 +552,32 @@ name           : my-hospitality-app
 scopes         : {}
 status         : approved
 ```
+
+
+### Revoke a Developer App
+
+```
+PS C:\dev\ps> Update-EdgeDevAppStatus  -Developer developer1@example.org -AppName Devapp-Dinotest-20170322 -Action revoke
+```
+
+### Approve a Developer App
+
+```
+PS C:\dev\ps> Update-EdgeDevAppStatus  -Developer developer1@example.org -AppName Devapp-Dinotest-20170322 -Action approve
+```
+
+### Approve a Specific Credential on a Developer App
+
+```
+PS C:\dev\ps> Update-EdgeDevAppStatus  -Developer developer1@example.org -AppName Devapp-Dinotest-20170322 =Key 18919ukjdjd -Action approve
+```
+
+### Approve a Specific Product for a Credential on a Developer App
+
+```
+PS C:\dev\ps> Update-EdgeDevAppStatus  -Developer developer1@example.org -AppName Devapp-Dinotest-20170322 =Key 18919ukjdjd -ApiProduct Product123 -Action approve
+```
+
 
 
 ### Create a Key Value Map (KVM)
