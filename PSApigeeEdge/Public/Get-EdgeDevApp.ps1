@@ -37,9 +37,9 @@ Function Get-EdgeDevApp {
 
     [cmdletbinding()]
     PARAM(
+        [string]$AppId,
         [string]$AppName,
         [string]$Developer,
-        [string]$AppId,
         [string]$Org,
         [Hashtable]$Params
     )
