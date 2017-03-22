@@ -69,14 +69,18 @@ Function Set-EdgeConnection {
             $ht
         }
         $ConnectionData = ReadJson $File
+        if ($ConnectionData.ContainsKey('File')) {
+            $ConnectionData.Remove( 'File' )
+        }
 
         # override the params from the file with any that are specified on the command line
-        $ParameterList = (Get-Command -Name $MyInvocation.InvocationName).Parameters
-        foreach ($key in $ParameterList.keys) {
+        # $ParameterList = (Get-Command -Name $MyInvocation.InvocationName).Parameters
+        # foreach ($key in $ParameterList.keys) {
+        foreach ($key in $MyInvocation.BoundParameters.keys) {
             if ($key -ne "File") {
                 $var = Get-Variable -Name $key -ErrorAction SilentlyContinue
                 if ($var) {
-                    $ConnectionData.Add( $var.name, $var.value)
+                    $ConnectionData.Set( $var.name, $var.value )
                 }
             }
         }
