@@ -114,25 +114,25 @@ function Migrate-EdgeApiKey {
         }
 
         # 5. Remove the credential from the original app
-        $Params.Set( 'AppName', $existingApp.name )
-        $Params.Set( 'Developer', $existingApp.developerId )
-        $Params.Set( 'Key', $existingCredential.consumerKey )
+        $Params['AppName'] = $existingApp.name
+        $Params['Developer']= $existingApp.developerId
+        $Params['Key']= $existingCredential.consumerKey
         Write-Host $( [string]::Format("removing original credential: {0}", $existingCredential.consumerKey  ) )
         Remove-EdgeAppCredential @Params
 
         # 6. explicitly add the older credential to the new app
-        $Params.Set( 'AppName', $DestinationAppName )
-        $Params.Set( 'Developer', $destDev.Email )
-        $Params.Set( 'Key', $existingCredential.consumerKey )
-        $Params.Set( 'Secret', $existingCredential.consumerSecret )
-        $Params.Set( 'Attributes', $( ConvertFrom-AttrListToHashtable $existingApp.attributes ) )
+        $Params['AppName']= $DestinationAppName
+        $Params['Developer']= $destDev.Email
+        $Params['Key']= $existingCredential.consumerKey
+        $Params['Secret']= $existingCredential.consumerSecret
+        $Params['Attributes']= $( ConvertFrom-AttrListToHashtable $existingApp.attributes )
         Write-Host $( [string]::Format("adding credential: {0}", $existingCredential.consumerKey  ) )
         Put-EdgeAppCredential @Params
 
         # 7. add the API Products to the new Credential
         $Params.Add('ApiProducts', @( $existingCredential.apiProducts |% { $_.apiproduct } ) )
         $Params.Remove( 'Secret')
-        $Params.Reomve( 'Attributes')
+        $Params.Remove( 'Attributes')
         Write-Host $( [string]::Format("updating API Products list:`n{0}", $(ConvertTo-Json $existingCredential.apiProducts)))
         $destinationCredential = $(Update-EdgeAppCredential @Params)
 
@@ -151,7 +151,7 @@ function Migrate-EdgeApiKey {
             $existingStatus = $_.status
             $oneProduct = $destinationCredential.apiProducts |? { $_.apiproduct -eq $existingProduct }
             if ($oneProduct.status -ne $existingStatus) {
-                $Params.Set('ApiProduct', $existingProduct )
+                $Params['ApiProduct']= $existingProduct
                 if ($existingStatus -eq "revoked") {
                     Write-Host $( [string]::Format("updating product {0} to revoked status", $existingProduct))
                     Revoke-EdgeAppCredential @Params

@@ -57,14 +57,12 @@ Function Revoke-EdgeAppCredential {
 
     if ($PSBoundParameters['Debug']) {
         $DebugPreference = 'Continue'
-        $Options.Add( 'Debug', $Debug )
+        $Options['Debug'] = $Debug
     }
     foreach ($key in $MyInvocation.BoundParameters.keys) {
         $var = Get-Variable -Name $key -ErrorAction SilentlyContinue
-        if ($var) {
-            $Options.Set( $var.name, $var.value )
-        }
+        if ($var) { $Options[$var.name] = $var.value }
     }
-    $Options.Set( 'Action', 'revoke' )
+    $Options['Action'] = 'revoke'
     Update-EdgeDevAppStatus @Options
 }

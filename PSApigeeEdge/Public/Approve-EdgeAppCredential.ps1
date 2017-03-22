@@ -57,9 +57,7 @@ Function Approve-EdgeAppCredential {
     }
     foreach ($key in $MyInvocation.BoundParameters.keys) {
         $var = Get-Variable -Name $key -ErrorAction SilentlyContinue
-        if ($var) {
-            $Options.Set( $var.name, $var.value )
-        }
+        if ($var) { $Options[$var.name] = $var.value }
     }
     $Options.Set( 'Action', 'approve' )
     Update-EdgeDevAppStatus @Options
