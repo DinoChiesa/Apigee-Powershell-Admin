@@ -133,6 +133,7 @@ function Migrate-EdgeApiKey {
         $Params.Add('ApiProducts', @( $existingCredential.apiProducts |% { $_.apiproduct } ) )
         $Params.Remove( 'Secret')
         $Params.Remove( 'Attributes')
+        $Params['Add'] = $True
         Write-Host $( [string]::Format("updating API Products list:`n{0}", $(ConvertTo-Json $existingCredential.apiProducts)))
         $destinationCredential = $(Update-EdgeAppCredential @Params)
 

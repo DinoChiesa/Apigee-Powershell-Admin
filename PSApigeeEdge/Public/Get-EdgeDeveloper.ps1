@@ -53,7 +53,6 @@ Function Get-EdgeDeveloper {
     if ($PSBoundParameters['Org']) {
         $Options.Add( 'Org', $Org )
     }
-
     if ($PSBoundParameters['Debug']) {
         $Options.Add( 'Debug', $Debug )
     }

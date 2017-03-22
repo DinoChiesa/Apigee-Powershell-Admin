@@ -53,12 +53,12 @@ Function Approve-EdgeAppCredential {
 
     if ($PSBoundParameters['Debug']) {
         $DebugPreference = 'Continue'
-        $Options.Add( 'Debug', $Debug )
+        $Options['Debug'] = $Debug
     }
     foreach ($key in $MyInvocation.BoundParameters.keys) {
         $var = Get-Variable -Name $key -ErrorAction SilentlyContinue
         if ($var) { $Options[$var.name] = $var.value }
     }
-    $Options.Set( 'Action', 'approve' )
+    $Options['Action'] = 'approve'
     Update-EdgeDevAppStatus @Options
 }
