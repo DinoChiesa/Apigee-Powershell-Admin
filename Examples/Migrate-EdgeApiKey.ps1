@@ -38,10 +38,9 @@ function Migrate-EdgeApiKey {
     )
 
     $Params = @{ }
-    if ($PSBoundParameters['Org']) {
-        $Params.Add( 'Org', $Org )
-    }
-    $Params.Add( 'ConsumerKey', $Key )
+    if ($PSBoundParameters['Org']) { $Params['Org'] = $Org }
+    if ($PSBoundParameters['Debug']) { $Params['Debug'] = $Debug }
+    $Params['ConsumerKey'] = $Key
     # 1. Find the existing app with that Key
     Write-Host $( [string]::Format("Finding the App with key {0}", $Key ) )
     $existingApp = Find-EdgeApp @Params
@@ -58,7 +57,7 @@ function Migrate-EdgeApiKey {
 
     # 2. locate the destination developer, make sure it exists and is active
     $Params.Remove( 'ConsumerKey' )
-    $Params.Add( 'Name', $DestinationDeveloper )
+    $Params['Name'] = $DestinationDeveloper
     Write-Host $( [string]::Format("Retrieving the Destination Developer {0}", $DestinationDeveloper ))
     $destDev = @( Get-EdgeDeveloper @Params )
     if ($destDev.status -eq 'active') {
@@ -81,14 +80,14 @@ function Migrate-EdgeApiKey {
 
     # 3a. determine if the destination app exists under the destination developer
     $Params.Remove( 'Name' )
-    $Params.Add( 'AppName', $DestinationAppName )
-    $Params.Add( 'Developer', $destDev.Email )
+    $Params['AppName'] = $DestinationAppName
+    $Params['Developer'] = $destDev.Email
     $destApp = Get-EdgeDevApp @Params
     $destAppIsNew = $False
     if ($destApp -eq $Null -or $destApp.status -eq 404) {
         # destination app does not exist
         # 3b. create a new app under that destination developer, generating new creds
-        $Params.Add('Attributes', $( ConvertFrom-AttrListToHashtable $existingApp.attributes ) )
+        $Params['Attributes'] = $( ConvertFrom-AttrListToHashtable $existingApp.attributes )
         Write-Host $( [string]::Format("destination App {0} does not exist; creating it", $destApp.name ) )
         $destApp = Create-EdgeDevApp @Params
         if ($destApp -eq $Null) {
@@ -108,7 +107,7 @@ function Migrate-EdgeApiKey {
         # 4. Optionally, Remove the implicitly generated credential from the app
         if ($destAppIsNew) {
             $generatedCredential = $destApp.credentials[0]
-            $Params.Add( 'Key', $generatedCredential.consumerKey )
+            $Params['Key'] = $generatedCredential.consumerKey
             Write-Host $( [string]::Format("removing generated credential: {0}", $generatedCredential.consumerKey  ) )
             Remove-EdgeAppCredential @Params
         }
@@ -130,7 +129,7 @@ function Migrate-EdgeApiKey {
         Put-EdgeAppCredential @Params
 
         # 7. add the API Products to the new Credential
-        $Params.Add('ApiProducts', @( $existingCredential.apiProducts |% { $_.apiproduct } ) )
+        $Params['ApiProducts'] = @( $existingCredential.apiProducts |% { $_.apiproduct } )
         $Params.Remove( 'Secret')
         $Params.Remove( 'Attributes')
         $Params['Add'] = $True
@@ -144,9 +143,8 @@ function Migrate-EdgeApiKey {
             Developer = $destDev.Email
             Key = $existingCredential.consumerKey
         }
-        if ($PSBoundParameters['Org']) {
-            $Params.Add( 'Org', $Org )
-        }
+        if ($PSBoundParameters['Org']) { $Params['Org'] = $Org }
+        if ($PSBoundParameters['Debug']) { $Params['Debug'] = $Debug }
         $existingCredential.apiProducts |% {
             $existingProduct = $_.apiproduct
             $existingStatus = $_.status

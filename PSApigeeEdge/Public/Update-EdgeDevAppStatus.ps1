@@ -70,10 +70,10 @@ Function Update-EdgeDevAppStatus {
 
     if ($PSBoundParameters['Debug']) {
         $DebugPreference = 'Continue'
-        $Options.Add( 'Debug', $Debug )
+        $Options['Debug'] = $Debug
     }
     if ($PSBoundParameters['Org']) {
-        $Options.Add( 'Org', $Org )
+        $Options['Org'] = $Org
     }
 
     if (!$PSBoundParameters['Developer']) {
@@ -92,21 +92,21 @@ Function Update-EdgeDevAppStatus {
 
     if ($PSBoundParameters['Key']) {
         if ($PSBoundParameters['ApiProduct']) {
-            $Options.Add( 'Collection', $(Join-Parts -Separator '/' -Parts 'developers', $Developer, 'apps', $AppName, 'keys', $Key, 'apiproducts' ) )
-            $Options.Add( 'Name', $ApiProduct )
+            $Options['Collection'] = $(Join-Parts -Separator '/' -Parts 'developers', $Developer, 'apps', $AppName, 'keys', $Key, 'apiproducts' )
+            $Options['Name'] = $ApiProduct
         }
         else {
-            $Options.Add( 'Collection', $(Join-Parts -Separator '/' -Parts 'developers', $Developer, 'apps', $AppName, 'keys' ) )
-            $Options.Add( 'Name', $Key )
+            $Options['Collection'] = $(Join-Parts -Separator '/' -Parts 'developers', $Developer, 'apps', $AppName, 'keys' )
+            $Options['Name'] = $Key
         }
     }
     else {
         # Just update the app status
-        $Options.Add( 'Collection', $(Join-Parts -Separator '/' -Parts 'developers', $Developer, 'apps' ) )
-        $Options.Add( 'Name', $AppName )
+        $Options['Collection'] = $(Join-Parts -Separator '/' -Parts 'developers', $Developer, 'apps' )
+        $Options['Name'] = $AppName
     }
-    $Options.Add( 'QParams', $( ConvertFrom-HashtableToQueryString @{ action = $Action } ))
+    $Options['QParams'] = $( ConvertFrom-HashtableToQueryString @{ action = $Action } )
 
-    Write-Debug ( "Options @Options`n" )
+    Write-Debug $( [string]::Format("Update-EdgeDevAppStatus Options {0}", $(ConvertTo-Json $Options )))
     Send-EdgeRequest @Options
 }

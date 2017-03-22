@@ -60,8 +60,8 @@ Function Revoke-EdgeAppCredential {
         $Options['Debug'] = $Debug
     }
     foreach ($key in $MyInvocation.BoundParameters.keys) {
-        $var = Get-Variable -Name $key -ErrorAction SilentlyContinue
-        if ($var) { $Options[$var.name] = $var.value }
+        $value = Get-Variable -Name $key -ErrorAction SilentlyContinue
+        if ($value) { $Options[$key] = $value }
     }
     $Options['Action'] = 'revoke'
     Update-EdgeDevAppStatus @Options
