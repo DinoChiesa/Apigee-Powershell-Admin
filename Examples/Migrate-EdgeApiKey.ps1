@@ -1,4 +1,3 @@
-# Migrate-ApiKeyForProduct.ps1
 function Migrate-EdgeApiKey {
     <#
     .SYNOPSIS
@@ -154,11 +153,11 @@ function Migrate-EdgeApiKey {
             if ($oneProduct.status -ne $existingStatus) {
                 $Params.Set('ApiProduct', $existingProduct )
                 if ($existingStatus -eq "revoked") {
-                    Write-Host $( [string]::Format("updating product {0} to revoked status", $existingProduct)
+                    Write-Host $( [string]::Format("updating product {0} to revoked status", $existingProduct))
                     Revoke-EdgeAppCredential @Params
                 }
                 elseif ($existingStatus -eq "approved" ) {
-                    Write-Host $( [string]::Format("updating product {0} to approved status", $existingProduct)
+                    Write-Host $( [string]::Format("updating product {0} to approved status", $existingProduct))
                     Approve-EdgeAppCredential @Params
                 }
             }
