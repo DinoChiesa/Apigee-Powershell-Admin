@@ -4,14 +4,14 @@ Function Get-EdgeAppCredential {
         Get the list of credentials for a developer app.
 
     .DESCRIPTION
-        Get the list of credentials for a developer app. You can also 
+        Get the list of credentials for a developer app. You can also
         use the Get-EdgeDevApp cmdlet to inquire the entire app, and then
-        examine the credentials property on the result.  This is a shortcut command
-        to retrieve only the credentials. 
+        examine the credentials property on the result. This is a shortcut command
+        to retrieve only the credentials.
 
     .PARAMETER AppId
         Optional. The id of the developer app to retrieve. You need to specify either AppId
-        or AppName and Developer to uniquely identify the app. 
+        or AppName and Developer to uniquely identify the app.
 
     .PARAMETER AppName
         Optional. The name of the developer app to retrieve.
@@ -50,9 +50,9 @@ Function Get-EdgeAppCredential {
         [string]$Org,
         [Hashtable]$Params
     )
-    
+
     $Options = @{ }
-    
+
     if ($PSBoundParameters['Debug']) {
         $Options.Add( 'Debug', $Debug )
     }
@@ -67,7 +67,7 @@ Function Get-EdgeAppCredential {
       (($PSBoundParameters['AppName'] -or $PSBoundParameters['Name']) -and $PSBoundParameters['AppId'])) {
       throw [System.ArgumentNullException] "AppName", "You must specify exactly one of -AppName or -AppId."
     }
-    
+
     if ($PSBoundParameters['AppId']) {
         $Options.Add( 'Collection', 'apps')
         $Options.Add( 'Name', $AppId )
@@ -80,7 +80,7 @@ Function Get-EdgeAppCredential {
         $Options.Add( 'Collection', $(Join-Parts -Separator '/' -Parts 'developers', $Developer, 'apps' ) )
         $Options.Add( 'Name', $RealAppName )
     }
-    
+
     $TempResult = Get-EdgeObject @Options
     if ($TempResult.credentials) {
         $TempResult.credentials

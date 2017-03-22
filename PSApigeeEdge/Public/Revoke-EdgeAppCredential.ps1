@@ -1,12 +1,12 @@
 Function Revoke-EdgeAppCredential {
     <#
     .SYNOPSIS
-        Revoke an existing credential or apiproduct on a credential for a developer app, without removing it.     
+        Revoke an existing credential or apiproduct on a credential for a developer app, without removing it.
 
     .DESCRIPTION
         Revoke an existing credential for a developer app, without removing it. Or, revoke a specific
-        API Product on a credential for a developer app. Revoking a credential or an apiproduct on a 
-        credential means the key will be rejected at runtime. 
+        API Product on a credential for a developer app. Revoking a credential or an apiproduct on a
+        credential means the key will be rejected at runtime.
 
     .PARAMETER AppName
         Required. The name of the developer app from which the credential will be revoked.
@@ -35,6 +35,10 @@ Function Revoke-EdgeAppCredential {
     .LINK
         Approve-EdgeAppCredential
 
+    .LINK
+        Update-EdgeDevAppStatus
+
+
     .FUNCTIONALITY
         ApigeeEdge
 
@@ -48,9 +52,9 @@ Function Revoke-EdgeAppCredential {
         [string]$ApiProduct,
         [string]$Org
     )
-    
+
     $Options = @{ }
-    
+
     if ($PSBoundParameters['Debug']) {
         $DebugPreference = 'Continue'
         $Options.Add( 'Debug', $Debug )
@@ -62,5 +66,5 @@ Function Revoke-EdgeAppCredential {
         }
     }
     $Options.Set( 'Action', 'revoke' )
-    Update-EdgeAppCredentialStatus @Options
+    Update-EdgeDevAppStatus @Options
 }

@@ -32,6 +32,9 @@ Function Approve-EdgeAppCredential {
     .LINK
         Revoke-EdgeAppCredential
 
+    .LINK
+        Update-EdgeDevAppStatus
+
     .FUNCTIONALITY
         ApigeeEdge
 
@@ -47,7 +50,7 @@ Function Approve-EdgeAppCredential {
     )
 
     $Options = @{ }
-    
+
     if ($PSBoundParameters['Debug']) {
         $DebugPreference = 'Continue'
         $Options.Add( 'Debug', $Debug )
@@ -59,6 +62,5 @@ Function Approve-EdgeAppCredential {
         }
     }
     $Options.Set( 'Action', 'approve' )
-    Update-EdgeAppCredentialStatus @Options
+    Update-EdgeDevAppStatus @Options
 }
-    
