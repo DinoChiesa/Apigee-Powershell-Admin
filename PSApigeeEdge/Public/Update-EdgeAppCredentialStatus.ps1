@@ -53,9 +53,9 @@ Function Update-EdgeAppCredentialStatus {
         [string]$Action,
         [string]$Org
     )
-    
+
     $Options = @{ }
-    
+
     if ($PSBoundParameters['Debug']) {
         $DebugPreference = 'Continue'
         $Options.Add( 'Debug', $Debug )
@@ -76,11 +76,11 @@ Function Update-EdgeAppCredentialStatus {
     if (!$PSBoundParameters['Action']) {
       throw [System.ArgumentNullException] "Action", "You must specify the -Action option."
     }
-    $Action = Action.ToLower()
+    $Action = $Action.ToLower()
     if ($Action -ne "approve" -and $Action -ne "revoke") {
       throw [System.ArgumentException] "Action", "Action must be 'revoke' or 'approve'."
     }
-    
+
     if ($PSBoundParameters['ApiProduct']) {
         $Options.Add( 'Collection', $(Join-Parts -Separator '/' -Parts 'developers', $Developer, 'apps', $AppName, 'keys', $Key, 'apiproducts' ) )
         $Options.Add( 'Name', $ApiProduct )
@@ -90,7 +90,7 @@ Function Update-EdgeAppCredentialStatus {
         $Options.Add( 'Name', $Key )
     }
     $Options.Add( 'QParams', $( ConvertFrom-HashtableToQueryString @{ action = $Action } ))
-    
+
     Write-Debug ( "Options @Options`n" )
     Send-EdgeRequest @Options
 }
