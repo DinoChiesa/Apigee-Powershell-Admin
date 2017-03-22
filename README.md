@@ -11,7 +11,7 @@ The goal is to allow Powershell scripts to do these things:
 | apiproducts   | list, query, create, delete, change quota, modify public/private, modify description, modify approvalType, modify scopes, add or remove proxy, modify custom attrs
 | developers    | list, query, create, delete, make active or inactive, modify custom attrs
 | developer app | list, query, create, delete, revoke, approve, add new credential, remove credential, modify custom attrs
-| credential    | list, revoke, approve, add apiproduct, remove apiproduct
+| credential    | list, revoke, approve, add apiproduct, remove apiproduct, revoke apiproduct, approve apiproduct
 | kvm           | list, query, create, delete, get all entries, get entry, add entry, modify entry, remove entry
 | cache         | list, query, create, delete, clear
 | keystore      | list, query, create, delete, import cert
@@ -57,7 +57,7 @@ This project is a work-in-progress. Here's the status:
 | apiproducts   | list, query, create, delete, modify description, modify approvalType, modify scopes, add or remove proxy, add or remove custom attrs, modify public/private, change quota | 
 | developers    | list, query, make active or inactive, create, delete, modify custom attrs | 
 | developer app | list, query, create, delete, revoke, approve, add new credential, remove credential | modify custom attrs
-| credential    | list, revoke, approve, add apiproduct, remove apiproduct |
+| credential    | list, revoke, approve, add apiproduct, remove apiproduct, revoke apiproduct, approve apiproduct |
 | kvm           | list, query, create, delete, get all entries, get entry, add entry, modify entry, remove entry |
 | cache         | list, query, create, delete, clear | 
 | keystore      | list, query, create, delete | import cert
