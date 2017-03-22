@@ -59,7 +59,7 @@ function Migrate-EdgeApiKey {
     # 2. locate the destination developer, make sure it exists and is active
     $Params.Remove( 'ConsumerKey' )
     $Params.Add( 'Name', $DestinationDeveloper )
-    Write-Host "Retrieving the Developer for that app"
+    Write-Host $( [string]::Format("Retrieving the Destination Developer {0}", $DestinationDeveloper ))
     $destDev = @( Get-EdgeDeveloper @Params )
     if ($destDev.status -eq 'active') {
         if ($destDev.developerId -eq $existingApp.developerId) {
