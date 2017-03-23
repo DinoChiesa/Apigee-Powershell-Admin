@@ -61,10 +61,7 @@ Function Revoke-EdgeAppCredential {
     }
     foreach ($k in $MyInvocation.BoundParameters.keys) {
         $var = Get-Variable -Name $k -ErrorAction SilentlyContinue
-        if ($var) {
-            Write-Host $( [string]::Format("key[{0}] value[{1}]", $k, $var.value) )
-            $Options[$k] = $var.value
-        }
+        if ($var) { $Options[$k] = $var.value }
     }
     $Options['Action'] = 'revoke'
     Write-Debug $( [string]::Format("Revoke-EdgeAppCredential Options {0}", $(ConvertTo-Json $Options )))
