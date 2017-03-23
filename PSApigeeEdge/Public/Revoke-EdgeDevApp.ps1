@@ -69,8 +69,7 @@ Function Revoke-EdgeDevApp {
           throw [System.ArgumentNullException] "Name", 'use -Name with -Developer'
         }
         if ($PSBoundParameters['Key']) {
-            $Options['Collection'] = $( Join-Parts -Separator '/' -Parts 'developers',
-                                            $Developer, 'apps', $Name, 'keys' ) )
+            $Options['Collection'] = $( Join-Parts -Separator '/' -Parts 'developers', $Developer, 'apps', $Name, 'keys' )
             $Options['Name'] = $Key
         }
         else {

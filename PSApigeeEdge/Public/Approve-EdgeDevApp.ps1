@@ -62,8 +62,7 @@ Function Approve-EdgeDevApp {
         $RealAppName = if ($PSBoundParameters['AppName']) { $AppName } else { $Name }
         # also handle key approval?   Not sure I like this option.
         if ($PSBoundParameters['Key']) {
-            $Options['Collection'] = $( Join-Parts -Separator '/' -Parts 'developers',
-                                            $Developer, 'apps', $RealAppName, 'keys' )
+            $Options['Collection'] = $( Join-Parts -Separator '/' -Parts 'developers', $Developer, 'apps', $RealAppName, 'keys' )
             $Options['Name'] = $Key
         }
         else {
