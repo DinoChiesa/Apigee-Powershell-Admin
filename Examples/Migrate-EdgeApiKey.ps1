@@ -114,16 +114,16 @@ function Migrate-EdgeApiKey {
 
         # 5. Remove the credential from the original app
         $Params['AppName'] = $existingApp.name
-        $Params['Developer']= $existingApp.developerId
-        $Params['Key']= $existingCredential.consumerKey
+        $Params['Developer'] = $existingApp.developerId
+        $Params['Key'] = $existingCredential.consumerKey
         Write-Host $( [string]::Format("removing original credential: {0}", $existingCredential.consumerKey  ) )
         Remove-EdgeAppCredential @Params
 
         # 6. explicitly add the older credential to the new app
-        $Params['AppName']= $DestinationAppName
-        $Params['Developer']= $destDev.Email
-        $Params['Key']= $existingCredential.consumerKey
-        $Params['Secret']= $existingCredential.consumerSecret
+        $Params['AppName'] = $DestinationAppName
+        $Params['Developer'] = $destDev.Email
+        $Params['Key'] = $existingCredential.consumerKey
+        $Params['Secret'] = $existingCredential.consumerSecret
         $Params['Attributes']= $( ConvertFrom-AttrListToHashtable $existingApp.attributes )
         Write-Host $( [string]::Format("adding credential: {0}", $existingCredential.consumerKey  ) )
         Put-EdgeAppCredential @Params
