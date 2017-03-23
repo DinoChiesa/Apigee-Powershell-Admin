@@ -61,7 +61,7 @@ Function Get-EdgeApiDeployment {
     }
     $Options.Add( 'Name', $Path )
 
-    Write-Debug ( "Options @Options`n" )
+    Write-Debug ([string]::Format("Options {0}`n", $(ConvertTo-Json $Options -Compress ) ) )
 
     if ( ! $PSBoundParameters['Revision'] ) {
         # an array of environments. Map it appropriately

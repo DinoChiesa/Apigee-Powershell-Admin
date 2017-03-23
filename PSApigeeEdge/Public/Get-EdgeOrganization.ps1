@@ -29,13 +29,12 @@ Function Get-EdgeOrganization {
 
     if ($PSBoundParameters['Debug']) {
         $DebugPreference = 'Continue'
-        $Options.Add( 'Debug', $Debug )
+        $Options['Debug'] = $Debug
     }
     if ($PSBoundParameters['Org']) {
-        $Options.Add( 'Org', $Org )
+        $Options['Org'] = $Org
     }
 
-    Write-Debug ( "Options @Options`n" )
-
+    Write-Debug $( [string]::Format("Get-EdgeOrganization Options {0}", $(ConvertTo-Json $Options )))
     Get-EdgeObject @Options
 }

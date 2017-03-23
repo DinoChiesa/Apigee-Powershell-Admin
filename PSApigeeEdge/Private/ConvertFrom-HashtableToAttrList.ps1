@@ -16,7 +16,7 @@ function ConvertFrom-HashtableToAttrList {
       The string used for the value of the k/v pair. Defaults to 'value'.
 
     .RETURNVALUE
-      An array of objects.
+      An array of hashtable objects with name,value keys. 
 
     .EXAMPLE
            ConvertFrom-HashTableToAttrList -Values @{

@@ -1,34 +1,34 @@
 Function Send-EdgeRequest {
     <#
     .SYNOPSIS
-        Send a request to Apigee Edge admin endpoint.
-        
+        Send a POST request to Apigee Edge admin endpoint.
+
     .DESCRIPTION
-        Send a request to Apigee Edge admin endpoint. This can be used to create
-        an object in Apigee Edge, to Update an object, Revoke a key, etc. 
+        Send a POST request to Apigee Edge admin endpoint. This can be used to create
+        an object in Apigee Edge, to Update an object, Revoke a key, etc.
 
     .PARAMETER Collection
-        Required. Type of object to create. This may be a composite. 
+        Required. Type of object to create. This may be a composite.
 
         Example: 'developers', 'apis', or 'apiproducts', or 'developers/dino@apigee.com/apps'
 
     .PARAMETER Name
-        Optional. a Particular name within the collection. 
+        Optional. a Particular name within the collection.
 
     .PARAMETER QParams
         Optional. Hashtable, which will be serialized as query params.
-        
+
     .PARAMETER NoAccept
         Optional. A string; set it to turn off the Accept header.
-        
+
     .PARAMETER ContentType
         Optional. A string, to override the content-type header.
-        
+
     .PARAMETER Payload
-        Optional. Hashtable, which will become the payload of the POST method. Serialized as JSON. 
+        Optional. Hashtable, which will become the payload of the POST method. Serialized as JSON.
 
     .PARAMETER Org
-        The Apigee Edge organization. 
+        The Apigee Edge organization.
 
     .EXAMPLE
         Send-EdgeRequest -Collection 'developers/dino@apigee.com/apps' -Payload @{
@@ -52,7 +52,7 @@ Function Send-EdgeRequest {
         [string]$Org,
         [Hashtable]$Payload
     )
-    
+
     if ($PSBoundParameters['Debug']) {
         $DebugPreference = 'Continue'
     }
@@ -81,11 +81,11 @@ Function Send-EdgeRequest {
     }
 
     if ($PSBoundParameters['QParams']) {
-         Write-Debug ( "QParams: $QParams`n" )
+         Write-Debug ( "Send-EdgeRequest QParams: $QParams`n" )
          $BaseUri = "${BaseUri}?${QParams}"
     }
-    Write-Debug ( "Uri $BaseUri`n" )
-    
+    Write-Debug ( "Send-EdgeRequest Uri $BaseUri`n" )
+
     $IRMParams = @{
         Uri = $BaseUri
         Method = 'POST'
@@ -102,14 +102,14 @@ Function Send-EdgeRequest {
     else {
         $IRMParams.Headers.Add('content-type', 'application/x-www-form-urlencoded')
     }
-    
+
     if ($PSBoundParameters['NoAccept']) {
       $IRMParams.Headers.Remove('Accept')
     }
     if ($PSBoundParameters['ContentType']) {
       $IRMParams.Headers['content-type'] = $ContentType  # overwrite
     }
-    
+
     Write-Debug ( "Running $($MyInvocation.MyCommand).`n" +
                  "Invoke-RestMethod parameters:`n$($IRMParams | Format-List | Out-String)" )
 

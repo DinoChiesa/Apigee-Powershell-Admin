@@ -53,6 +53,6 @@ Function Delete-EdgeApi {
         $Options.Add( 'Name', $Name )
     }
 
-    Write-Debug ( "Options @Options`n" )
+    Write-Debug ([string]::Format("Options {0}`n", $(ConvertTo-Json $Options -Compress ) ) )
     Delete-EdgeObject @Options
 }

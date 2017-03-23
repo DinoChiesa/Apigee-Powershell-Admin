@@ -30,27 +30,23 @@ Function Get-EdgeEnvironment {
         [string]$Org,
         [Hashtable]$Params
     )
-    
-    if ($PSBoundParameters['Debug']) {
-        $DebugPreference = 'Continue'
-    }
-    
+
     $Options = @{
         Collection = 'environments'
     }
-    
+
     if ($PSBoundParameters['Debug']) {
-        $Options.Add( 'Debug', $Debug )
+        $DebugPreference = 'Continue'
+        $Options['Debug'] = $Debug
     }
     if ($PSBoundParameters['Org']) {
-        $Options.Add( 'Org', $Org )
+        $Options['Org'] = $Org
     }
-    
+
     if ($PSBoundParameters['Name']) {
-        $Options.Add( 'Name', $Name )
+        $Options['Name'] = $Name
     }
 
-    Write-Debug ( "Options @Options`n" )
-
+    Write-Debug $( [string]::Format("Get-EdgeEnvironment Options {0}", $(ConvertTo-Json $Options )))
     Get-EdgeObject @Options
 }

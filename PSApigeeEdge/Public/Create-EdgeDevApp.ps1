@@ -7,11 +7,15 @@ Function Create-EdgeDevApp {
         Create a developer app in Apigee Edge. This will generate a single
         credential for the app, with a list of api Products and optionally an expiry. 
 
-    .PARAMETER Name
-        The name of the app. It must be unique for this developer. 
+    .PARAMETER AppName
+        Required. The name of the app. It must be unique for this developer. 
+
+    .PARAMETER DisplayName
+        Optional. The displayName of the app. If omitted, the AppName will be used
+        for the DisplayName.
 
     .PARAMETER Developer
-        The id or email of the developer for which to create the app.
+        Required. The id or email of the developer for which to create the app.
 
     .PARAMETER ApiProducts
         An array of strings, the names of API Products that should be enabled for the
@@ -25,25 +29,26 @@ Function Create-EdgeDevApp {
         The default is no expiry.
 
     .PARAMETER CallbackUrl
-        Optional. The callback URL for this app.  Used for 3-legged OAuth. 
+        Optional. The callback URL for this app. Used this is the app will employ 3-legged OAuth.
 
     .PARAMETER Attributes
         Optional. Hashtable specifying custom attributes for the app. 
 
     .PARAMETER Org
-        The Apigee Edge organization. The default is to use the value from Set-EdgeConnection.
+        Optional. The Apigee Edge organization. The default is to use the value from Set-EdgeConnection.
 
     .EXAMPLE
-        Create-EdgeDevApp -Name abcdefg-1 -Developer Elaine@example.org
+        Create-EdgeDevApp -AppName abcdefg-1 -Developer Elaine@example.org
 
     .FUNCTIONALITY
         ApigeeEdge
-
     #>
 
     [cmdletbinding()]
     param(
-        [Parameter(Mandatory=$True)][string]$Name,
+        [string]$Name,
+        [string]$AppName,
+        [string]$DisplayName,
         [Parameter(Mandatory=$True)][string]$Developer,
         [Parameter(Mandatory=$True)][string[]]$ApiProducts,
         [string]$Expiry,
@@ -61,9 +66,10 @@ Function Create-EdgeDevApp {
     if (!$PSBoundParameters['Developer']) {
       throw [System.ArgumentNullException] "Developer", "You must specify the -Developer option."
     }
-    if (!$PSBoundParameters['Name']) {
-      throw [System.ArgumentNullException] "Name", "You must specify the -Name option."
+    if (!$PSBoundParameters['Name'] -and !$PSBoundParameters['AppName']) {
+        throw [System.ArgumentNullException] "AppName", 'You must specify the -AppName option.'
     }
+    $RealAppName = if ($PSBoundParameters['AppName']) { $AppName } else { $Name }
 
     $coll = Join-Parts -Separator '/' -Parts 'developers', $Developer, 'apps'
     $Options.Add( 'Collection', $coll )
@@ -72,7 +78,8 @@ Function Create-EdgeDevApp {
     }
 
     $Payload = @{
-      name = $Name
+      name = $RealAppName
+      displayName = if ($PSBoundParameters['DisplayName']) { $DisplayName } else { $RealAppName }
       apiProducts = $ApiProducts
     }
 
@@ -87,8 +94,8 @@ Function Create-EdgeDevApp {
       $Payload.Add('callbackUrl', $CallbackUrl )
     }
     if ($PSBoundParameters['Attributes']) {
-      $a = @(ConvertFrom-HashtableToAttrList -Values $Attributes)
-      $Payload.Add('attributes', $a )
+        $a = @(ConvertFrom-HashtableToAttrList -Values $Attributes)
+        $Payload.Add('attributes', $a )
     }
     $Options.Add( 'Payload', $Payload )
 

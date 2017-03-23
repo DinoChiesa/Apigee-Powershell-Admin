@@ -6,12 +6,12 @@ Function Get-EdgeDevApp {
     .DESCRIPTION
         Get one or more developer apps from Apigee Edge.
 
-    .PARAMETER Id
+    .PARAMETER AppId
         The id of the developer app to retrieve.
         The default is to list all developer app IDs.
-        Do not specify this if specifying -Name.
+        Do not specify this if specifying -AppName.
 
-    .PARAMETER Name
+    .PARAMETER AppName
         The name of the particular developer app to retrieve. You must specify -Developer when
         using this option. 
 
@@ -20,24 +20,26 @@ Function Get-EdgeDevApp {
         The default is to list apps for all developers.
 
     .PARAMETER Org
-        The Apigee Edge organization. The default is to use the value from Set-EdgeConnection.
+        Optional. The Apigee Edge organization. The default is to use the value from Set-EdgeConnection.
+
+    .EXAMPLE
+        $appset = @( Get-EdgeDevApp -Params @{ expand = $True } )
 
     .EXAMPLE
         Get-EdgeDevApp -Org cap500
 
     .EXAMPLE
-        Get-EdgeDevApp -Id  32ae4dbe-2e39-4225-b994-242042089723
+        Get-EdgeDevApp -Id 32ae4dbe-2e39-4225-b994-242042089723
 
     .FUNCTIONALITY
         ApigeeEdge
-
     #>
 
     [cmdletbinding()]
     PARAM(
-        [string]$Name,
+        [string]$AppId,
+        [string]$AppName,
         [string]$Developer,
-        [string]$Id,
         [string]$Org,
         [Hashtable]$Params
     )
@@ -56,14 +58,14 @@ Function Get-EdgeDevApp {
 
     if ($PSBoundParameters['Developer']) {
         $Options.Add( 'Collection', $(Join-Parts -Separator '/' -Parts 'developers', $Developer, 'apps' ) )
-        if ($PSBoundParameters['Name']) {
-            $Options.Add( 'Name', $Name )
+        if ($PSBoundParameters['AppName']) {
+            $Options.Add( 'Name', $AppName )
         }
     }
     else {
         $Options.Add( 'Collection', 'apps')
-        if ($PSBoundParameters['Id']) {
-            $Options.Add( 'Name', $Id )
+        if ($PSBoundParameters['AppId']) {
+            $Options.Add( 'Name', $AppId )
         }
     }
 

@@ -6,22 +6,31 @@ Function Set-EdgeConnection {
     .DESCRIPTION
         Sets connection information, including Organization name, and user credentials, for Apigee Edge administrative actions.
 
+    .PARAMETER File
+        Optional. A file that contains a JSON representation of the connection informtion. Example:
+
+            {
+              "Org" : "myorgname",
+              "User" : "dchiesa@google.com",
+              "EncryptedPassword" : "01000000d08c9ddf011....."
+            }
+
     .PARAMETER Org
-        Required. The Apigee Edge organization. 
+        Optional. Required if File is not specified. This is the Apigee Edge organization.
 
     .PARAMETER User
-        Required. The Apigee Edge administrative user. 
+        Required. The Apigee Edge administrative user.
 
     .PARAMETER Password
         Optional. The plaintext password for the Apigee Edge administrative user. Specify this
-        or the EncryptedPassword. 
+        or the EncryptedPassword.
 
     .PARAMETER EncryptedPassword
         Optional. The encrypted password for the Apigee Edge administrative user. Use this as an
         alternative to the Password parameter. To get the encrypted password, you can do this:
 
          $SecurePass = Read-Host -assecurestring "Please enter the password"
-         ConvertFrom-SecureString $SecurePass
+         $EncryptedString = ConvertFrom-SecureString $SecurePass
 
     .PARAMETER MgmtUri
         The base Uri for the Edge API Management server.
@@ -39,34 +48,63 @@ Function Set-EdgeConnection {
     [cmdletbinding()]
     [Diagnostics.CodeAnalysis.SuppressMessage("PSAvoidUsingUserNameAndPassWordParams","")]
     [Diagnostics.CodeAnalysis.SuppressMessage("PSAvoidUsingConvertToSecureStringWithPlainText","")]
-    
+
     param(
-        [Parameter(Mandatory=$True)][string]$Org,
-        [Parameter(Mandatory=$True)][string]$User,
+        [string]$File,
+        [string]$Org,
+        [string]$User,
         [string]$Password,
         [string]$EncryptedPassword,
         [string]$MgmtUri = 'https://api.enterprise.apigee.com'
     )
 
-    if( $PSBoundParameters.ContainsKey('Org')) {
-      $MyInvocation.MyCommand.Module.PrivateData.Connection['Org'] = $Org
-    }
-    
-    if(! $PSBoundParameters.ContainsKey('User') ) {
-       throw [System.ArgumentNullException] "USer", "you must provide the -User parameter."
-    }
+    if ($PSBoundParameters.ContainsKey('File')) {
+        Function ReadJson {
+            param($filename)
+            $json = Get-Content $filename -Raw | ConvertFrom-JSON
+            $ht = @{}
+            foreach ($prop in $json.psobject.properties.name) {
+                $ht[$prop] = $json.$prop
+            }
+            $ht
+        }
+        $ConnectionData = ReadJson $File
+        if ($ConnectionData.ContainsKey('File')) {
+            $ConnectionData.Remove( 'File' )
+        }
 
-    if (! $PSBoundParameters.ContainsKey('Password') -and ! $PSBoundParameters.ContainsKey('EncryptedPassword')) {
-         $SecurePass = Read-Host -assecurestring "Please enter the password for ${User}"
-    }
-    elseif ($PSBoundParameters.ContainsKey('Password')) {
-         $SecurePass = ConvertTo-SecureString -String $Password -AsPlainText -Force
+        # override the params from the file with any that are specified on the command line
+        foreach ($key in $MyInvocation.BoundParameters.keys) {
+            if ($key -ne "File") {
+                $var = Get-Variable -Name $key -ErrorAction SilentlyContinue
+                if ($var) {
+                    $ConnectionData[$var.name] = $var.value
+                }
+            }
+        }
+        Set-EdgeConnection @ConnectionData
     }
     else {
-         $SecurePass = ConvertTo-SecureString -String $EncryptedPassword 
-    }
+        if (! $PSBoundParameters.ContainsKey('Org')) {
+            throw [System.ArgumentNullException] "Org", "you must provide the -Org parameter."
+        }
+        if (! $PSBoundParameters.ContainsKey('User') ) {
+            throw [System.ArgumentNullException] "User", "you must provide the -User parameter."
+        }
 
-    $MyInvocation.MyCommand.Module.PrivateData.Connection['MgmtUri'] = $MgmtUri
-    $MyInvocation.MyCommand.Module.PrivateData.Connection['User'] = $User
-    $MyInvocation.MyCommand.Module.PrivateData.Connection['SecurePass'] = $SecurePass
+        if (! $PSBoundParameters.ContainsKey('Password') -and ! $PSBoundParameters.ContainsKey('EncryptedPassword')) {
+            $SecurePass = Read-Host -assecurestring "Please enter the password for ${User}"
+        }
+        elseif ($PSBoundParameters.ContainsKey('Password')) {
+            $SecurePass = ConvertTo-SecureString -String $Password -AsPlainText -Force
+        }
+        else {
+            $SecurePass = ConvertTo-SecureString -String $EncryptedPassword
+        }
+
+        $MyInvocation.MyCommand.Module.PrivateData.Connection['Org'] = $Org
+        $MyInvocation.MyCommand.Module.PrivateData.Connection['MgmtUri'] = $MgmtUri
+        $MyInvocation.MyCommand.Module.PrivateData.Connection['User'] = $User
+        $MyInvocation.MyCommand.Module.PrivateData.Connection['SecurePass'] = $SecurePass
+    }
 }

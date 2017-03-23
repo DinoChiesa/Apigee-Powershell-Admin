@@ -8,3 +8,6 @@ ConnectionData.json
 *.zip
 notes-DO-NOT-COMMIT.txt
 todo.txt
+
+**/*.*~
+**/#*.*#

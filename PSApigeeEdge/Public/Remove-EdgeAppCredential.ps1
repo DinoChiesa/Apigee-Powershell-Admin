@@ -6,8 +6,11 @@ Function Remove-EdgeAppCredential {
     .DESCRIPTION
         Remove an existing credential from a developer app.
 
-    .PARAMETER Name
+    .PARAMETER AppName
         The name of the developer app from which the credential will be removed.
+
+    .PARAMETER Name
+        A synonym for AppName.
 
     .PARAMETER Developer
         The id or email of the developer that owns the app from which the credential will be removed.
@@ -19,7 +22,7 @@ Function Remove-EdgeAppCredential {
         The Apigee Edge organization. The default is to use the value from Set-EdgeConnection.
 
     .EXAMPLE
-        Remove-EdgeAppCredential -Name DPC6 -Developer dchiesa@example.org -Key pd0mg1FuedmfCpY9gWZonQmR2fGD3Osw
+        Remove-EdgeAppCredential -AppName DPC6 -Developer dchiesa@example.org -Key pd0mg1FuedmfCpY9gWZonQmR2fGD3Osw
 
     .FUNCTIONALITY
         ApigeeEdge
@@ -28,46 +31,37 @@ Function Remove-EdgeAppCredential {
 
     [cmdletbinding()]
     PARAM(
-        [Parameter(Position=0,
-         Mandatory=$True,
-         ValueFromPipeline=$True)]
+        [string]$AppName,
         [string]$Name,
-        
-        [Parameter(Position=1,
-         Mandatory=$True,
-         ValueFromPipeline=$True)]
         [string]$Developer,
-
-        [Parameter(Position=2,
-         Mandatory=$True,
-         ValueFromPipeline=$True)]
         [string]$Key,
-
         [string]$Org
     )
-    
+
     $Options = @{ }
-    
+
     if ($PSBoundParameters['Debug']) {
-        $Options.Add( 'Debug', $Debug )
+        $Options['Debug'] = $Debug
     }
     if ($PSBoundParameters['Org']) {
-        $Options.Add( 'Org', $Org )
+        $Options['Org'] = $Org
     }
 
     if (!$PSBoundParameters['Developer']) {
         throw [System.ArgumentNullException] "Developer", "You must specify the -Developer option."
     }
-    if (!$PSBoundParameters['Name']) {
-      throw [System.ArgumentNullException] "Name", "You must specify the -Name option."
+    if (!$PSBoundParameters['AppName'] -and !$PSBoundParameters['Name']) {
+      throw [System.ArgumentNullException] "AppName", "You must specify the -AppName option."
     }
+    $RealAppName = if ($PSBoundParameters['AppName']) { $AppName } else { $Name }
+
     if (!$PSBoundParameters['Key']) {
       throw [System.ArgumentNullException] "Key", "You must specify the -Key option."
     }
-    
-    $Options.Add( 'Collection', $(Join-Parts -Separator '/' -Parts 'developers', $Developer, 'apps', $Name, 'keys' ) )
-    $Options.Add( 'Name', $Key )
 
-    Write-Debug ( "Options @Options`n" )
+    $Options['Collection'] = $(Join-Parts -Separator '/' -Parts 'developers', $Developer, 'apps', $RealAppName, 'keys' )
+    $Options['Name'] = $Key
+
+    Write-Debug $( [string]::Format("Remove-EdgeAppCredential Options {0}", $(ConvertTo-Json $Options )))
     Delete-EdgeObject @Options
 }

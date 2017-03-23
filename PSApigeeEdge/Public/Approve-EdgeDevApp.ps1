@@ -6,19 +6,22 @@ Function Approve-EdgeDevApp {
     .DESCRIPTION
         Set the status of the developer app to 'Approved', which means the credentials
         will be treated as valid, at runtime. Or, alternatively, approve a single
-        credential within a developer app. 
+        credential within a developer app.
+
+    .PARAMETER AppName
+        The name of the app. You must specify the -Developer option if you use -AppName.
 
     .PARAMETER Name
-        The name of the app. You must specify the -Developer option if you use -Name. 
+        Synonum for AppName.
 
-    .PARAMETER Id
-        The id of the app. Use this in lieu of -Name and -Developer. 
+    .PARAMETER AppId
+        The id of the app. Use this in lieu of -AppName and -Developer.
 
     .PARAMETER Developer
         The id or email of the developer that owns the app.
 
     .PARAMETER Key
-        The Key to revoke. Use this to revoke a single credential, rather than the entire app. 
+        The Key to revoke. Use this to revoke a single credential, rather than the entire app.
 
     .PARAMETER Org
         The Apigee Edge organization. The default is to use the value from Set-EdgeConnection.
@@ -36,67 +39,55 @@ Function Approve-EdgeDevApp {
 
     [cmdletbinding()]
     PARAM(
-        [Parameter(Position=0,
-         Mandatory=$True,
-         ParameterSetName="byName",
-         ValueFromPipeline=$True)]
         [string]$Name,
-        
-        [Parameter(Position=1,
-         Mandatory=$True,
-         ParameterSetName="byName",
-         ValueFromPipeline=$True)]
+        [string]$AppName,
         [string]$Developer,
-        
-        [Parameter(Position=0,
-         Mandatory=$True,
-         ParameterSetName="byId",
-         ValueFromPipeline=$True)]
-        [string]$Id,
-        
+        [string]$AppId,
         [string]$Key,
         [string]$Org
     )
-    
+
     $Options = @{
        QParams = $( ConvertFrom-HashtableToQueryString @{ action = 'approve' } )
     }
-    
+
     if ($PSBoundParameters['Debug']) {
-        $Options.Add( 'Debug', $Debug )
+        $Options['Debug'] = $Debug
     }
-    
+
     if ($PSBoundParameters['Developer']) {
-        if (!$PSBoundParameters['Name']) {
-          throw [System.ArgumentNullException] "Name", 'use -Name with -Developer'
+        if (!$PSBoundParameters['Name'] -and !$PSBoundParameters['AppName']) {
+            throw [System.ArgumentNullException] "AppName", 'use -AppName and -Developer.'
         }
+        $RealAppName = if ($PSBoundParameters['AppName']) { $AppName } else { $Name }
+        # also handle key approval?   Not sure I like this option.
         if ($PSBoundParameters['Key']) {
-            $Options.Add( 'Collection', $( Join-Parts -Separator '/' -Parts 'developers',
-                                            $Developer, 'apps', $Name, 'keys' ) )
-            $Options.Add( 'Name', $Key)
+            $Options['Collection'] = $( Join-Parts -Separator '/' -Parts 'developers', $Developer, 'apps', $RealAppName, 'keys' )
+            $Options['Name'] = $Key
         }
         else {
-            $Options.Add( 'Collection', $( Join-Parts -Separator '/' -Parts 'developers', $Developer, 'apps' ) )
-            $Options.Add( 'Name', $Name)
+            $Options['Collection'] = $( Join-Parts -Separator '/' -Parts 'developers', $Developer, 'apps' )
+            $Options['Name'] = $RealAppName
         }
     }
     else {
-        if (!$PSBoundParameters['Id']) {
-          throw [System.ArgumentNullException] "Id", 'use -Id if not specifying -Name and -Developer'
+        if (!$PSBoundParameters['AppId']) {
+          throw [System.ArgumentNullException] "AppId", 'use -AppId if not specifying -AppName and -Developer'
         }
         if ($PSBoundParameters['Key']) {
-            $Options.Add( 'Collection', $( Join-Parts -Separator '/' -Parts 'apps', $Id, 'keys' ) )
-            $Options.Add( 'Name', $Key)
+            $Options['Collection'] = $( Join-Parts -Separator '/' -Parts 'apps', $AppId, 'keys' )
+            $Options['Name'] = $Key
         }
         else {
-          $Options.Add( 'Collection', 'apps')
-          $Options.Add( 'Name', $Id)
+          $Options['Collection'] = 'apps'
+          $Options['Name'] = $AppId
         }
     }
 
     if ($PSBoundParameters['Org']) {
-        $Options.Add( 'Org', $Org )
+        $Options['Org'] = $Org
     }
 
+    Write-Debug ([string]::Format("Approve-EdgeDevApp Options {0}`n", $(ConvertTo-Json $Options -Compress ) ) )
     Send-EdgeRequest @Options
 }

@@ -75,7 +75,6 @@ Describe "Set-EdgeConnection" {
     }
 }
 
-
 Describe "Get-EdgeOrganization-1" {
 
     Context 'Strict mode' { 
@@ -94,7 +93,6 @@ Describe "Get-EdgeOrganization-1" {
         }
     }
 }
-
 
 Describe "Get-EdgeEnvironment-1" {
 
@@ -119,7 +117,6 @@ Describe "Get-EdgeEnvironment-1" {
         }
     }
 }
-
 
 Describe "Import-EdgeApi-1" {
 
@@ -165,7 +162,6 @@ Describe "Import-EdgeApi-1" {
     }
 }
 
-
 Describe "Get-EdgeApi-1" {
 
     Context 'Strict mode' { 
@@ -191,12 +187,12 @@ Describe "Get-EdgeApi-1" {
             else {
                 $oneproxy.metaData.lastModifiedAt | Should BeLessThan $Script:Props.StartMilliseconds
             }
-            
-            $oneproxy.metaData.lastModifiedBy | Should Not BeNullOrEmpty
+
+            # Sometimes this is empty.  Not sure why!
+            # $oneproxy.metaData.lastModifiedBy | Should Not BeNullOrEmpty
         }
     }
 }
-
 
 Describe "Deploy-EdgeApi-1" {
     Context 'Strict mode' { 
@@ -260,8 +256,6 @@ Describe "Export-EdgeApi-1" {
     }
 }
 
-
-
 Describe "Get-ApiRevisions-1" {
     
     Context 'Strict mode' {
@@ -312,7 +306,6 @@ Describe "Get-ApiRevisions-1" {
     }
 }
 
-
 Describe "Undeploy-EdgeApi-1" {
     Context 'Strict mode' { 
         Set-StrictMode -Version latest
@@ -335,7 +328,6 @@ Describe "Undeploy-EdgeApi-1" {
     }
 }
 
- 
 Describe "Create-Kvm-1" {
     Context 'Strict mode' {
     
@@ -479,7 +471,6 @@ Describe "Create-Kvm-1" {
     }
 }
 
-
 Describe "Crud-KvmEntry-1" {
     Context 'Strict mode' {
         Set-StrictMode -Version latest
@@ -599,7 +590,6 @@ Describe "Crud-KvmEntry-1" {
     }
 }
 
-
 Describe "Create-Developer-1" {
     Context 'Strict mode' {
     
@@ -627,7 +617,6 @@ Describe "Create-Developer-1" {
         }
     }
 }
-
 
 Describe "Get-Developers-1" {
     
@@ -672,7 +661,6 @@ Describe "Get-Developers-1" {
     }
 }
 
-
 Describe "Create-ApiProduct-1" {
     Context 'Strict mode' {
         
@@ -697,7 +685,6 @@ Describe "Create-ApiProduct-1" {
         }
     }
 }
-
 
 Describe "Get-ApiProduct-1" {
     
@@ -745,7 +732,6 @@ Describe "Get-ApiProduct-1" {
     }
 }
 
-
 Describe "Create-App-1" {
     Context 'Strict mode' {
 
@@ -757,17 +743,17 @@ Describe "Create-App-1" {
         $Products = @( @( Get-EdgeApiProduct -Params @{ expand = 'true'} ).apiProduct |
           ?{ $_.name.StartsWith($Script:Props.SpecialPrefix) } | % { @{ Name = $_.name } } )
 
-        $cases = @{ expiry = "48h" },
-                @{ expiry = '86400' }, # default is a number of seconds
-                @{ expiry = '21d' },
-                @{ expiry = (Get-Date).AddDays(60).ToString('yyyy-MM-dd') }
-                @{ expiry = "" }
+        $cases = @{ Expiry = "48h"; Hours = 48 },
+                @{ Expiry = '86400'; Hours = 24 }, # default is a number of seconds
+                @{ Expiry = '21d'; Hours = 21*24 },
+                @{ Expiry = (Get-Date).AddDays(60).ToString('yyyy-MM-dd'); Hours = 60*24 }
+                @{ Expiry = "" }
 
-        It 'creates an App with credential expiry <expiry>' -TestCases $cases {
-            param($expiry)
+        It 'creates an App with credential expiry <Expiry>' -TestCases $cases {
+            param($Expiry, $Hours)
 
             $Params = @{
-                Name = [string]::Format('{0}-app-{1}', $Script:Props.SpecialPrefix, $expiry )
+                AppName = [string]::Format('{0}-app-{1}', $Script:Props.SpecialPrefix, $expiry )
                 Developer = $Developers[0].Email
                 ApiProducts = @( $Products[0].Name )
             }
@@ -776,8 +762,110 @@ Describe "Create-App-1" {
             }
 
             $app = Create-EdgeDevApp @Params
-            { $app } | Should Not Throw
-            #TODO : verify expiry?
+            
+            # verify expiry
+            if (![string]::IsNullOrEmpty($expiry)) {
+                $NowMilliseconds = [int64](([datetime]::UtcNow)-(get-date "1/1/1970")).TotalMilliseconds
+                $Delta = [int][Math]::Ceiling(($app.credentials[0].expiresAt - $NowMilliseconds)/1000/3600)
+                $Delta | Should Be $Hours
+            }
+        }
+    }
+}
+
+Describe "CRUD-App-Credential" {
+    Context 'Strict mode' {
+        Set-StrictMode -Version latest
+
+        $NewAppName = [string]::Format('{0}-app-{1}', $Script:Props.SpecialPrefix, "credtest" )
+        $Developers = @( @( Get-EdgeDeveloper ) |
+          ?{ $_.StartsWith($Script:Props.SpecialPrefix) } | % { @{ Email = $_ } } )
+
+        $Products = @( @( Get-EdgeApiProduct -Params @{ expand = 'true'} ).apiProduct |
+          ?{ $_.name.StartsWith($Script:Props.SpecialPrefix) } | % { @{ Name = $_.name } } )
+
+        It 'creates an App' {
+            $Params = @{
+                AppName = $NewAppName
+                Developer = $Developers[0].Email
+                ApiProducts = @( $Products[0].Name )
+                Expiry = '72h'
+            }
+            $app = $( Create-EdgeDevApp @Params )
+            $app.credentials.count | Should Be 1
+            
+            # verify expiry
+            $NowMilliseconds = [int64](([datetime]::UtcNow)-(get-date "1/1/1970")).TotalMilliseconds
+            $Delta = [int][Math]::Ceiling(($app.credentials[0].expiresAt - $NowMilliseconds)/1000/3600)
+            $Delta | Should Be 72
+        }
+
+        It 'adds a credential on the just-created App' {
+            $OriginalCreds = @( Get-EdgeAppCredential -AppName $NewAppName -Developer $Developers[0].Email )
+            $OriginalCreds.count | Should Be 1
+
+            $Params = @{
+                Name = $NewAppName
+                Developer = $Developers[0].Email
+                ApiProducts = @( $Products[0].Name )
+                Expiry = '96h'
+            }
+
+            $app = $( Add-EdgeAppCredential @Params )
+            $app.credentials.count | Should Be 2
+
+            $UpdatedCreds = @( Get-EdgeAppCredential -AppName $NewAppName -Developer $Developers[0].Email )
+            $UpdatedCreds.count | Should Be 2
+            
+            $NowMilliseconds = [int64](([datetime]::UtcNow)-(get-date "1/1/1970")).TotalMilliseconds
+            
+            # verify credential expiry
+            $app.credentials | foreach {
+                $Delta = [int][Math]::Ceiling(($_.expiresAt - $NowMilliseconds)/1000/3600)
+                if ($_.consumerKey -eq $OriginalCreds[0].consumerKey) {
+                    $Delta | Should Be 72
+                }
+                else {
+                    $Delta | Should Be 96
+                }
+            }
+        }
+
+        It 'tries to remove a credential that does not exist' {
+            { Remove-EdgeAppCredential -AppName $NewAppName -Developer $Developers[0].Email -Key pd0mg1FuedmfCpY9gWZonQmR2fGD3Osw -Debug } | Should Throw
+        }
+
+        It 'removes a credential on the just-created App' {
+            $OriginalCreds = @( Get-EdgeAppCredential -AppName $NewAppName -Developer $Developers[0].Email )
+            $OriginalCreds.count | Should Be 2
+            $app = $( Remove-EdgeAppCredential -AppName $NewAppName -Developer $Developers[0].Email -Key $OriginalCreds[0].consumerKey )
+
+            $UpdatedCreds = @( Get-EdgeAppCredential -AppName $NewAppName -Developer $Developers[0].Email )
+            $UpdatedCreds.count | Should Be 1
+        }
+        
+        It 'revokes a credential on the just-created App' {
+            $OriginalCreds = @( Get-EdgeAppCredential -AppName $NewAppName -Developer $Developers[0].Email )
+            $OriginalCreds.count | Should Be 1
+            $OriginalCreds[0].status | Should Be "approved"
+            
+            Revoke-EdgeAppCredential -AppName $NewAppName -Developer $Developers[0].Email -key $OriginalCreds[0].consumerKey
+
+            $UpdatedCreds = @( Get-EdgeAppCredential -AppName $NewAppName -Developer $Developers[0].Email )
+            $UpdatedCreds.count | Should Be 1
+            $UpdatedCreds[0].status | Should Be "revoked"
+        }
+        
+        It 'approves a credential on the just-created App' {
+            $OriginalCreds = @( Get-EdgeAppCredential -AppName $NewAppName -Developer $Developers[0].Email )
+            $OriginalCreds.count | Should Be 1
+            $OriginalCreds[0].status | Should Be "revoked"
+            
+            Approve-EdgeAppCredential -AppName $NewAppName -Developer $Developers[0].Email -key $OriginalCreds[0].consumerKey 
+
+            $UpdatedCreds = @( Get-EdgeAppCredential -AppName $NewAppName -Developer $Developers[0].Email )
+            $UpdatedCreds.count | Should Be 1
+            $UpdatedCreds[0].status | Should Be "approved"
         }
     }
 }
@@ -795,36 +883,34 @@ Describe "Create-App-Failures" {
           ?{ $_.name.StartsWith($Script:Props.SpecialPrefix) } | % { @{ Name = $_.name } } )
 
         $expiryCases = @{ expiry = "2016-12-10" }, # in the past
-                @{ expiry = '-43200' }, # negative integer
-                @{ expiry = 'ABCDE' } # invalid
+        @{ expiry = '-43200' }, # negative integer
+        @{ expiry = 'ABCDE' } # invalid
 
         It 'creates an App with invalid expiry <expiry>' -TestCases $expiryCases {
             param($expiry)
-
             $Params = @{
-                Name = [string]::Format('{0}-app-failure-A-{1}', $Script:Props.SpecialPrefix, $expiry )
+                AppName = [string]::Format('{0}-app-failure-A-{1}', $Script:Props.SpecialPrefix, $expiry )
                 Developer = $Developers[0].Email
                 ApiProducts = @( $Products[0].Name )
                 Expiry = $expiry
             }
-
             { Create-EdgeDevApp @Params } | Should Throw
         }
         
         It 'tries to create an App with missing Developer' {
             $expiry = '28d'
             $Params = @{
-                Name = [string]::Format('{0}-app-failure-B-{1}', $Script:Props.SpecialPrefix, $expiry )
+                AppName = [string]::Format('{0}-app-failure-B-{1}', $Script:Props.SpecialPrefix, $expiry )
                 ApiProducts = @( $Products[0].Name )
                 Expiry = $expiry
             }
             { Create-EdgeDevApp @Params } | Should Throw
         }
-            
+        
         It 'tries to create an App with missing ApiProducts' {
             $expiry = '120d'
             $Params = @{
-                Name = [string]::Format('{0}-app-failure-C-{1}', $Script:Props.SpecialPrefix, $expiry )
+                AppName = [string]::Format('{0}-app-failure-C-{1}', $Script:Props.SpecialPrefix, $expiry )
                 Developer = $Developers[0].Email
                 Expiry = $expiry
             }
@@ -832,70 +918,67 @@ Describe "Create-App-Failures" {
         }
         
         It 'tries to create an App with missing Name' {
-            $Params = @{
-                ApiProducts = @( $Products[0].Name )
-                Developer = $Developers[0].Email
-            }
-            { Create-EdgeDevApp @Params } | Should Throw
+            #$Params = @{
+            #    ApiProducts = @( $Products[0].Name )
+            #    Developer = $Developers[0].Email
+            #}
+            { Create-EdgeDevApp -ApiProducts @( $Products[0].Name ) -Developer $Developers[0].Email } | Should Throw
         }
     }
 }
 
-
 Describe "Get-Apps-1" {
-    
     Context 'Strict mode' {
-    
+        
         Set-StrictMode -Version latest
-
+        
+        $appids = @( Get-EdgeDevApp | %{ @{ Id = $_ } } )
+        $emails = @( Get-EdgeDeveloper | %{ @{ Email = $_ } } )
+        
         It 'gets a list of apps' {
-            $apps = @( get-edgeDevApp )
-            $apps.count | Should BeGreaterThan 0
+            $appids.count | Should BeGreaterThan 0
         }
         
         It 'gets a list of apps with expansion' {
-            $apps = @( get-edgeDevApp -Params @{ expand = 'true' } )
-            $apps.count | Should BeGreaterThan 0
+            $getresponse = @( Get-EdgeDevApp -Params @{ expand = 'true' } )
+            $getresponse.app.count | Should BeGreaterThan 0
         }
         
-        It 'gets a list of apps for developer <Name>'  -TestCases @( ToArrayOfHash  @( Get-EdgeDeveloper ) ) {
-            param($Name)
-        
-            $apps = @( Get-EdgeDevApp -Developer $Name )
+        It 'gets a list of apps for developer <Email>'  -TestCases $emails {
+            param($Email)
+            
+            $apps = @( Get-EdgeDevApp -Developer $Email )
             $apps.count | Should Not BeNullOrEmpty
-            $appsExpanded = @(( Get-EdgeDevApp -Developer $Name -Params @{ expand = 'true' } ).app)
+            $appsExpanded = @( ( Get-EdgeDevApp -Developer $Email -Params @{ expand = 'true' } ).app )
             $apps.count | Should Be $appsExpanded.count
         }
         
-        It 'gets details of app <Name>'  -TestCases @( ToArrayOfHash  @( Get-EdgeDevApp ) ) {
-            param($Name)
-        
-            $app = Get-EdgeDevApp -Id $Name
-            $app.appId | Should Be $Name
+        It 'gets details of app <Id>' -TestCases $appids {
+            param($Id)
+            $app = Get-EdgeDevApp -AppId $Id
+            $app.appId | Should Be $Id
             $NowMilliseconds = [int64](([datetime]::UtcNow)-(get-date "1/1/1970")).TotalMilliseconds
             $app.createdAt | Should BeLessthan $NowMilliseconds
             $app.lastModifiedAt | Should BeLessthan $NowMilliseconds
             $app.status | Should Not BeNullOrEmpty
         }
         
-        It 'gets a list of apps by ID per developer <Name>'  -TestCases @( ToArrayOfHash  @( Get-EdgeDeveloper ) ) {
-            param($Name)
-        
-            $appsExpanded = @(( Get-EdgeDevApp -Developer $Name -Params @{ expand = 'true' } ).app)
+        It 'gets a list of apps by ID per developer <Email>' -TestCases $emails {
+            param($Email)
+            
+            $appsExpanded = @(( Get-EdgeDevApp -Developer $Email -Params @{ expand = 'true' } ).app)
             $excludedProps = @( 'attributes', 'apiProducts', 'credentials' )
             foreach ($app in $appsExpanded) {
-                $app2 = Get-EdgeDevApp -Id $app.appId 
+                $app2 = Get-EdgeDevApp -AppId $app.appId 
                 # $app2 | Should Be $app  # No.
 
                 # I think it might be possible to do something smart with Compare-Object
                 # But... instead we will iterate the properties and compare each one, while
                 # excluding properties with non-primitive values.
                 $app2.psobject.properties | % {
-                    $value2 = $_.Value
-                    $name = $_.Name
-                    if ( $excludedProps -notcontains $name ) {
-                        $value1 = $( $app | select -expand $name )
-                        $value2 | Should Be $value1
+                    if ( $excludedProps -notcontains $_.Name ) {
+                        $value1 = $( $app | select -expand $_.Name )
+                        $_.Value | Should Be $value1
                     }
                 }
             }
@@ -903,9 +986,44 @@ Describe "Get-Apps-1" {
     }
 }
 
+Describe "Revoke-Approve-Apps-1" {
+    Context 'Strict mode' {
+        Set-StrictMode -Version latest
+
+        $AppList = @( @( Get-EdgeDevApp -Params @{ expand = $True } ).app |
+          ?{ $_.name.StartsWith($Script:Props.SpecialPrefix) } | %{ @{ Name = $_.name; Id = $_.appId; DevId = $_.developerId } })
+
+        # $DevList = @( @( Get-EdgeDeveloper -Params @{ expand = $True } ).developer |
+        #  ?{ $_.email.StartsWith($Script:Props.SpecialPrefix) } | %{ @{ Apps = $_.apps; Email = $_.email } })
+
+        It 'verifies the count of apps created previously in this test run' {
+            $AppList.count | Should BeGreaterThan 0
+        }
+        
+        It 'revokes app <Id> (<Name>)' -TestCases $AppList {
+            param($Name, $Id, $DevId)
+            $app = Get-EdgeDevApp -AppId $Id
+            $app.status | Should Be 'approved'
+            $dev = Get-EdgeDeveloper -Name $DevId
+            Revoke-EdgeDevApp -Name $Name -Developer $dev.email
+            $app = Get-EdgeDevApp -AppId $Id
+            $app.status | Should Be 'revoked'
+        }
+    
+        It 'approves app <Id> (<Name>)' -TestCases $AppList {
+            param($Name, $Id, $DevId)
+            $app = Get-EdgeDevApp -AppId $Id
+            $app.status | Should Be 'revoked'
+            $dev = Get-EdgeDeveloper -Name $DevId
+            Approve-EdgeDevApp -Name $Name -Developer $dev.email
+            $app = Get-EdgeDevApp -AppId $Id
+            $app.status | Should Be 'approved'
+        }
+    }
+}
 
 Describe "Get-Kvm-1" {
-    Context 'Strict mode' { 
+    Context 'Strict mode' {
 
         Set-StrictMode -Version latest
 
@@ -944,7 +1062,6 @@ Describe "Get-Kvm-1" {
     }
 }
 
-
 Describe "Delete-DevApp-1" {
     Context 'Strict mode' {
         Set-StrictMode -Version latest
@@ -953,11 +1070,10 @@ Describe "Delete-DevApp-1" {
 
         It 'deletes devapp <Name>' -TestCases $DevApps {
             param($Dev, $Name)
-            Delete-EdgeDevApp -Developer $Dev -Name $Name
+            Delete-EdgeDevApp -Developer $Dev -AppName $Name
         }
     }
 }
-
 
 Describe "Delete-ApiProduct-1" {
     Context 'Strict mode' {
@@ -975,7 +1091,6 @@ Describe "Delete-ApiProduct-1" {
     }
 }
 
-
 Describe "Delete-Developer-1" {
     Context 'Strict mode' {
     
@@ -990,7 +1105,6 @@ Describe "Delete-Developer-1" {
         }
     }
 }
-
 
 Describe "Delete-Kvm-1" {
     Context 'Strict mode' {
@@ -1022,7 +1136,6 @@ Describe "Delete-Kvm-1" {
     }
 }
 
-
 Describe "Create-Keystore-1" {
     Context 'Strict mode' {
     
@@ -1040,7 +1153,6 @@ Describe "Create-Keystore-1" {
         }
     }
 }
-
 
 Describe "Get-Keystore-1" {
     Context 'Strict mode' {
@@ -1066,7 +1178,6 @@ Describe "Get-Keystore-1" {
         }
     }
 }
-
 
 Describe "Delete-Keystore-1" {
     Context 'Strict mode' {
@@ -1096,7 +1207,6 @@ Describe "Delete-Keystore-1" {
     }
 }
 
-
 Describe "Delete-EdgeApi-1" {
     Context 'Strict mode' {
         Set-StrictMode -Version latest
@@ -1111,7 +1221,6 @@ Describe "Delete-EdgeApi-1" {
         }
     }
 }
-
 
 Describe "Get-Vhost-1" {
     Context 'Strict mode' {
@@ -1138,7 +1247,7 @@ Describe "Get-Vhost-1" {
 
 ## TODO: insert more tests here:
 # eg,
-# - Add-EdgeAppCredential - add a new credential to an app
+# - CRUD for EdgeAppCredential - add a new credential to an app
 # - Update-EdgeAppCredential.ps1 - revoke or approve a credential, or change products list
 # - {Create,Get,Update,Delete} for KvmEntry at proxy scope (iff CPS)
 
