@@ -1001,7 +1001,7 @@ Describe "Revoke-Approve-Apps-1" {
         }
         
         It 'revokes app <Id> (<Name>)' -TestCases $AppList {
-            param($Name, $Id)
+            param($Name, $Id, $DevId)
             $app = Get-EdgeDevApp -AppId $Id
             $app.status | Should Be 'approved'
             $dev = Get-EdgeDeveloper -Name $DevId
@@ -1011,7 +1011,7 @@ Describe "Revoke-Approve-Apps-1" {
         }
     
         It 'approves app <Id> (<Name>)' -TestCases $AppList {
-            param($Name, $Id)
+            param($Name, $Id, $DevId)
             $app = Get-EdgeDevApp -AppId $Id
             $app.status | Should Be 'revoked'
             $dev = Get-EdgeDeveloper -Name $DevId
