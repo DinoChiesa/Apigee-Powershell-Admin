@@ -65,10 +65,10 @@ Function Update-EdgeAppCredential {
     $Options = @{ }
     
     if ($PSBoundParameters['Debug']) {
-        $Options.Add( 'Debug', $Debug )
+        $Options['Debug'] = $Debug 
     }
     if ($PSBoundParameters['Org']) {
-        $Options.Add( 'Org', $Org )
+        $Options['Org'] = $Org 
     }
 
     if (!$PSBoundParameters['Developer']) {
@@ -87,26 +87,26 @@ Function Update-EdgeAppCredential {
     }
 
     if ($Add) {
-        $Options.Add( 'Collection', $(Join-Parts -Separator '/' -Parts 'developers', $Developer, 'apps', $RealAppName, keys ) )
-        $Options.Add( 'Name', $Key )
+        $Options['Collection'] = $(Join-Parts -Separator '/' -Parts 'developers', $Developer, 'apps', $RealAppName, keys ) 
+        $Options['Name'] = $Key 
 
         $Payload = @{
           apiProducts = $ApiProducts
         }
 
-        $Options.Add( 'Payload', $Payload )
+        $Options['Payload'] = $Payload 
 
-        Write-Debug ( "Options @Options`n" )
+        Write-Debug $( [string]::Format("Update-EdgeAppCredential Options {0}", $(ConvertTo-Json $Options )))
         Send-EdgeRequest @Options
     }
     else {
         # Remove, each one in series
         $ApiProducts | Foreach-Object {
-          $Options['Collection'] = $(Join-Parts -Separator '/' -Parts 'developers', $Developer, 'apps', $RealAppName, keys, $Key, 'apiproducts' )
-          $Options['Name'] = $_
+            $Options['Collection'] = $(Join-Parts -Separator '/' -Parts 'developers', $Developer, 'apps', $RealAppName, keys, $Key, 'apiproducts' )
+            $Options['Name'] = $_
           
-          Write-Debug ( "Options @Options`n" )
-          Delete-EdgeObject @Options
+            Write-Debug $( [string]::Format("Update-EdgeAppCredential Options {0}", $(ConvertTo-Json $Options )))
+            Delete-EdgeObject @Options
         }
     }
 

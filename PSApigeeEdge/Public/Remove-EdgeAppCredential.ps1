@@ -37,14 +37,14 @@ Function Remove-EdgeAppCredential {
         [string]$Key,
         [string]$Org
     )
-    
+
     $Options = @{ }
-    
+
     if ($PSBoundParameters['Debug']) {
-        $Options.Add( 'Debug', $Debug )
+        $Options['Debug'] = $Debug
     }
     if ($PSBoundParameters['Org']) {
-        $Options.Add( 'Org', $Org )
+        $Options['Org'] = $Org
     }
 
     if (!$PSBoundParameters['Developer']) {
@@ -58,10 +58,10 @@ Function Remove-EdgeAppCredential {
     if (!$PSBoundParameters['Key']) {
       throw [System.ArgumentNullException] "Key", "You must specify the -Key option."
     }
-    
-    $Options.Add( 'Collection', $(Join-Parts -Separator '/' -Parts 'developers', $Developer, 'apps', $RealAppName, 'keys' ) )
-    $Options.Add( 'Name', $Key )
 
-    Write-Debug ( "Options @Options`n" )
+    $Options['Collection'] = $(Join-Parts -Separator '/' -Parts 'developers', $Developer, 'apps', $RealAppName, 'keys' )
+    $Options['Name'] = $Key
+
+    Write-Debug $( [string]::Format("Remove-EdgeAppCredential Options {0}", $(ConvertTo-Json $Options )))
     Delete-EdgeObject @Options
 }
