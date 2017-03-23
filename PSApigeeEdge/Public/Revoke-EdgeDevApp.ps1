@@ -78,6 +78,7 @@ Function Revoke-EdgeDevApp {
         }
     }
     else {
+        # I think this may not work.  It may not be possible to revoke an App via AppId
         if (!$PSBoundParameters['AppId']) {
           throw [System.ArgumentNullException] "AppId", 'use -AppId if not specifying -Name and -Developer'
         }
