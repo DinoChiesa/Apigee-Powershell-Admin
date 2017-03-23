@@ -1005,7 +1005,7 @@ Describe "Revoke-Approve-Apps-1" {
             $app = Get-EdgeDevApp -AppId $Id
             $app.status | Should Be 'approved'
             $dev = Get-EdgeDeveloper -Name $DevId
-            Revoke-EdgeDevApp -AppName $Name -Developer $dev.email
+            Revoke-EdgeDevApp -Name $Name -Developer $dev.email
             $app = Get-EdgeDevApp -AppId $Id
             $app.status | Should Be 'revoked'
         }
@@ -1015,7 +1015,7 @@ Describe "Revoke-Approve-Apps-1" {
             $app = Get-EdgeDevApp -AppId $Id
             $app.status | Should Be 'revoked'
             $dev = Get-EdgeDeveloper -Name $DevId
-            Approve-EdgeDevApp -AppName $Name -Developer $dev.email
+            Approve-EdgeDevApp -Name $Name -Developer $dev.email
             $app = Get-EdgeDevApp -AppId $Id
             $app.status | Should Be 'approved'
         }
