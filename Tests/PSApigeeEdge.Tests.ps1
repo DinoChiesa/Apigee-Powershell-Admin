@@ -1012,7 +1012,7 @@ Describe "Revoke-Approve-Apps-1" {
             param($Name, $Id)
             $app = Get-EdgeDevApp -AppId $Id
             $app.status | Should Be 'revoked'
-            Revoke-EdgeDevApp -AppId $Id
+            Approve-EdgeDevApp -AppId $Id
             $app = Get-EdgeDevApp -AppId $Id
             $app.status | Should Be 'approved'
         }
