@@ -14,6 +14,7 @@ function Read-EdgeTokenStash
             Write-Debug ([string]::Format( "Read-EdgeTokenStash Token stash file {0} does not exist.", $TokenStashFile) )
             return $null
         }
+        Write-Debug ([string]::Format( "Read-EdgeTokenStash Reading token stash file {0} ", $TokenStashFile) )
         # System.Management.Automation.PSCustomObject
         Get-Content $TokenStashFile -Raw | ConvertFrom-JSON
     }

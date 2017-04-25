@@ -38,6 +38,9 @@ function Get-EdgeStashedAdminToken
             return $null
         }
 
+        Write-Debug ( "Get-EdgeStashedAdminToken TokenData:`n" +
+                 "$($TokenData | Format-List | Out-String)" )
+
         $User = $MyInvocation.MyCommand.Module.PrivateData.Connection['User']
         if (!$User) {
             throw [System.ArgumentNullException] "There is no User set. Have you called Set-EdgeConnection ?"

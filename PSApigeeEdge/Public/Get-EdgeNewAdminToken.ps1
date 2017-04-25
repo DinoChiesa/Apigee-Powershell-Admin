@@ -42,9 +42,14 @@ Function Get-EdgeNewAdminToken {
                 Accept = 'application/json'
                 Authorization = 'Basic ZWRnZWNsaTplZGdlY2xpc2VjcmV0'
             }
-            Body = [string]::Format("username={0}&password={1}&grant_type=password", $User, $Pass)
+            Body = @{
+                username = $User
+                password = $Pass
+                grant_type = "password"
+            }
         }
-        $IRMParams.Headers.Add('content-type', 'application/x-www-form-urlencoded')
+        # not sure if necessary
+        #$IRMParams.Headers.Add('content-type', 'application/x-www-form-urlencoded')
 
         Write-Debug ( "Running $($MyInvocation.MyCommand).`n" +
                       "Invoke-RestMethod parameters:`n$($IRMParams | Format-List | Out-String)" )
@@ -52,7 +57,13 @@ Function Get-EdgeNewAdminToken {
         Try {
             $TokenResult = Invoke-RestMethod @IRMParams
             Write-Debug "Raw:`n$($TokenResult | Out-String)"
-            Write-EdgeTokenStash -User $User -NewToken $TokenResult
+            Write-Debug ("TokenResult type: " + $TokenResult.GetType().ToString())
+            if ($TokenResult -and $TokenResult.psobject -and $TokenResult.psobject.properties) {
+                Add-Member -InputObject $TokenResult -MemberType NoteProperty -Name "issued_at" -Value $(Get-NowMilliseconds)
+                Write-Debug "Updated:`n$($TokenResult | Out-String)"
+
+                Write-EdgeTokenStash -User $User -NewToken $TokenResult
+            }
         }
         Catch {
             Throw $_
