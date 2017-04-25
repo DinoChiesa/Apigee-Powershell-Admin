@@ -11,13 +11,13 @@ Function Import-EdgeApi {
 
     .PARAMETER Source
         Required. A string, repreenting the source of the apiproxy bundle to import. This
-        can be the name of a file, in zip format; or it can be the name of a directory, which 
-        this cmdlet will zip itself. In either case, the structure must be like so: 
+        can be the name of a file, in zip format; or it can be the name of a directory, which
+        this cmdlet will zip itself. In either case, the structure must be like so:
 
-            .\apiproxy 
-            .\apiproxy\proxies 
+            .\apiproxy
+            .\apiproxy\proxies
             .\apiproxy\proxies\proxy1.xml
-            .\apiproxy\policies 
+            .\apiproxy\policies
             .\apiproxy\policies\Policy1.xml
             .\apiproxy\policies\...
             .\apiproxy\targets
@@ -50,7 +50,7 @@ Function Import-EdgeApi {
         [string]$Source,
         [string]$Org
     )
-    
+
     if ($PSBoundParameters['Debug']) {
         $DebugPreference = 'Continue'
     }
@@ -64,11 +64,11 @@ Function Import-EdgeApi {
 
     $ZipFile = ""
     $isFile = $False
-    $mypath = $(Resolve-Path $Source)
+    $mypath = $(Resolve-PathSafe $Source)
     if ($mypath.count -ne 1) {
         throw [System.ArgumentException] "The provided Source does not resolve."
     }
-    
+
     if([System.IO.File]::Exists($mypath.Path)){
         $isFile = $True
         $ZipFile = $mypath.Path
@@ -85,9 +85,9 @@ Function Import-EdgeApi {
         Write-Debug ([string]::Format("Zipfile {0}`n", $ZipFile))
     }
     else {
-      throw [System.ArgumentException] "Source does not refer to a readable file or directory."
+      throw [System.ArgumentException] $([string]::Format("Source file refers to '{0}', not a readable file or directory.", $mypath.Path))
     }
-    
+
     if( ! $PSBoundParameters.ContainsKey('Org')) {
       if( ! $MyInvocation.MyCommand.Module.PrivateData.Connection['Org']) {
         throw [System.ArgumentNullException] 'Org', "use the -Org parameter to specify the organization."
@@ -119,7 +119,7 @@ Function Import-EdgeApi {
     Write-Debug ([string]::Format("Params {0}`n", $(ConvertTo-Json $IRMParams -Compress ) ) )
 
     Try {
-        $TempResult = Invoke-WebRequest @IRMParams -UseBasicParsing 
+        $TempResult = Invoke-WebRequest @IRMParams -UseBasicParsing
 
         Write-Debug "Raw:`n$($TempResult | Out-String)"
     }

@@ -1,7 +1,7 @@
 function Get-EdgeTokenExpired
 {
     [cmdletbinding()]
-    PARAM($usertoken)
+    PARAM([System.Management.Automation.PSCustomObject]$usertoken)
     PROCESS {
         if (!$usertoken) {
             throw [System.ArgumentNullException] "You must pass a usertoken [pscustomobject]."

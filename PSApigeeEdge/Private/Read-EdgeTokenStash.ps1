@@ -7,10 +7,10 @@ function Read-EdgeTokenStash
         if (!$TokenStashFile) {
             throw [System.ArgumentNullException] "There is no Token stash set. Have you called Set-EdgeConnection ?"
         }
-        $TokenData = $null
-        if([System.IO.File]::Exists($TokenStashFile)) {
-            $TokenData = Get-Content $TokenStashFile -Raw | ConvertFrom-JSON
+        if(![System.IO.File]::Exists($TokenStashFile)) {
+            return $null
         }
-        $TokenData
+        # System.Management.Automation.PSCustomObject
+        Get-Content $TokenStashFile -Raw | ConvertFrom-JSON
     }
 }

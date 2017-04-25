@@ -27,10 +27,10 @@ function Using-Object
     }
 }
 
-function Get-AllFiles([string] $SourceDir) 
+function Get-AllFiles([string] $SourceDir)
 {
     # This gets the flattened list of all the files in the source directory,
-    # which is what we need to produce a zip archive. The ShortPath flips 
+    # which is what we need to produce a zip archive. The ShortPath flips
     # the slashes, for compatibility with Java Zip Stream.
 
     $mypath = $(Resolve-Path $SourceDir)
@@ -40,7 +40,7 @@ function Get-AllFiles([string] $SourceDir)
 
 function Zip-DirectoryEx([string] $SourceDir)
 {
-    $mypath = $(Resolve-Path $SourceDir)
+    $mypath = $(Resolve-PathSafe $SourceDir)
     if ($mypath.count -ne 1) {
         throw [System.ArgumentException] "The provided Source does not resolve."
     }
@@ -58,6 +58,5 @@ function Zip-DirectoryEx([string] $SourceDir)
                      }
          }
     }
-    $ZipFileName 
+    $ZipFileName
 }
-

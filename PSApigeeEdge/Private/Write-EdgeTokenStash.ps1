@@ -1,7 +1,10 @@
 function Write-EdgeTokenStash
 {
     [cmdletbinding()]
-    PARAM($User, $NewTokenJson)
+    PARAM(
+        [string] $User,
+        [string] $NewTokenJson
+    )
     PROCESS {
         $TokenStashFile = $MyInvocation.MyCommand.Module.PrivateData.Connection['TokenStash']
         $TokenData = Read-EdgeTokenStash
