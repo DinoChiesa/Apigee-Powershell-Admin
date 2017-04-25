@@ -7,6 +7,9 @@ Function Get-EdgeNewAdminToken {
         Gets an OAuth token for Edge Administration. This works only with Edge SaaS.
         You must have previously called Set-EdgeConnection to specify the user + password.
 
+    .PARAMETER MfaCode
+        Optional. The MFA code for authenticating, if your user requires it.
+
     .LINK
         Set-EdgeConnection
 
@@ -20,7 +23,7 @@ Function Get-EdgeNewAdminToken {
 
     [cmdletbinding()]
 
-    param()
+    param([string]$MfaCode)
 
     PROCESS {
         if ($PSBoundParameters['Debug']) {
@@ -46,10 +49,12 @@ Function Get-EdgeNewAdminToken {
                 username = $User
                 password = $Pass
                 grant_type = "password"
+                # TODO : handle mfa code here
             }
         }
-        # not sure if necessary
-        #$IRMParams.Headers.Add('content-type', 'application/x-www-form-urlencoded')
+        if ($MfaCode) {
+            $IRMParams.Body.Add('mfa_token', $MfaCode)
+        }
 
         Write-Debug ( "Running $($MyInvocation.MyCommand).`n" +
                       "Invoke-RestMethod parameters:`n$($IRMParams | Format-List | Out-String)" )

@@ -4,7 +4,7 @@ Function UnDeploy-EdgeApi {
         UnDeploy an apiproxy in Apigee Edge.
 
     .DESCRIPTION
-        UnDeploy a revision of an API proxy that is deployed. 
+        UnDeploy a revision of an API proxy that is deployed.
 
     .PARAMETER Name
         Required. The name of the apiproxy to deploy.
@@ -13,7 +13,7 @@ Function UnDeploy-EdgeApi {
         Required. The name of the environment from which to undeploy the api proxy.
 
     .PARAMETER Revision
-        Required. The revision of the apiproxy. 
+        Required. The revision of the apiproxy.
 
     .PARAMETER Org
         Optional. The Apigee Edge organization. The default is to use the value from Set-EdgeConnection.
@@ -33,7 +33,7 @@ Function UnDeploy-EdgeApi {
         [Parameter(Mandatory=$True)][string]$Revision,
         [string]$Org
     )
-    
+
     if ($PSBoundParameters['Debug']) {
         $DebugPreference = 'Continue'
     }
@@ -54,15 +54,11 @@ Function UnDeploy-EdgeApi {
       }
       $Org = $MyInvocation.MyCommand.Module.PrivateData.Connection['Org']
     }
-    
+
     if( ! $MyInvocation.MyCommand.Module.PrivateData.Connection['MgmtUri']) {
       throw [System.ArgumentNullException] 'MgmtUri', 'use Set-EdgeConnection to specify the Edge connection information.'
     }
     $MgmtUri = $MyInvocation.MyCommand.Module.PrivateData.Connection['MgmtUri']
-
-    if( ! $MyInvocation.MyCommand.Module.PrivateData.Connection['SecurePass']) {
-      throw [System.ArgumentNullException] 'SecurePass', 'use Set-EdgeConnection to specify the Edge connection information.'
-    }
 
     $BaseUri = Join-Parts -Separator '/' -Parts $MgmtUri, '/v1/o', $Org, 'apis', $Name, 'revisions', $Revision, 'deployments'
 
@@ -72,9 +68,8 @@ Function UnDeploy-EdgeApi {
         Headers = @{
             Accept = 'application/json'
             'content-type' = 'application/x-www-form-urlencoded'
-            Authorization = 'Basic ' + $( Get-EdgeBasicAuth )
         }
-        # these will transform into query params?  postbody? 
+        # these will transform into postbody
         Body = @{
           action = 'undeploy'
           env = $Env
@@ -83,9 +78,10 @@ Function UnDeploy-EdgeApi {
         }
     }
 
+    Apply-EdgeAuthorization -MgmtUri $MgmtUri -IRMParams $IRMParams
+
     Try {
         $TempResult = Invoke-RestMethod @IRMParams
-
         Write-Debug "Raw:`n$($TempResult | Out-String)"
     }
     Catch {

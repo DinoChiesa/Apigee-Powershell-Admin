@@ -25,6 +25,9 @@ Function Set-EdgeConnection {
         Optional. The plaintext password for the Apigee Edge administrative user. Specify this
         or the EncryptedPassword.
 
+    .PARAMETER MfaCode
+        Optional. The plaintext MFA code for your user. Used for obtaining a token.
+
     .PARAMETER EncryptedPassword
         Optional. The encrypted password for the Apigee Edge administrative user. Use this as an
         alternative to the Password parameter. To get the encrypted password, you can do this:
@@ -54,6 +57,7 @@ Function Set-EdgeConnection {
         [string]$Org,
         [string]$User,
         [string]$Password,
+        [string]$MfaCode,
         [string]$EncryptedPassword,
         [string]$MgmtUri = 'https://api.enterprise.apigee.com'
     )
@@ -111,7 +115,7 @@ Function Set-EdgeConnection {
                         $UserToken = Get-EdgeRefreshedAdminToken -UserToken $UserToken
                     }
                     ElseIf (! $UserToken ) {
-                        $UserToken = Get-EdgeNewAdminToken
+                        $UserToken = Get-EdgeNewAdminToken -MfaCode $MfaCode
                     }
                 }
                 Catch {

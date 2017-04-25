@@ -4,7 +4,7 @@ Function Deploy-EdgeApi {
         Deploy an apiproxy in Apigee Edge.
 
     .DESCRIPTION
-        Deploy a revision of an API proxy that is not yet deployed. 
+        Deploy a revision of an API proxy that is not yet deployed.
 
     .PARAMETER Name
         Required. The name of the apiproxy to deploy.
@@ -13,10 +13,10 @@ Function Deploy-EdgeApi {
         Required. The name of the environment to which to deploy the api proxy.
 
     .PARAMETER Revision
-        Required. The revision of the apiproxy. 
+        Required. The revision of the apiproxy.
 
     .PARAMETER Basepath
-        Optional. The basepath to prepend to the proxy endpoints in the API proxy bundle. 
+        Optional. The basepath to prepend to the proxy endpoints in the API proxy bundle.
 
     .PARAMETER Org
         Optional. The Apigee Edge organization. The default is to use the value from Set-EdgeConnection.
@@ -38,7 +38,7 @@ Function Deploy-EdgeApi {
         [string]$Basepath,
         [Hashtable]$Params
     )
-    
+
     if ($PSBoundParameters['Debug']) {
         $DebugPreference = 'Continue'
     }
@@ -66,10 +66,6 @@ Function Deploy-EdgeApi {
     }
     $MgmtUri = $MyInvocation.MyCommand.Module.PrivateData.Connection['MgmtUri']
 
-    if( ! $MyInvocation.MyCommand.Module.PrivateData.Connection['SecurePass']) {
-      throw [System.ArgumentNullException] 'SecurePass', 'use Set-EdgeConnection to specify the Edge connection information.'
-    }
-
     $BaseUri = Join-Parts -Separator '/' -Parts $MgmtUri, '/v1/o', $Org, 'apis', $Name, 'revisions', $Revision, 'deployments'
 
     $RequestBody = @{
@@ -78,22 +74,23 @@ Function Deploy-EdgeApi {
           override = 'true'
           delay = 30
     }
-    
+
     if ($PSBoundParameters['Basepath']) {
         $RequestBody['basepath'] = $Basepath
     }
-    
+
     $IRMParams = @{
         Uri = $BaseUri
         Method = 'POST'
         Headers = @{
             Accept = 'application/json'
             'content-type' = 'application/x-www-form-urlencoded'
-            Authorization = 'Basic ' + $( Get-EdgeBasicAuth )
         }
-        # this hash will transform into query params?  postbody? 
+        # this hash will transform into query params?  postbody?
         Body = $RequestBody
     }
+
+    Apply-EdgeAuthorization -MgmtUri $MgmtUri -IRMParams $IRMParams
 
     Try {
         $TempResult = Invoke-RestMethod @IRMParams

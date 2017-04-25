@@ -99,10 +99,6 @@ Function Import-EdgeApi {
     }
     $MgmtUri = $MyInvocation.MyCommand.Module.PrivateData.Connection['MgmtUri']
 
-    if( ! $MyInvocation.MyCommand.Module.PrivateData.Connection['SecurePass']) {
-      throw [System.ArgumentNullException] 'SecurePass', 'use Set-EdgeConnection to specify the Edge connection information.'
-    }
-
     $BaseUri = Join-Parts -Separator '/' -Parts $MgmtUri, '/v1/o', $Org, 'apis'
 
     $IRMParams = @{
@@ -111,10 +107,11 @@ Function Import-EdgeApi {
         Headers = @{
             Accept = 'application/json'
             'content-type' = 'application/octet-stream'
-            Authorization = 'Basic ' + $( Get-EdgeBasicAuth )
         }
         InFile = $ZipFile
     }
+
+    Apply-EdgeAuthorization -MgmtUri $MgmtUri -IRMParams $IRMParams
 
     Write-Debug ([string]::Format("Params {0}`n", $(ConvertTo-Json $IRMParams -Compress ) ) )
 
