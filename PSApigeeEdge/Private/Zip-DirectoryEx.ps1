@@ -34,15 +34,18 @@ function Get-AllFiles([string] $SourceDir)
     # the slashes, for compatibility with Java Zip Stream.
 
     $mypath = $(Resolve-Path $SourceDir)
-    $allfiles = @(Get-ChildItem -Path $mypath.Path  -Recurse -File).FullName
+    if ( $mypath.count -ne 1 ) {
+        throw [System.ArgumentException] "SourceDir", [string]::Format("The provided SourceDir ({0}) does not resolve.", $SourceDir)
+    }
+    $allfiles = @(Get-ChildItem -Path $mypath.Path -Recurse -File).FullName
     $allfiles |% { @{ FullPath = $_; ShortPath = $_.Replace($mypath.Path+'\','').Replace('\','/') } }
 }
 
 function Zip-DirectoryEx([string] $SourceDir)
 {
     $mypath = $(Resolve-PathSafe $SourceDir)
-    if ($mypath.count -ne 1) {
-        throw [System.ArgumentException] "The provided Source does not resolve."
+    if (! $mypath) {
+        throw [System.ArgumentException] "SourceDir", "The provided Source does not resolve."
     }
 
     $ZipFileName = [string]::Format('{0}\bundle-{1}.zip', $env:temp, $(Get-Random))

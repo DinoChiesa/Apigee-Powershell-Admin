@@ -65,27 +65,27 @@ Function Import-EdgeApi {
     $ZipFile = ""
     $isFile = $False
     $mypath = $(Resolve-PathSafe $Source)
-    if ($mypath.count -ne 1) {
-        throw [System.ArgumentException] "The provided Source does not resolve."
+    if (! $mypath) {
+        throw [System.ArgumentException] "Source", "The provided Source does not resolve."
     }
 
-    if([System.IO.File]::Exists($mypath.Path)){
+    if([System.IO.File]::Exists($mypath)){
         $isFile = $True
-        $ZipFile = $mypath.Path
+        $ZipFile = $mypath
         Write-Debug ([string]::Format("Source is file {0}`n", $ZipFile))
     }
-    elseif ([System.IO.Directory]::Exists($mypath.Path)) {
+    elseif ([System.IO.Directory]::Exists($mypath)) {
         # Validate that there is an apiproxy directory
         $apiproxyPaths = @(Join-Path -Path $mypath -ChildPath "apiproxy" -Resolve)
         if ($apiproxyPaths.count -ne 1) {
             throw [System.ArgumentException] "Cannot find apiproxy directory under the Source directory."
         }
-        Write-Debug ([string]::Format("Source is directory {0}`n", $mypath.Path))
-        $ZipFile = Zip-DirectoryEx -SourceDir $mypath.Path
+        Write-Debug ([string]::Format("Source is directory {0}`n", $mypath))
+        $ZipFile = Zip-DirectoryEx -SourceDir $mypath
         Write-Debug ([string]::Format("Zipfile {0}`n", $ZipFile))
     }
     else {
-      throw [System.ArgumentException] $([string]::Format("Source file refers to '{0}', not a readable file or directory.", $mypath.Path))
+      throw [System.ArgumentException] "Source", $([string]::Format("Source file refers to '{0}', not a readable file or directory.", $mypath))
     }
 
     if( ! $PSBoundParameters.ContainsKey('Org')) {
