@@ -120,8 +120,11 @@ Function Set-EdgeConnection {
             }
             Catch {
                 write-host "Exception"
-                write-host ([string]::Format("stacktrace: {0}", $_.Exception.Stacktrace))
-                #write-host ([string]::Format("gettype: {0}", $_.GetType()))
+                write-host ([string]::Format("getType: {0}", $_.GetType()))
+                write-host $_
+                if ($_.GetType().ToString() -eq "System.Management.Automation.ErrorRecord") {
+                    write-host ([string]::Format("stacktrace: {0}", $_.Exception.Stacktrace))
+                }
             }
         }
     }
