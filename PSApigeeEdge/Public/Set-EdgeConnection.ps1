@@ -97,30 +97,18 @@ Function Set-EdgeConnection {
                 throw [System.ArgumentNullException] "User", "you must provide the -User parameter."
             }
 
-            if (! $PSBoundParameters.ContainsKey('Password') -and ! $PSBoundParameters.ContainsKey('EncryptedPassword')) {
-                $SecurePass = Read-Host -assecurestring "Please enter the password for ${User}"
-            }
-            elseif ($PSBoundParameters.ContainsKey('Password')) {
-                $SecurePass = ConvertTo-SecureString -String $Password -AsPlainText -Force
-            }
-            else {
-                $SecurePass = ConvertTo-SecureString -String $EncryptedPassword
-            }
-
-            $MyInvocation.MyCommand.Module.PrivateData.Connection['Org'] = $Org
-            $MyInvocation.MyCommand.Module.PrivateData.Connection['MgmtUri'] = $MgmtUri
-            $MyInvocation.MyCommand.Module.PrivateData.Connection['User'] = $User
-            $MyInvocation.MyCommand.Module.PrivateData.Connection['SecurePass'] = $SecurePass
-
+            $UserToken = $null
             if  ( $MgmtUri.Equals("https://api.enterprise.apigee.com")) {
                 # connect to Edge SaaS, get a token
                 Try {
                     $TokenStashPath = $(Resolve-PathSafe -Path $(Join-Path -Path $env:TEMP -ChildPath '.apigee-edge-tokens') )
-                    # write-host ([string]::Format("token stash path: {0}", $TokenStashPath))
                     $MyInvocation.MyCommand.Module.PrivateData.Connection['TokenStash'] = $TokenStashPath
-                    $userToken = Get-EdgeStashedAdminToken
-                    if (! $userToken ) {
-                        $userToken = Get-EdgeNewAdminToken
+                    $UserToken = Get-EdgeStashedAdminToken
+                    If ( $UserToken -and $( Get-EdgeTokenIsExpired $UserToken )) {
+                        $UserToken = Get-EdgeRefreshedAdminToken -UserToken $UserToken
+                    }
+                    ElseIf (! $UserToken ) {
+                        $UserToken = Get-EdgeNewAdminToken
                     }
                 }
                 Catch {
@@ -132,6 +120,25 @@ Function Set-EdgeConnection {
                     }
                 }
             }
+
+            if (! $UserToken ) {
+                if (! $PSBoundParameters.ContainsKey('Password') -and ! $PSBoundParameters.ContainsKey('EncryptedPassword')) {
+
+                    $SecurePass = Read-Host -assecurestring "Please enter the password for ${User}"
+
+                }
+                elseif ($PSBoundParameters.ContainsKey('Password')) {
+                    $SecurePass = ConvertTo-SecureString -String $Password -AsPlainText -Force
+                }
+                else {
+                    $SecurePass = ConvertTo-SecureString -String $EncryptedPassword
+                }
+                $MyInvocation.MyCommand.Module.PrivateData.Connection['SecurePass'] = $SecurePass
+            }
+
+            $MyInvocation.MyCommand.Module.PrivateData.Connection['Org'] = $Org
+            $MyInvocation.MyCommand.Module.PrivateData.Connection['MgmtUri'] = $MgmtUri
+            $MyInvocation.MyCommand.Module.PrivateData.Connection['User'] = $User
         }
     }
 }

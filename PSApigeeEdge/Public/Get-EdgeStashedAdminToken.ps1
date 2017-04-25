@@ -7,7 +7,8 @@ function Get-EdgeStashedAdminToken
     .DESCRIPTION
         Retrieve an OAuth token for Edge Administration, from the stash. This works only with Edge SaaS.
         You must have previously called Set-EdgeConnection to specify the user + password,
-        and Get-EdgeAdminToken at some point in the past. If the token is expired, this function returns null.
+        and Get-EdgeAdminToken at some point in the past. If the stashed token is expired, this function
+        returns the expired token. This allows the caller to use the refresh token, if desired.
 
     .LINK
         Set-EdgeConnection
@@ -46,11 +47,12 @@ function Get-EdgeStashedAdminToken
             throw [System.ArgumentNullException] "There is no User set. Have you called Set-EdgeConnection ?"
         }
         $UserToken = $TokenData.psobject.properties |?{ $_.MemberType -eq 'NoteProperty' -and $_.Name -eq $User }
-        if ( ($UserToken -eq $null) -or $( Get-EdgeTokenIsExpired $UserToken )) {
-            Write-Debug ( "Get-EdgeStashedAdminToken Token is null or Expired" )
-            return $null
-        }
+        # if ( ($UserToken -eq $null) -or $( Get-EdgeTokenIsExpired $UserToken )) {
+        #     Write-Debug ( "Get-EdgeStashedAdminToken Token is null or Expired" )
+        #     return $null
+        # }
 
+        # possibly expired, caller must check
         $UserToken
     }
 }
