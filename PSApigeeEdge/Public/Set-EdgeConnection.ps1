@@ -113,9 +113,9 @@ Function Set-EdgeConnection {
                 $TokenStashPath = $(Resolve-PathSafe -Path $(Join-Path -Path $env:TEMP -ChildPath '.apigee-edge-tokens') )
                 # write-host ([string]::Format("token stash path: {0}", $TokenStashPath))
                 $MyInvocation.MyCommand.Module.PrivateData.Connection['TokenStash'] = $TokenStashPath
-                $userToken = Get-StashedEdgeAdminToken
+                $userToken = Get-EdgeStashedAdminToken
                 if (! $userToken ) {
-                    $userToken = Get-NewEdgeAdminToken
+                    $userToken = Get-EdgeNewAdminToken
                 }
             }
             Catch {
@@ -123,7 +123,7 @@ Function Set-EdgeConnection {
                 write-host ([string]::Format("getType: {0}", $_.GetType()))
                 write-host $_
                 if ($_.GetType().ToString() -eq "System.Management.Automation.ErrorRecord") {
-                    write-host ([string]::Format("stacktrace: {0}", $_.Exception.Stacktrace))
+                    write-host ([string]::Format("stacktrace: {0}", $_.ScriptStacktrace))
                 }
             }
         }

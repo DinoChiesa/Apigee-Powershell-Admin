@@ -1,10 +1,10 @@
 function Get-EdgeTokenIsExpired
 {
     [cmdletbinding()]
-    PARAM([System.Management.Automation.PSCustomObject]$usertoken)
+    PARAM( [System.Management.Automation.PSNoteProperty] $usertoken )
     PROCESS {
         if (!$usertoken) {
-            throw [System.ArgumentNullException] "You must pass a usertoken [pscustomobject]."
+            throw [System.ArgumentNullException] "You must pass a usertoken [PSNoteProperty]."
         }
         else {
             $lifetime = $usertoken.Value.expires_in

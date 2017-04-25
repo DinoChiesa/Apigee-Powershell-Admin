@@ -64,6 +64,6 @@ Function Get-EdgeNewAdminToken {
             Remove-Variable User
         }
 
-        Get-StashedEdgeAdminToken
+        Get-EdgeStashedAdminToken
     }
 }
