@@ -56,9 +56,9 @@ function Zip-DirectoryEx([string] $SourceDir)
 
     Using-Object ($fs = New-Object System.IO.FileStream($ZipFileName, [System.IO.FileMode]::Create)) {
          Using-Object ($arch = New-Object System.IO.Compression.ZipArchive($fs, [System.IO.Compression.ZipArchiveMode]::Create)) {
-                     Get-AllFiles $mypath.Path | foreach {
-                         $t = @([System.IO.Compression.ZipFileExtensions]::CreateEntryFromFile($arch, $_.FullPath, $_.ShortPath) )
-                     }
+             Get-AllFiles $mypath | foreach {
+                 $t = @([System.IO.Compression.ZipFileExtensions]::CreateEntryFromFile($arch, $_.FullPath, $_.ShortPath) )
+             }
          }
     }
     $ZipFileName
