@@ -13,7 +13,7 @@ function Write-EdgeTokenStash
 
         $UnexpiredTokenData = "{}" | ConvertFrom-Json
         $TokenData.psobject.properties |?{ $_.MemberType -eq 'NoteProperty' } |% {
-            if (! Get-EdgeTokenExpired $_ ) {
+            if (! $( Get-EdgeTokenExpired $_ ) ) {
               $UnexpiredTokenData | Add-Member -MemberType NoteProperty -Name $_.Name -Value $_.Value -Force
             }
         }

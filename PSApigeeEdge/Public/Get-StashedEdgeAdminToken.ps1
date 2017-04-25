@@ -38,7 +38,7 @@ function Get-StashedEdgeAdminToken
             throw [System.ArgumentNullException] "There is no User set. Have you called Set-EdgeConnection ?"
         }
         $UserToken = $TokenData.psobject.properties |?{ $_.MemberType -eq 'NoteProperty' -and $_.Name -eq $User }
-        if ( ($UserToken -eq $null) -or Get-EdgeTokenExpired $UserToken ) {
+        if ( ($UserToken -eq $null) -or $( Get-EdgeTokenExpired $UserToken )) {
             return $null
         }
 

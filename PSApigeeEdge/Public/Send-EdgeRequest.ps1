@@ -99,7 +99,7 @@ Function Send-EdgeRequest {
         $IRMParams.Headers.Add('Authorization', 'Bearer ' + $usertoken.Value.access_token)
     }
     else {
-        $IRMParams.Headers.Add('Authorization', 'Basic ' + $( Get-EdgeBasicAuth )
+        $IRMParams.Headers.Add('Authorization', 'Basic ' + $( Get-EdgeBasicAuth ))
     }
 
     if ($PSBoundParameters['Payload']) {
