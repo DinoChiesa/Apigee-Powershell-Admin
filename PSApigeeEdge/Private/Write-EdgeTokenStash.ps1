@@ -6,11 +6,18 @@ function Write-EdgeTokenStash
         [string] $NewTokenJson
     )
     PROCESS {
+        if ($PSBoundParameters['Debug']) {
+            $DebugPreference = 'Continue'
+        }
+
         $TokenStashFile = $MyInvocation.MyCommand.Module.PrivateData.Connection['TokenStash']
         $TokenData = Read-EdgeTokenStash
         if (! $TokenData) {
             $TokenData = "{}" | ConvertFrom-Json
         }
+
+        Write-Debug ( "NewTokenJson:`n" + $NewTokenJson )
+
         $Value = $NewTokenJson | ConvertFrom-Json
         $TokenData | Add-Member -MemberType NoteProperty -Name $User -Value $Value -Force
 

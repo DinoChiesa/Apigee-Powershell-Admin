@@ -110,8 +110,9 @@ Function Set-EdgeConnection {
         if  ( $MgmtUri.Equals("https://api.enterprise.apigee.com")) {
             # connect to Edge SaaS, get a token
             Try {
-                $MyInvocation.MyCommand.Module.PrivateData.Connection['TokenStash'] = $(Resolve-PathSafe -Path $(Join-Path -Path $env:TEMP -ChildPath '.apigee-edge-tokens') ).Path
-
+                $TokenStashPath = $(Resolve-PathSafe -Path $(Join-Path -Path $env:TEMP -ChildPath '.apigee-edge-tokens') )
+                # write-host ([string]::Format("token stash path: {0}", $TokenStashPath))
+                $MyInvocation.MyCommand.Module.PrivateData.Connection['TokenStash'] = $TokenStashPath
                 $userToken = Get-StashedEdgeAdminToken
                 if (! $userToken ) {
                     $userToken = Get-NewEdgeAdminToken
@@ -119,7 +120,8 @@ Function Set-EdgeConnection {
             }
             Catch {
                 write-host "Exception"
-                write-host $_.Exception.Stacktrace
+                write-host ([string]::Format("stacktrace: {0}", $_.Exception.Stacktrace))
+                #write-host ([string]::Format("gettype: {0}", $_.GetType()))
             }
         }
     }
