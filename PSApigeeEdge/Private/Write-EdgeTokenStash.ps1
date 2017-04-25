@@ -3,7 +3,7 @@ function Write-EdgeTokenStash
     [cmdletbinding()]
     PARAM(
         [string] $User,
-        [string] $NewTokenJson
+        $NewToken
     )
     PROCESS {
         if ($PSBoundParameters['Debug']) {
@@ -16,10 +16,11 @@ function Write-EdgeTokenStash
             $TokenData = "{}" | ConvertFrom-Json
         }
 
-        Write-Debug ( "NewTokenJson.getType(): " + $( $NewTokenJson.GetType() ) )
-        Write-Debug ( "NewTokenJson:`n" + $NewTokenJson )
+        Write-Debug ( "NewToken.getType(): " + $( $NewToken.GetType() ) )
+        Write-Debug ( "NewToken:`n" + $NewToken )
 
-        $Value = $NewTokenJson | ConvertFrom-Json
+        #$Value = $NewTokenJson | ConvertFrom-Json
+        $Value = $NewToken
         $TokenData | Add-Member -MemberType NoteProperty -Name $User -Value $Value -Force
 
         $UnexpiredTokenData = "{}" | ConvertFrom-Json
