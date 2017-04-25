@@ -1,4 +1,4 @@
-function Get-EdgeTokenExpired
+function Get-EdgeTokenIsExpired
 {
     [cmdletbinding()]
     PARAM([System.Management.Automation.PSCustomObject]$usertoken)

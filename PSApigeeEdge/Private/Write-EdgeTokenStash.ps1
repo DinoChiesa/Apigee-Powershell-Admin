@@ -16,6 +16,7 @@ function Write-EdgeTokenStash
             $TokenData = "{}" | ConvertFrom-Json
         }
 
+        Write-Debug ( "NewTokenJson.getType(): " + $( $NewTokenJson.GetType() ) )
         Write-Debug ( "NewTokenJson:`n" + $NewTokenJson )
 
         $Value = $NewTokenJson | ConvertFrom-Json
@@ -23,7 +24,7 @@ function Write-EdgeTokenStash
 
         $UnexpiredTokenData = "{}" | ConvertFrom-Json
         $TokenData.psobject.properties |?{ $_.MemberType -eq 'NoteProperty' } |% {
-            if (! $( Get-EdgeTokenExpired $_ ) ) {
+            if (! $( Get-EdgeTokenIsExpired $_ ) ) {
               $UnexpiredTokenData | Add-Member -MemberType NoteProperty -Name $_.Name -Value $_.Value -Force
             }
         }

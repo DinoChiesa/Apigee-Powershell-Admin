@@ -1,4 +1,4 @@
-Function Get-NewEdgeAdminToken {
+Function Get-EdgeNewAdminToken {
     <#
     .SYNOPSIS
         Gets an OAuth token for Edge Administration.
@@ -11,7 +11,7 @@ Function Get-NewEdgeAdminToken {
         Set-EdgeConnection
 
     .LINK
-        Get-StashedEdgeAdminToken
+        Get-EdgeStashedAdminToken
 
     .FUNCTIONALITY
         ApigeeEdge
@@ -52,7 +52,7 @@ Function Get-NewEdgeAdminToken {
         Try {
             $TokenResult = Invoke-RestMethod @IRMParams
             Write-Debug "Raw:`n$($TokenResult | Out-String)"
-            Write-EdgeTokenStash -User $User -NewTokenJson $TokenResult
+            Write-EdgeTokenStash -User $User -NewToken $TokenResult
         }
         Catch {
             Throw $_
