@@ -106,5 +106,15 @@ Function Set-EdgeConnection {
         $MyInvocation.MyCommand.Module.PrivateData.Connection['MgmtUri'] = $MgmtUri
         $MyInvocation.MyCommand.Module.PrivateData.Connection['User'] = $User
         $MyInvocation.MyCommand.Module.PrivateData.Connection['SecurePass'] = $SecurePass
+
+        if  ( $MgmtUri.Equals("https://api.enterprise.apigee.com")) {
+            # connect to Edge SaaS, get a token
+            $MyInvocation.MyCommand.Module.PrivateData.Connection['TokenStash'] = $(Resolve-Path -Path $(Join-Path -Path $env:TEMP -ChildPath '.apigee-edge-tokens') ).Path
+
+            $userToken = Get-StashedEdgeAdminToken
+            if (! $userToken ) {
+                $userToken = Get-NewEdgeAdminToken
+            }
+        }
     }
 }

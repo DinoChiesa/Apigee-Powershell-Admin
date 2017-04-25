@@ -46,7 +46,7 @@ Function Add-EdgeAppCredential {
         [Parameter(Mandatory=$True)][string[]]$ApiProducts,
 
         [string]$Expiry,
-        
+
         [string]$Org
     )
 

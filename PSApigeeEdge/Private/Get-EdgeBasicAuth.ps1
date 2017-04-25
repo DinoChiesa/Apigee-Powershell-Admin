@@ -8,7 +8,7 @@ function Get-EdgeBasicAuth
         if (!$SecurePass) {
             throw [System.ArgumentNullException] "There is no SecurePass stored. Have you called Set-EdgeConnection ?"
         }
-        
+
         $Pass = [System.Runtime.InteropServices.marshal]::PtrToStringAuto([System.Runtime.InteropServices.marshal]::SecureStringToBSTR($SecurePass))
 
         $User = $MyInvocation.MyCommand.Module.PrivateData.Connection['User']
@@ -23,6 +23,6 @@ function Get-EdgeBasicAuth
         Remove-Variable bytes
 
         $base64
-    
+
     }
 }

@@ -91,8 +91,15 @@ Function Send-EdgeRequest {
         Method = 'POST'
         Headers = @{
             Accept = 'application/json'
-            Authorization = 'Basic ' + $( Get-EdgeBasicAuth )
         }
+    }
+
+    $usertoken = if ($MgmtUri.Equals("https://api.enterprise.apigee.com")) { Get-StashedEdgeAdminToken }
+    if ( $usertoken -and $usertoken.Value -and $usertoken.Value.access_token ) {
+        $IRMParams.Headers.Add('Authorization', 'Bearer ' + $usertoken.Value.access_token)
+    }
+    else {
+        $IRMParams.Headers.Add('Authorization', 'Basic ' + $( Get-EdgeBasicAuth )
     }
 
     if ($PSBoundParameters['Payload']) {
