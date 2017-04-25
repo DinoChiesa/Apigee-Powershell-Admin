@@ -5,17 +5,26 @@ Function Apply-EdgeAuthorization {
         [System.Collections.Hashtable] $IRMParams
     )
 
-    Try {
-        $usertoken = if ($MgmtUri.Equals("https://api.enterprise.apigee.com")) { $( Get-StashedEdgeAdminToken ) }
-        if ( $usertoken -and $usertoken.Value -and $usertoken.Value.access_token ) {
-            $IRMParams.Headers.Add('Authorization', 'Bearer ' + $usertoken.Value.access_token)
+    PROCESS {
+        if ($PSBoundParameters['Debug']) {
+            $DebugPreference = 'Continue'
         }
-        else {
-            $IRMParams.Headers.Add('Authorization', 'Basic ' + $( Get-EdgeBasicAuth ))
-        }
-    }
-    Finally {
-        Remove-Variable usertoken
-    }
 
+        Try {
+            $usertoken = if ($MgmtUri.Equals("https://api.enterprise.apigee.com")) { $( Get-EdgeStashedAdminToken ) }
+            Write-Debug ( "Apply-EdgeAuthorization usertoken: " + $( $usertoken | Format-List | Out-String )  )
+
+            if ( $usertoken -and $usertoken.Value -and $usertoken.Value.access_token ) {
+                Write-Debug ( "Apply-EdgeAuthorization using stashed token" )
+                $IRMParams.Headers.Add('Authorization', 'Bearer ' + $usertoken.Value.access_token)
+            }
+            else {
+                Write-Debug ( "Apply-EdgeAuthorization using Basic Auth" )
+                $IRMParams.Headers.Add('Authorization', 'Basic ' + $( Get-EdgeBasicAuth ))
+            }
+        }
+        Finally {
+            if ($usertoken) { Remove-Variable usertoken }
+        }
+    }
 }
