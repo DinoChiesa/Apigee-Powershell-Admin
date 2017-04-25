@@ -96,6 +96,9 @@ Function Set-EdgeConnection {
             if (! $PSBoundParameters.ContainsKey('User') ) {
                 throw [System.ArgumentNullException] "User", "you must provide the -User parameter."
             }
+            $MyInvocation.MyCommand.Module.PrivateData.Connection['Org'] = $Org
+            $MyInvocation.MyCommand.Module.PrivateData.Connection['MgmtUri'] = $MgmtUri
+            $MyInvocation.MyCommand.Module.PrivateData.Connection['User'] = $User
 
             $UserToken = $null
             if  ( $MgmtUri.Equals("https://api.enterprise.apigee.com")) {
@@ -135,10 +138,6 @@ Function Set-EdgeConnection {
                 }
                 $MyInvocation.MyCommand.Module.PrivateData.Connection['SecurePass'] = $SecurePass
             }
-
-            $MyInvocation.MyCommand.Module.PrivateData.Connection['Org'] = $Org
-            $MyInvocation.MyCommand.Module.PrivateData.Connection['MgmtUri'] = $MgmtUri
-            $MyInvocation.MyCommand.Module.PrivateData.Connection['User'] = $User
         }
     }
 }
