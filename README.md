@@ -141,7 +141,7 @@ Please enter the password for dino@apigee.com: ***********
 ```
 
 All commands that interact with Apigee Edge rely on this connection information.
-You need to do this only once during a Powershell session. If you wish to connect as a different user, you should run this command again. 
+You need to do this only once during a Powershell session. If you wish to connect as a different user, you should run this command again.
 
 By default, the module will attempt to connect to the Apigee-managed cloud Edge service, which is available at https://api.enterprise.apigee.com . To connect to a self-managed Apigee Edge, specify the base URL of the Edge management server, using the MgmtUri parameter:
 
@@ -198,7 +198,23 @@ Set-EdgeConnection -File .\ConnectionData-myorg.json
 
 You can use any of the parameters describe above in this file. We recommend you do not store the password in cleartext, but use the encrypted password form.
 
-After setting this connection information, you can run any of the following commands without re-entering your credentials. 
+After setting this connection information, you can run any of the following commands without re-entering your credentials.
+
+Beginning with v0.2.14, if you are connecting to the Apigee-managed Edge SaaS, the Set-EdgeConnection command will attempt to obtain an OAuth token for the admin API, via a POST request to https://login.apigee.com/oauth/token , as documented on [this page](http://docs.apigee.com/api-services/content/using-oauth2-security-apigee-edge-management-api).
+
+The Set-EdgeConnection will first look for a stashed token, which it stores in a file called .apigee-edge-tokens in the TEMP directory of your machine. This is the logic:
+
+* if it finds a stashed, un-expired token for the user you specify, it will use that.
+* if it finds a stashed, expired token for the user you specify, it will attempt to refresh the token.
+* if that does not work, it will fall back to requiring a password.
+
+Normally tokens live for 30 minutes. It's possible that a PS script will find an un-expired token in the stash, and then during the course of the run, the token may expire. In that case the module is designed to refresh the token automatically. 
+
+Notes:
+
+* access to the token stash in your TEMP directory will imply the ability to connect to Apigee Edge. 
+* The stash can contain multiple tokens. They're indexed by user name (email address).
+
 
 ### List Developers
 
