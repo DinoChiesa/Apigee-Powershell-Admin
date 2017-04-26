@@ -17,7 +17,7 @@ Function Get-EdgeObject {
         Name of the object to retrieve.
 
     .PARAMETER Org
-        The Apigee Edge organization.
+        Optional. The Apigee Edge organization.
 
     .PARAMETER Env
         The Apigee Edge environment. This parameter does not apply to all object types.
