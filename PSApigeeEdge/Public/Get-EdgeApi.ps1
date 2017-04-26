@@ -26,9 +26,9 @@ Function Get-EdgeApi {
 
     [cmdletbinding()]
     param(
-        [string]$Org,
         [string]$Name,
-        [string]$Revision
+        [string]$Revision,
+        [string]$Org
     )
 
     $Options = @{
