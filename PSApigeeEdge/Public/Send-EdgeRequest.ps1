@@ -69,10 +69,6 @@ Function Send-EdgeRequest {
     }
     $MgmtUri = $MyInvocation.MyCommand.Module.PrivateData.Connection['MgmtUri']
 
-    if( ! $MyInvocation.MyCommand.Module.PrivateData.Connection['SecurePass']) {
-      throw [System.ArgumentNullException] 'SecurePass', "use Set-EdgeConnection to specify the Edge connection information."
-    }
-
     if ($PSBoundParameters['Name']) {
       $BaseUri = Join-Parts -Separator "/" -Parts $MgmtUri, '/v1/o', $Org, $Collection, $Name
     }
@@ -91,9 +87,10 @@ Function Send-EdgeRequest {
         Method = 'POST'
         Headers = @{
             Accept = 'application/json'
-            Authorization = 'Basic ' + $( Get-EdgeBasicAuth )
         }
     }
+
+    Apply-EdgeAuthorization -MgmtUri $MgmtUri -IRMParams $IRMParams
 
     if ($PSBoundParameters['Payload']) {
         $IRMParams.Add('Body', $( $Payload | ConvertTo-JSON ) )

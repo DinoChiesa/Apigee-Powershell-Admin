@@ -37,7 +37,7 @@ Function Export-EdgeApi {
         [string]$Dest,
         [string]$Org
     )
-    
+
     if ($PSBoundParameters['Debug']) {
         $DebugPreference = 'Continue'
     }
@@ -52,7 +52,7 @@ Function Export-EdgeApi {
         $tstmp = [System.DateTime]::Now.ToString('yyyyMMdd-HHmmss')
         $Dest = "${Name}-r${Revision}-${tstmp}.zip"
     }
-    
+
     if( ! $PSBoundParameters.ContainsKey('Org')) {
       if( ! $MyInvocation.MyCommand.Module.PrivateData.Connection['Org']) {
         throw [System.ArgumentNullException] 'Org', "use the -Org parameter to specify the organization."
@@ -66,25 +66,20 @@ Function Export-EdgeApi {
     }
     $MgmtUri = $MyInvocation.MyCommand.Module.PrivateData.Connection['MgmtUri']
 
-    if( ! $MyInvocation.MyCommand.Module.PrivateData.Connection['SecurePass']) {
-      throw [System.ArgumentNullException] 'SecurePass', 'use Set-EdgeConnection to specify the Edge connection information.'
-    }
-
     $BaseUri = Join-Parts -Separator '/' -Parts $MgmtUri, '/v1/o', $Org, 'apis', $Name, 'revisions', $Revision
     Write-Debug "BaseUri: $BaseUri"
 
     $IRMParams = @{
         Uri = "${BaseUri}?format=bundle"
         Method = 'GET'
-        Headers = @{
-            Authorization = 'Basic ' + $( Get-EdgeBasicAuth )
-        }
+        Headers = @{ }
         OutFile = $Dest
     }
 
-    Try {
-        $TempResult = Invoke-WebRequest @IRMParams -UseBasicParsing 
+    Apply-EdgeAuthorization -MgmtUri $MgmtUri -IRMParams $IRMParams
 
+    Try {
+        $TempResult = Invoke-WebRequest @IRMParams -UseBasicParsing
         Write-Debug "Raw:`n$($TempResult | Out-String)"
     }
     Catch {

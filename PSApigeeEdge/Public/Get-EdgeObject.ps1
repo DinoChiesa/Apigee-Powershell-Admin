@@ -6,10 +6,10 @@ Function Get-EdgeObject {
     .DESCRIPTION
         Get one or more objects from Apigee Edge, such as developers, apis, apiproducts.
         This is a lower-level cmdlet. You may want to try the higher-level cmdlets like
-        Get-EdgeApi or Get-EdgeDeveloper, etc. 
+        Get-EdgeApi or Get-EdgeDeveloper, etc.
 
     .PARAMETER Collection
-        Type of object to query for. 
+        Type of object to query for.
 
         Example: 'developers', 'apis', 'caches', or 'apiproducts'
 
@@ -17,11 +17,11 @@ Function Get-EdgeObject {
         Name of the object to retrieve.
 
     .PARAMETER Org
-        The Apigee Edge organization. 
+        Optional. The Apigee Edge organization.
 
     .PARAMETER Env
         The Apigee Edge environment. This parameter does not apply to all object types.
-        It applies to 'caches' and 'kvms' but not developers or apis. 
+        It applies to 'caches' and 'kvms' but not developers or apis.
 
     .PARAMETER Params
         Hash table with query options for the specific collection type.
@@ -47,7 +47,7 @@ Function Get-EdgeObject {
         [string]$Org,
         [Hashtable]$Params
     )
-    
+
     if ($PSBoundParameters['Debug']) {
         $DebugPreference = 'Continue'
     }
@@ -56,10 +56,6 @@ Function Get-EdgeObject {
       throw [System.ArgumentNullException] 'MgmtUri', "use Set-EdgeConnection to specify the Edge connection information."
     }
     $MgmtUri = $MyInvocation.MyCommand.Module.PrivateData.Connection['MgmtUri']
-
-    if( ! $MyInvocation.MyCommand.Module.PrivateData.Connection['SecurePass']) {
-      throw [System.ArgumentNullException] 'SecurePass', "use Set-EdgeConnection to specify the Edge connection information."
-    }
 
     if( ! $PSBoundParameters.ContainsKey('Org')) {
       if( ! $MyInvocation.MyCommand.Module.PrivateData.Connection['Org']) {
@@ -74,7 +70,7 @@ Function Get-EdgeObject {
     else {
          $PartialPath = Join-Parts -Separator '/' -Parts '/v1/o', $Org
     }
-    
+
     if($PSBoundParameters['Name']) {
       $BaseUri = Join-Parts -Separator '/' -Parts $MgmtUri, $PartialPath, $Collection, $Name
     }
@@ -82,17 +78,18 @@ Function Get-EdgeObject {
       $BaseUri = Join-Parts -Separator '/' -Parts $MgmtUri, $PartialPath, $Collection
     }
 
-    Write-Debug ( "Uri $BaseUri`n" )
+    Write-Debug ( "Get-EdgeObject Uri $BaseUri`n" )
 
     $IRMParams = @{
         Uri = $BaseUri
         Method = 'Get'
         Headers = @{
             Accept = 'application/json'
-            Authorization = 'Basic ' + $( Get-EdgeBasicAuth )
         }
     }
-    
+
+    Apply-EdgeAuthorization -MgmtUri $MgmtUri -IRMParams $IRMParams
+
     if($PSBoundParameters.ContainsKey('Params')) {
         $IRMParams.Add( 'Body', $Params )
     }
@@ -102,7 +99,6 @@ Function Get-EdgeObject {
 
     Try {
         $TempResult = Invoke-RestMethod @IRMParams
-
         Write-Debug "Raw:`n$($TempResult | Out-String)"
     }
     Catch {

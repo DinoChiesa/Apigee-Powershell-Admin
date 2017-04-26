@@ -7,7 +7,7 @@ Function Delete-EdgeObject {
         Delete one or more objects from Apigee Edge, such as developers, apis, apiproducts
 
     .PARAMETER Collection
-        Type of object to delete. 
+        Type of object to delete.
 
         Example: 'developers', 'apis', or 'apiproducts'
 
@@ -15,7 +15,7 @@ Function Delete-EdgeObject {
         Name of the object to delete.
 
     .PARAMETER Org
-        The Apigee Edge organization. 
+        The Apigee Edge organization.
 
     .EXAMPLE
         Delete-EdgeObject -Collection apis -Name dino-test-2
@@ -32,7 +32,7 @@ Function Delete-EdgeObject {
         [string]$Org,
         [Hashtable]$Params
     )
-    
+
     if ($PSBoundParameters['Debug']) {
         $DebugPreference = 'Continue'
     }
@@ -54,11 +54,8 @@ Function Delete-EdgeObject {
     }
     $MgmtUri = $MyInvocation.MyCommand.Module.PrivateData.Connection['MgmtUri']
 
-    if( ! $MyInvocation.MyCommand.Module.PrivateData.Connection['SecurePass']) {
-      throw [System.ArgumentNullException] "SecurePass", "use Set-EdgeConnection to specify the Edge connection information."
-    }
     $BaseUri = Join-Parts -Separator "/" -Parts $MgmtUri, '/v1/o', $Org, $Collection, $Name
-    
+
     Write-Debug ( "Uri $BaseUri`n" )
 
     $IRMParams = @{
@@ -66,10 +63,11 @@ Function Delete-EdgeObject {
         Method = 'Delete'
         Headers = @{
             Accept = 'application/json'
-            Authorization = 'Basic ' + $( Get-EdgeBasicAuth )
         }
     }
-    
+
+    Apply-EdgeAuthorization -MgmtUri $MgmtUri -IRMParams $IRMParams
+
     Write-Debug ( "Running $($MyInvocation.MyCommand).`n" +
                  "Invoke-RestMethod parameters:`n$($IRMParams | Format-List | Out-String)" )
 

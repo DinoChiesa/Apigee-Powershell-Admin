@@ -11,13 +11,13 @@ Function Import-EdgeApi {
 
     .PARAMETER Source
         Required. A string, repreenting the source of the apiproxy bundle to import. This
-        can be the name of a file, in zip format; or it can be the name of a directory, which 
-        this cmdlet will zip itself. In either case, the structure must be like so: 
+        can be the name of a file, in zip format; or it can be the name of a directory, which
+        this cmdlet will zip itself. In either case, the structure must be like so:
 
-            .\apiproxy 
-            .\apiproxy\proxies 
+            .\apiproxy
+            .\apiproxy\proxies
             .\apiproxy\proxies\proxy1.xml
-            .\apiproxy\policies 
+            .\apiproxy\policies
             .\apiproxy\policies\Policy1.xml
             .\apiproxy\policies\...
             .\apiproxy\targets
@@ -50,7 +50,7 @@ Function Import-EdgeApi {
         [string]$Source,
         [string]$Org
     )
-    
+
     if ($PSBoundParameters['Debug']) {
         $DebugPreference = 'Continue'
     }
@@ -64,30 +64,30 @@ Function Import-EdgeApi {
 
     $ZipFile = ""
     $isFile = $False
-    $mypath = $(Resolve-Path $Source)
-    if ($mypath.count -ne 1) {
-        throw [System.ArgumentException] "The provided Source does not resolve."
+    $mypath = $(Resolve-PathSafe $Source)
+    if (! $mypath) {
+        throw [System.ArgumentException] "Source", "The provided Source does not resolve."
     }
-    
-    if([System.IO.File]::Exists($mypath.Path)){
+
+    if([System.IO.File]::Exists($mypath)){
         $isFile = $True
-        $ZipFile = $mypath.Path
+        $ZipFile = $mypath
         Write-Debug ([string]::Format("Source is file {0}`n", $ZipFile))
     }
-    elseif ([System.IO.Directory]::Exists($mypath.Path)) {
+    elseif ([System.IO.Directory]::Exists($mypath)) {
         # Validate that there is an apiproxy directory
         $apiproxyPaths = @(Join-Path -Path $mypath -ChildPath "apiproxy" -Resolve)
         if ($apiproxyPaths.count -ne 1) {
             throw [System.ArgumentException] "Cannot find apiproxy directory under the Source directory."
         }
-        Write-Debug ([string]::Format("Source is directory {0}`n", $mypath.Path))
-        $ZipFile = Zip-DirectoryEx -SourceDir $mypath.Path
+        Write-Debug ([string]::Format("Source is directory {0}`n", $mypath))
+        $ZipFile = Zip-DirectoryEx -SourceDir $mypath
         Write-Debug ([string]::Format("Zipfile {0}`n", $ZipFile))
     }
     else {
-      throw [System.ArgumentException] "Source does not refer to a readable file or directory."
+      throw [System.ArgumentException] "Source", $([string]::Format("Source file refers to '{0}', not a readable file or directory.", $mypath))
     }
-    
+
     if( ! $PSBoundParameters.ContainsKey('Org')) {
       if( ! $MyInvocation.MyCommand.Module.PrivateData.Connection['Org']) {
         throw [System.ArgumentNullException] 'Org', "use the -Org parameter to specify the organization."
@@ -99,10 +99,6 @@ Function Import-EdgeApi {
     }
     $MgmtUri = $MyInvocation.MyCommand.Module.PrivateData.Connection['MgmtUri']
 
-    if( ! $MyInvocation.MyCommand.Module.PrivateData.Connection['SecurePass']) {
-      throw [System.ArgumentNullException] 'SecurePass', 'use Set-EdgeConnection to specify the Edge connection information.'
-    }
-
     $BaseUri = Join-Parts -Separator '/' -Parts $MgmtUri, '/v1/o', $Org, 'apis'
 
     $IRMParams = @{
@@ -111,15 +107,16 @@ Function Import-EdgeApi {
         Headers = @{
             Accept = 'application/json'
             'content-type' = 'application/octet-stream'
-            Authorization = 'Basic ' + $( Get-EdgeBasicAuth )
         }
         InFile = $ZipFile
     }
 
+    Apply-EdgeAuthorization -MgmtUri $MgmtUri -IRMParams $IRMParams
+
     Write-Debug ([string]::Format("Params {0}`n", $(ConvertTo-Json $IRMParams -Compress ) ) )
 
     Try {
-        $TempResult = Invoke-WebRequest @IRMParams -UseBasicParsing 
+        $TempResult = Invoke-WebRequest @IRMParams -UseBasicParsing
 
         Write-Debug "Raw:`n$($TempResult | Out-String)"
     }
