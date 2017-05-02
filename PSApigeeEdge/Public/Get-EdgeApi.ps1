@@ -31,28 +31,5 @@ Function Get-EdgeApi {
         [string]$Org
     )
 
-    $Options = @{
-        Collection = 'apis'
-    }
-
-    if ($PSBoundParameters['Debug']) {
-        $DebugPreference = 'Continue'
-        $Options['Debug'] = $Debug
-    }
-    if ($PSBoundParameters['Org']) {
-        $Options['Org'] = $Org
-    }
-
-    if ($PSBoundParameters['Name']) {
-      if ($PSBoundParameters['Revision']) {
-        $Path = Join-Parts -Separator "/" -Parts $Name, 'revisions', $Revision
-        $Options['Name'] = $Path
-      }
-      else {
-        $Options['Name'] = $Name
-      }
-    }
-
-    Write-Debug $( [string]::Format("Get-EdgeApi Options {0}", $(ConvertTo-Json $Options )))
-    Get-EdgeObject @Options
+    Get-EdgeAsset -Collection 'apis' -Name $Name -Revision $Revision -Org $Org
 }

@@ -8,6 +8,8 @@ The goal is to allow Powershell scripts to do these things:
 | :------------ | :------------------ |
 | org           | query, update properties |
 | apis          | list, query, inquire revisions, inquire deployment status, import, export, delete, delete revision, deploy, undeploy
+| sharedflows   | list, query, inquire revisions, inquire deployment status, import, export, delete, delete revision, deploy, undeploy
+| flowhooks     | ?? 
 | apiproducts   | list, query, create, delete, change quota, modify public/private, modify description, modify approvalType, modify scopes, add or remove proxy, modify custom attrs
 | developers    | list, query, create, delete, make active or inactive, modify custom attrs
 | developer app | list, query, create, delete, revoke, approve, add new credential, remove credential, modify custom attrs
@@ -25,7 +27,6 @@ Not in scope:
 - TargetServers: list, create, edit, etc
 - data masks
 - apimodels
-- shared flows or flow hooks (for now; we will deliver this when shared flows are final)
 - retrieving analytics or data from custom reports
 - DebugSessions (trace)
 - anything in BaaS
@@ -54,6 +55,8 @@ This project is a work-in-progress. Here's the status:
 | :------------ | :----------------------- | :--------------------
 | org           | query | update properties 
 | apis          | list, query, inquire revisions, inquire deployment status, import, export, delete, delete revision, deploy, undeploy
+| sharedflows   |
+| flowhooks     | 
 | apiproducts   | list, query, create, delete, modify description, modify approvalType, modify scopes, add or remove proxy, add or remove custom attrs, modify public/private, change quota | 
 | developers    | list, query, make active or inactive, create, delete, modify custom attrs | 
 | developer app | list, query, create, delete, revoke, approve, add new credential, remove credential | modify custom attrs
