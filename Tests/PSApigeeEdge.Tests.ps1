@@ -208,7 +208,7 @@ Describe "Deploy-EdgeApi-1" {
             param($Name, $Env, $Index)
             # use a unique basepath to prevent conflicts
             $basepath = [string]::Format('/{0}-{1}',  $Script:Props.SpecialPrefix, $Index);
-            $deployment = @( Deploy-EdgeApi -Name $Name -Env $Env -Revision 1 -Basepath $basepath -Debug )
+            $deployment = @( Deploy-EdgeApi -Name $Name -Env $Env -Revision 1 -Basepath $basepath )
             $deployment | Should Not BeNullOrEmpty
             $deployment.state | Should Be "deployed"
         }
