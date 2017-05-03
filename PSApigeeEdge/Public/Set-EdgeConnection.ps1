@@ -65,16 +65,19 @@ Function Set-EdgeConnection {
     PROCESS {
 
         Function SetOrGetEdgePassword {
-            if (! $PSBoundParameters.ContainsKey('Password') -and ! $PSBoundParameters.ContainsKey('EncryptedPassword')) {
-                $SecurePass = Read-Host -assecurestring "Please enter the password for ${User}"
+            PARAM ( [string]$Password, [string]$EncryptedPassword )
+            PROCESS {
+                if (! $PSBoundParameters.ContainsKey('Password') -and ! $PSBoundParameters.ContainsKey('EncryptedPassword')) {
+                    $SecurePass = Read-Host -assecurestring "Please enter the password for ${User}"
+                }
+                elseif ($PSBoundParameters.ContainsKey('Password')) {
+                    $SecurePass = ConvertTo-SecureString -String $Password -AsPlainText -Force
+                }
+                else {
+                    $SecurePass = ConvertTo-SecureString -String $EncryptedPassword
+                }
+                $MyInvocation.MyCommand.Module.PrivateData.Connection['SecurePass'] = $SecurePass
             }
-            elseif ($PSBoundParameters.ContainsKey('Password')) {
-                $SecurePass = ConvertTo-SecureString -String $Password -AsPlainText -Force
-            }
-            else {
-                $SecurePass = ConvertTo-SecureString -String $EncryptedPassword
-            }
-            $MyInvocation.MyCommand.Module.PrivateData.Connection['SecurePass'] = $SecurePass
         }
         
         if ($PSBoundParameters['Debug']) {
@@ -134,7 +137,7 @@ Function Set-EdgeConnection {
                             if ($_.GetType().ToString().Equals("System.Management.Automation.ErrorRecord")) {
                                 $ResponsePayload = $( ConvertFrom-Json $_ )
                                 if ($ResponsePayload.error -eq "invalid_token" -and ($ResponsePayload.error_description -match "\(expired\)")) {
-                                    SetOrGetEdgePassword
+                                    SetOrGetEdgePassword @PSBoundParameters
                                     $UserToken = Get-EdgeNewAdminToken -MfaCode $MfaCode
                                 }
                                 else {
@@ -144,7 +147,7 @@ Function Set-EdgeConnection {
                         }
                     }
                     ElseIf (! $UserToken ) {
-                        SetOrGetEdgePassword
+                        SetOrGetEdgePassword @PSBoundParameters
                         $UserToken = Get-EdgeNewAdminToken -MfaCode $MfaCode
                     }
                 }
@@ -159,7 +162,7 @@ Function Set-EdgeConnection {
             }
 
             if (! $UserToken ) {
-                SetOrGetEdgePassword
+                SetOrGetEdgePassword @PSBoundParameters
             }
         }
     }
