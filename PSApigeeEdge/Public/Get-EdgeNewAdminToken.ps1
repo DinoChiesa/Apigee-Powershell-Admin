@@ -6,6 +6,8 @@ Function Get-EdgeNewAdminToken {
     .DESCRIPTION
         Gets an OAuth token for Edge Administration. This works only with Edge SaaS.
         You must have previously called Set-EdgeConnection to specify the user + password.
+        In fact this cmdlet gets called implicitly by Set-EdgeConnection as necessary.
+        You probably do not need to call it directly. 
 
     .PARAMETER MfaCode
         Optional. The MFA code for authenticating, if your user requires it.
