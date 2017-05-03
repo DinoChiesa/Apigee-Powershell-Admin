@@ -55,7 +55,7 @@ This project is a work-in-progress. Here's the status:
 | :------------ | :----------------------- | :--------------------
 | org           | query | update properties 
 | apis          | list, query, inquire revisions, inquire deployment status, import, export, delete, delete revision, deploy, undeploy
-| sharedflows   |
+| sharedflows   | list, query, inquire revisions, inquire deployment status, deploy, undeploy  | import, export, delete, delete revision,
 | flowhooks     | 
 | apiproducts   | list, query, create, delete, modify description, modify approvalType, modify scopes, add or remove proxy, add or remove custom attrs, modify public/private, change quota | 
 | developers    | list, query, make active or inactive, create, delete, modify custom attrs | 
