@@ -50,6 +50,7 @@ Function UnDeploy-EdgeAsset {
     Apply-EdgeAuthorization -MgmtUri $MgmtUri -IRMParams $IRMParams
 
     Try {
+        Write-Debug ( "UnDeploy-EdgeAsset Uri $BaseUri`n" )
         $TempResult = Invoke-RestMethod @IRMParams
         Write-Debug "Raw:`n$($TempResult | Out-String)"
     }

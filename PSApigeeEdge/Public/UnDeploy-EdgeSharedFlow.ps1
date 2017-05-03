@@ -33,5 +33,5 @@ Function UnDeploy-EdgeSharedFlow {
         [string]$Org
     )
 
-    UnDeploy-EdgeAsset -AssetType 'sharedflows' -Name $Name -Env $Env -Revision $Revision -Org $Org -Debug:$Debug
+    UnDeploy-EdgeAsset -AssetType 'sharedflows' -Name $Name -Env $Env -Revision $Revision -Org $Org
 }

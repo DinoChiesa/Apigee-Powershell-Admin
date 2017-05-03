@@ -35,5 +35,5 @@ Function Deploy-EdgeSharedFlow {
         [Hashtable]$Params
     )
 
-    Deploy-EdgeAsset -AssetType 'apis' -Name $Name -Env $Env -Revision $Revision -Org $Org -Params $Params  -Debug:$Debug
+    Deploy-EdgeAsset -AssetType 'apis' -Name $Name -Env $Env -Revision $Revision -Org $Org -Params $Params
 }

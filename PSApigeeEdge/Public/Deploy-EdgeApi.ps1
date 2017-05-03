@@ -39,5 +39,5 @@ Function Deploy-EdgeApi {
         [Hashtable]$Params
     )
 
-    Deploy-EdgeAsset -AssetType 'apis' -Name $Name -Env $Env -Revision $Revision -Org $Org -Basepath $Basepath  -Debug:$Debug -Params $Params
+    Deploy-EdgeAsset -AssetType 'apis' -Name $Name -Env $Env -Revision $Revision -Org $Org -Basepath $Basepath -Params $Params
 }
