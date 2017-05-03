@@ -30,47 +30,6 @@ Function Get-EdgeApiDeployment {
         [string]$Revision,
         [Hashtable]$Params
     )
-    
-    if ($PSBoundParameters['Debug']) {
-        $DebugPreference = 'Continue'
-    }
 
-    if (!$PSBoundParameters['Name']) {
-      throw [System.ArgumentNullException] "Name", "You must specify the -Name option."
-    }
-
-    $Options = @{
-        Collection = 'apis'
-    }
-    
-    if ($PSBoundParameters['Debug']) {
-        $Options.Add( 'Debug', $Debug )
-    }
-    if ($PSBoundParameters['Params']) {
-        $Options.Add( 'Params', $Params )
-    }
-    if ($PSBoundParameters['Org']) {
-        $Options.Add( 'Org', $Org )
-    }
-    
-    if ($PSBoundParameters['Revision']) {
-        $Path = Join-Parts -Separator "/" -Parts $Name, 'revisions', $Revision, 'deployments'
-    }
-    else {
-        $Path = Join-Parts -Separator "/" -Parts $Name, 'deployments'
-    }
-    $Options.Add( 'Name', $Path )
-
-    Write-Debug ([string]::Format("Options {0}`n", $(ConvertTo-Json $Options -Compress ) ) )
-
-    if ( ! $PSBoundParameters['Revision'] ) {
-        # an array of environments. Map it appropriately
-        (Get-EdgeObject @Options).environment | % {
-          @{ 'Environment' = $_.name; 'Revision' = $_.revision }
-        }
-    }
-    else {
-        (Get-EdgeObject @Options).environment 
-    }
-
+    Get-EdgeAssetDeployment -AssetType 'apis' -Name $Name -Org $Org -Revision $Revision -Params $Params     
 }
