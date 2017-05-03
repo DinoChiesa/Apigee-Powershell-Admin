@@ -34,7 +34,7 @@ Function Deploy-EdgeAsset {
       throw [System.ArgumentNullException] "Revision", "You must specify the -Revision option."
     }
 
-    if( ! $PSBoundParameters.ContainsKey('Org')) {
+    if( ! $PSBoundParameters['Org']) {
       if( ! $MyInvocation.MyCommand.Module.PrivateData.Connection['Org']) {
         throw [System.ArgumentNullException] "Org", "use the -Org parameter to specify the organization."
       }
