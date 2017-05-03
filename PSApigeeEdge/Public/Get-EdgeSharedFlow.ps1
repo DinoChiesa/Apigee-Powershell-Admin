@@ -31,5 +31,5 @@ Function Get-EdgeSharedFlow {
         [string]$Org
     )
 
-    Get-EdgeAsset -Collection 'sharedflows' -Name $Name -Revision $Revision -Org $Org
+    Get-EdgeAsset -AssetType 'sharedflows' -Name $Name -Revision $Revision -Org $Org
 }

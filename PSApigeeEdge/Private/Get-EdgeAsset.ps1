@@ -1,16 +1,16 @@
 Function Get-EdgeAsset {
     [cmdletbinding()]
     param(
-        [string]$Collection,
+        [string]$AssetType,
         [string]$Name,
         [string]$Revision,
         [string]$Org
     )
 
-    if (!$PSBoundParameters['Collection']) {
-        throw [System.ArgumentNullException] "Collection", "You must specify the -Collection option."
+    if (!$PSBoundParameters['AssetType']) {
+        throw [System.ArgumentNullException] "AssetType", "You must specify the -AssetType option."
     }
-    $Options = @{ Collection = $Collection }
+    $Options = @{ Collection = $AssetType }
 
     if ($PSBoundParameters['Debug']) {
         $DebugPreference = 'Continue'

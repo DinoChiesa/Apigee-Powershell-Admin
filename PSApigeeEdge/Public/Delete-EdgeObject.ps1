@@ -73,7 +73,6 @@ Function Delete-EdgeObject {
 
     Try {
         $TempResult = Invoke-RestMethod @IRMParams
-
         Write-Debug "Raw:`n$($TempResult | Out-String)"
     }
     Catch {

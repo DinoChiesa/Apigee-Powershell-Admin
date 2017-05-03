@@ -31,5 +31,5 @@ Function Get-EdgeApi {
         [string]$Org
     )
 
-    Get-EdgeAsset -Collection 'apis' -Name $Name -Revision $Revision -Org $Org
+    Get-EdgeAsset -AssetType 'apis' -Name $Name -Revision $Revision -Org $Org
 }
