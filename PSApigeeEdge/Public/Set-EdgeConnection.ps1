@@ -63,6 +63,23 @@ Function Set-EdgeConnection {
     )
 
     PROCESS {
+
+        Function SetOrGetEdgePassword {
+            PARAM ( [string]$Password, [string]$EncryptedPassword )
+            PROCESS {
+                if (! $PSBoundParameters.ContainsKey('Password') -and ! $PSBoundParameters.ContainsKey('EncryptedPassword')) {
+                    $SecurePass = Read-Host -assecurestring "Please enter the password for ${User}"
+                }
+                elseif ($PSBoundParameters.ContainsKey('Password')) {
+                    $SecurePass = ConvertTo-SecureString -String $Password -AsPlainText -Force
+                }
+                else {
+                    $SecurePass = ConvertTo-SecureString -String $EncryptedPassword
+                }
+                $MyInvocation.MyCommand.Module.PrivateData.Connection['SecurePass'] = $SecurePass
+            }
+        }
+        
         if ($PSBoundParameters['Debug']) {
             $DebugPreference = 'Continue'
         }
@@ -112,9 +129,25 @@ Function Set-EdgeConnection {
                     $MyInvocation.MyCommand.Module.PrivateData.Connection['TokenStash'] = $TokenStashPath
                     $UserToken = Get-EdgeStashedAdminToken
                     If ( $UserToken -and $( Get-EdgeTokenIsExpired $UserToken )) {
-                        $UserToken = Get-EdgeRefreshedAdminToken -UserToken $UserToken
+                        Try {
+                            $UserToken = Get-EdgeRefreshedAdminToken -UserToken $UserToken
+                        }
+                        Catch {
+                            # it is possible that the refresh token is expired also 
+                            if ($_.GetType().ToString().Equals("System.Management.Automation.ErrorRecord")) {
+                                $ResponsePayload = $( ConvertFrom-Json $_ )
+                                if ($ResponsePayload.error -eq "invalid_token" -and ($ResponsePayload.error_description -match "\(expired\)")) {
+                                    SetOrGetEdgePassword @PSBoundParameters
+                                    $UserToken = Get-EdgeNewAdminToken -MfaCode $MfaCode
+                                }
+                                else {
+                                    Throw $_
+                                }
+                            }
+                        }
                     }
                     ElseIf (! $UserToken ) {
+                        SetOrGetEdgePassword @PSBoundParameters
                         $UserToken = Get-EdgeNewAdminToken -MfaCode $MfaCode
                     }
                 }
@@ -129,18 +162,7 @@ Function Set-EdgeConnection {
             }
 
             if (! $UserToken ) {
-                if (! $PSBoundParameters.ContainsKey('Password') -and ! $PSBoundParameters.ContainsKey('EncryptedPassword')) {
-
-                    $SecurePass = Read-Host -assecurestring "Please enter the password for ${User}"
-
-                }
-                elseif ($PSBoundParameters.ContainsKey('Password')) {
-                    $SecurePass = ConvertTo-SecureString -String $Password -AsPlainText -Force
-                }
-                else {
-                    $SecurePass = ConvertTo-SecureString -String $EncryptedPassword
-                }
-                $MyInvocation.MyCommand.Module.PrivateData.Connection['SecurePass'] = $SecurePass
+                SetOrGetEdgePassword @PSBoundParameters
             }
         }
     }

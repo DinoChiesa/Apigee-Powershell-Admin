@@ -1,13 +1,13 @@
-Function Delete-EdgeApi {
+Function Delete-EdgeSharedFlow {
     <#
     .SYNOPSIS
-        Delete an apiproxy, or a revision of an apiproxy, from Apigee Edge.
+        Delete a sharedflow, or a revision of a sharedflow, from Apigee Edge.
 
     .DESCRIPTION
-        Delete an apiproxy, or a revision of an apiproxy, from Apigee Edge.
+        Delete a sharedflow, or a revision of a sharedflow, from Apigee Edge.
 
     .PARAMETER Name
-        Required. The name of the apiproxy to delete.
+        Required. The name of the sharedflow to delete.
         
     .PARAMETER Revision
         Optional. The revision to delete. If not specified, all revisions will be deleted.
@@ -16,7 +16,7 @@ Function Delete-EdgeApi {
         The Apigee Edge organization. The default is to use the value from Set-EdgeConnection.
 
     .EXAMPLE
-        Delete-EdgeApi dino-test-2
+        Delete-EdgeSharedFlow common-error-handling
 
     .FUNCTIONALITY
         ApigeeEdge
@@ -33,5 +33,5 @@ Function Delete-EdgeApi {
     if ($PSBoundParameters['Debug']) {
         $DebugPreference = 'Continue'
     }
-    Delete-EdgeAsset -AssetType 'apis' -Name $Name -Revision $Revision -Org $Org
+    Delete-EdgeAsset -AssetType 'sharedflows' -Name $Name -Revision $Revision -Org $Org
 }

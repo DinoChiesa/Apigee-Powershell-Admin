@@ -832,7 +832,7 @@ Describe "CRUD-App-Credential" {
         }
 
         It 'tries to remove a credential that does not exist' {
-            { Remove-EdgeAppCredential -AppName $NewAppName -Developer $Developers[0].Email -Key pd0mg1FuedmfCpY9gWZonQmR2fGD3Osw -Debug } | Should Throw
+            { Remove-EdgeAppCredential -AppName $NewAppName -Developer $Developers[0].Email -Key pd0mg1FuedmfCpY9gWZonQmR2fGD3Osw } | Should Throw
         }
 
         It 'removes a credential on the just-created App' {

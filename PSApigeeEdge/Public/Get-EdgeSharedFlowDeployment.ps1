@@ -1,22 +1,22 @@
-Function Get-EdgeApiDeployment {
+Function Get-EdgeSharedFlowDeployment {
     <#
     .SYNOPSIS
-        Get the deployment status for an apiproxy in Apigee Edge
+        Get the deployment status for a sharedflow in Apigee Edge
 
     .DESCRIPTION
-        Get the deployment status for an apiproxy in Apigee Edge
+        Get the deployment status for a sharedflow in Apigee Edge
 
     .PARAMETER Name
-        Required. The name of the apiproxy to inquire.
+        Required. The name of the sharedflow to inquire.
 
     .PARAMETER Revision
-        Optional. The revision of the named apiproxy to inquire.
+        Optional. The revision of the named sharedflow to inquire.
 
     .PARAMETER Org
         The Apigee Edge organization. The default is to use the value from Set-EdgeConnection.
 
     .EXAMPLE
-        Get-EdgeApiDeployment -Name oauth2-pwd-cc
+        Get-EdgeSharedFlowDeployment -Name sf1a
 
     .FUNCTIONALITY
         ApigeeEdge
@@ -34,5 +34,5 @@ Function Get-EdgeApiDeployment {
     if ($PSBoundParameters['Debug']) {
         $DebugPreference = 'Continue'
     }
-    Get-EdgeAssetDeployment -AssetType 'apis' -Name $Name -Org $Org -Revision $Revision -Params $Params     
+    Get-EdgeAssetDeployment -AssetType 'sharedflows' -Name $Name -Org $Org -Revision $Revision -Params $Params     
 }

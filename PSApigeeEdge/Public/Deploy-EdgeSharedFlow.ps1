@@ -1,25 +1,25 @@
-Function UnDeploy-EdgeApi {
+Function Deploy-EdgeSharedFlow {
     <#
     .SYNOPSIS
-        UnDeploy an apiproxy in Apigee Edge.
+        Deploy a sharedflow in Apigee Edge.
 
     .DESCRIPTION
-        UnDeploy a revision of an API proxy that is deployed.
+        Deploy a revision of a sharedflow that is not yet deployed. It must exist.
 
     .PARAMETER Name
-        Required. The name of the apiproxy to undeploy.
+        Required. The name of the sharedflow to deploy.
 
     .PARAMETER Env
-        Required. The name of the environment from which to undeploy the api proxy.
+        Required. The name of the environment to which to deploy the sharedflow.
 
     .PARAMETER Revision
-        Required. The revision of the apiproxy.
+        Required. The revision of the sharedflow.
 
     .PARAMETER Org
         Optional. The Apigee Edge organization. The default is to use the value from Set-EdgeConnection.
 
     .EXAMPLE
-        UnDeploy-EdgeApi -Name oauth2-pwd-cc -Env test -Revision 2
+        Deploy-EdgeSharedFlow -Name sf-1 -Env test -Revision 8
 
     .FUNCTIONALITY
         ApigeeEdge
@@ -31,11 +31,12 @@ Function UnDeploy-EdgeApi {
         [Parameter(Mandatory=$True)][string]$Name,
         [Parameter(Mandatory=$True)][string]$Env,
         [Parameter(Mandatory=$True)][string]$Revision,
-        [string]$Org
+        [string]$Org,
+        [Hashtable]$Params
     )
 
     if ($PSBoundParameters['Debug']) {
         $DebugPreference = 'Continue'
     }
-    UnDeploy-EdgeAsset -AssetType 'apis' -Name $Name -Env $Env -Revision $Revision -Org $Org
+    Deploy-EdgeAsset -AssetType 'apis' -Name $Name -Env $Env -Revision $Revision -Org $Org -Params $Params
 }

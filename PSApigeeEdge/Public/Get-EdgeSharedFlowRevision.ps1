@@ -1,19 +1,19 @@
-Function Get-EdgeApiRevision {
+Function Get-EdgeSharedFlowRevision {
     <#
     .SYNOPSIS
-        Get the list of revisions for an apiproxy from Apigee Edge.
+        Get the list of revisions for a sharedflow from Apigee Edge.
 
     .DESCRIPTION
-        Get the list of revisions for an apiproxy from Apigee Edge.
+        Get the list of revisions for a sharedflow from Apigee Edge.
 
     .PARAMETER Name
-        Required. The name of the apiproxy to retrieve.
+        Required. The name of the sharedflow to retrieve.
 
     .PARAMETER Org
         Optional. The Apigee Edge organization. The default is to use the value from Set-EdgeConnection.
 
     .EXAMPLE
-        Get-EdgeApiRevision -Name myapiproxy
+        Get-EdgeSharedFlowRevision -Name common-error-handling
 
     .FUNCTIONALITY
         ApigeeEdge
@@ -28,5 +28,5 @@ Function Get-EdgeApiRevision {
     if ($PSBoundParameters['Debug']) {
         $DebugPreference = 'Continue'
     }
-    @(Get-EdgeAssetRevision -AssetType 'apis' -Name $Name -Org $Org )
+    @( Get-EdgeAssetRevision -AssetType 'sharedflows' -Name $Name -Org $Org )
 }
