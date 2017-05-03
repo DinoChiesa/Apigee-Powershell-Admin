@@ -31,5 +31,8 @@ Function Get-EdgeApi {
         [string]$Org
     )
 
+    if ($PSBoundParameters['Debug']) {
+        $DebugPreference = 'Continue'
+    }
     Get-EdgeAsset -AssetType 'apis' -Name $Name -Revision $Revision -Org $Org
 }

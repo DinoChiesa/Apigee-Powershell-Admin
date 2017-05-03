@@ -60,6 +60,7 @@ Function Create-EdgeDevApp {
     $Options = @{ }
     
     if ($PSBoundParameters['Debug']) {
+        $DebugPreference = 'Continue'
         $Options.Add( 'Debug', $Debug )
     }
     

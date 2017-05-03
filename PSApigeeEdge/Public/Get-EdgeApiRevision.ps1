@@ -25,5 +25,8 @@ Function Get-EdgeApiRevision {
         [Parameter(Mandatory=$True)][string]$Name,
         [string]$Org
     )
+    if ($PSBoundParameters['Debug']) {
+        $DebugPreference = 'Continue'
+    }
     @(Get-EdgeAssetRevision -AssetType 'apis' -Name $Name -Org $Org )
 }

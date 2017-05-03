@@ -33,5 +33,8 @@ Function UnDeploy-EdgeSharedFlow {
         [string]$Org
     )
 
+    if ($PSBoundParameters['Debug']) {
+        $DebugPreference = 'Continue'
+    }
     UnDeploy-EdgeAsset -AssetType 'sharedflows' -Name $Name -Env $Env -Revision $Revision -Org $Org
 }

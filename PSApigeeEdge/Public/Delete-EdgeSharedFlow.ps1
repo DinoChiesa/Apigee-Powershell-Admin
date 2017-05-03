@@ -30,5 +30,8 @@ Function Delete-EdgeSharedFlow {
         [string]$Org
     )
     
+    if ($PSBoundParameters['Debug']) {
+        $DebugPreference = 'Continue'
+    }
     Delete-EdgeAsset -AssetType 'sharedflows' -Name $Name -Revision $Revision -Org $Org
 }

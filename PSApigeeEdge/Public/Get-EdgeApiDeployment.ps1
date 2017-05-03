@@ -31,5 +31,8 @@ Function Get-EdgeApiDeployment {
         [Hashtable]$Params
     )
 
+    if ($PSBoundParameters['Debug']) {
+        $DebugPreference = 'Continue'
+    }
     Get-EdgeAssetDeployment -AssetType 'apis' -Name $Name -Org $Org -Revision $Revision -Params $Params     
 }

@@ -25,5 +25,8 @@ Function Get-EdgeSharedFlowRevision {
         [Parameter(Mandatory=$True)][string]$Name,
         [string]$Org
     )
+    if ($PSBoundParameters['Debug']) {
+        $DebugPreference = 'Continue'
+    }
     @( Get-EdgeAssetRevision -AssetType 'sharedflows' -Name $Name -Org $Org )
 }

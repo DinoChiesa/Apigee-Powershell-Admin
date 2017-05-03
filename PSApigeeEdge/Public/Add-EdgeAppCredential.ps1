@@ -55,6 +55,7 @@ Function Add-EdgeAppCredential {
 
     if ($PSBoundParameters['Debug']) {
         $Options.Add( 'Debug', $Debug )
+        $DebugPreference = 'Continue'
     }
 
     if (!$PSBoundParameters['Developer']) {

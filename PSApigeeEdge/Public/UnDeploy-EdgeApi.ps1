@@ -34,5 +34,8 @@ Function UnDeploy-EdgeApi {
         [string]$Org
     )
 
+    if ($PSBoundParameters['Debug']) {
+        $DebugPreference = 'Continue'
+    }
     UnDeploy-EdgeAsset -AssetType 'apis' -Name $Name -Env $Env -Revision $Revision -Org $Org
 }

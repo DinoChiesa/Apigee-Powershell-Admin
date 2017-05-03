@@ -31,5 +31,8 @@ Function Get-EdgeSharedFlowDeployment {
         [Hashtable]$Params
     )
 
+    if ($PSBoundParameters['Debug']) {
+        $DebugPreference = 'Continue'
+    }
     Get-EdgeAssetDeployment -AssetType 'sharedflows' -Name $Name -Org $Org -Revision $Revision -Params $Params     
 }
