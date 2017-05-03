@@ -34,5 +34,5 @@ Function UnDeploy-EdgeApi {
         [string]$Org
     )
 
-    UnDeploy-EdgeAsset -AssetType 'apis' -Name $Name -Env $Env -Revision $Revision -Org $Org
+    UnDeploy-EdgeAsset -AssetType 'apis' -Name $Name -Env $Env -Revision $Revision -Org $Org -Debug $Debug
 }

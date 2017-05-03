@@ -208,7 +208,7 @@ Describe "Deploy-EdgeApi-1" {
             param($Name, $Env, $Index)
             # use a unique basepath to prevent conflicts
             $basepath = [string]::Format('/{0}-{1}',  $Script:Props.SpecialPrefix, $Index);
-            $deployment = @( Deploy-EdgeApi -Name $Name -Env $Env -Revision 1 -Basepath $basepath )
+            $deployment = @( Deploy-EdgeApi -Name $Name -Env $Env -Revision 1 -Basepath $basepath -Debug )
             $deployment | Should Not BeNullOrEmpty
             $deployment.state | Should Be "deployed"
         }
@@ -832,7 +832,7 @@ Describe "CRUD-App-Credential" {
         }
 
         It 'tries to remove a credential that does not exist' {
-            { Remove-EdgeAppCredential -AppName $NewAppName -Developer $Developers[0].Email -Key pd0mg1FuedmfCpY9gWZonQmR2fGD3Osw -Debug } | Should Throw
+            { Remove-EdgeAppCredential -AppName $NewAppName -Developer $Developers[0].Email -Key pd0mg1FuedmfCpY9gWZonQmR2fGD3Osw } | Should Throw
         }
 
         It 'removes a credential on the just-created App' {
