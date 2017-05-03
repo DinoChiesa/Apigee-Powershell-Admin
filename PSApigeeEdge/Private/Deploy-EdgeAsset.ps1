@@ -55,7 +55,7 @@ Function Deploy-EdgeAsset {
           delay = 30 # currently not parameterized
     }
 
-    if ($AssetType =eq "apis") {
+    if ($AssetType -eq "apis") {
         if ($PSBoundParameters['Basepath']) {
             $RequestBody['basepath'] = $Basepath
         }
