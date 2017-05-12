@@ -5,10 +5,10 @@ Function Create-EdgeDevApp {
 
     .DESCRIPTION
         Create a developer app in Apigee Edge. This will generate a single
-        credential for the app, with a list of api Products and optionally an expiry. 
+        credential for the app, with a list of API Products and optionally an expiry.
 
     .PARAMETER AppName
-        Required. The name of the app. It must be unique for this developer. 
+        Required. The name of the app. It must be unique for this developer.
 
     .PARAMETER DisplayName
         Optional. The displayName of the app. If omitted, the AppName will be used
@@ -18,8 +18,8 @@ Function Create-EdgeDevApp {
         Required. The id or email of the developer for which to create the app.
 
     .PARAMETER ApiProducts
-        An array of strings, the names of API Products that should be enabled for the
-        first credential created for this app.
+        Optional. An array of strings, the names of API Products that should be enabled
+        for the first credential created for this app.
 
     .PARAMETER Expiry
         Optional. The expiry for the first credential that will be created for this app.
@@ -32,7 +32,7 @@ Function Create-EdgeDevApp {
         Optional. The callback URL for this app. Used this is the app will employ 3-legged OAuth.
 
     .PARAMETER Attributes
-        Optional. Hashtable specifying custom attributes for the app. 
+        Optional. Hashtable specifying custom attributes for the app.
 
     .PARAMETER Org
         Optional. The Apigee Edge organization. The default is to use the value from Set-EdgeConnection.
@@ -56,14 +56,14 @@ Function Create-EdgeDevApp {
         [hashtable]$Attributes,
         [string]$Org
     )
-    
+
     $Options = @{ }
-    
+
     if ($PSBoundParameters['Debug']) {
         $DebugPreference = 'Continue'
         $Options.Add( 'Debug', $Debug )
     }
-    
+
     if (!$PSBoundParameters['Developer']) {
       throw [System.ArgumentNullException] "Developer", "You must specify the -Developer option."
     }
