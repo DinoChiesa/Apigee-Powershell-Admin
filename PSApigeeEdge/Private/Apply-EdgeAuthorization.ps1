@@ -28,26 +28,32 @@ Function Apply-EdgeAuthorization {
         }
 
         Try {
-            $UserToken = if ($MgmtUri.Equals("https://api.enterprise.apigee.com")) { $( Get-EdgeStashedAdminToken ) }
-            Write-Debug ( "Apply-EdgeAuthorization usertoken: " + $( $UserToken | Format-List | Out-String )  )
-            If ( $UserToken -and ! $( Get-EdgeTokenIsExpired $UserToken )) {
-                Write-Debug ( "Apply-EdgeAuthorization using stashed token" )
-                $IRMParams.Headers.Add('Authorization', 'Bearer ' + $usertoken.Value.access_token)
-            }
-            ElseIf ( $( OkToTryRefresh -Lifetime $UserToken.expires_in ) ) {
-                Write-Debug ( "Apply-EdgeAuthorization try refresh token" )
-                $UserToken = Get-EdgeRefreshedAdminToken -UserToken $UserToken
-                if ( $UserToken -and $UserToken.Value -and $UserToken.Value.access_token ) {
-                    Write-Debug ( "Apply-EdgeAuthorization using refreshed token" )
-                    $IRMParams.Headers.Add('Authorization', 'Bearer ' + $UserToken.Value.access_token)
+            if ($MgmtUri.Equals("https://api.enterprise.apigee.com")) {
+                $UserToken = $( Get-EdgeStashedAdminToken )
+                Write-Debug ( "Apply-EdgeAuthorization usertoken: " + $( $UserToken | Format-List | Out-String )  )
+                If ( $UserToken -and ! $( Get-EdgeTokenIsExpired $UserToken )) {
+                    Write-Debug ( "Apply-EdgeAuthorization using stashed token" )
+                    $IRMParams.Headers.Add('Authorization', 'Bearer ' + $usertoken.Value.access_token)
+                }
+                ElseIf ( $( OkToTryRefresh -Lifetime $UserToken.expires_in ) ) {
+                    Write-Debug ( "Apply-EdgeAuthorization try refresh token" )
+                    $UserToken = Get-EdgeRefreshedAdminToken -UserToken $UserToken
+                    if ( $UserToken -and $UserToken.Value -and $UserToken.Value.access_token ) {
+                        Write-Debug ( "Apply-EdgeAuthorization using refreshed token" )
+                        $IRMParams.Headers.Add('Authorization', 'Bearer ' + $UserToken.Value.access_token)
+                    }
+                    else {
+                        Write-Debug ( "Apply-EdgeAuthorization could not refresh token, using Basic Auth" )
+                        $IRMParams.Headers.Add('Authorization', 'Basic ' + $( Get-EdgeBasicAuth ))
+                    }
                 }
                 else {
-                    Write-Debug ( "Apply-EdgeAuthorization could not refresh token, using Basic Auth" )
+                    Write-Debug ( "Apply-EdgeAuthorization not ok to refresh, using Basic Auth" )
                     $IRMParams.Headers.Add('Authorization', 'Basic ' + $( Get-EdgeBasicAuth ))
                 }
             }
             else {
-                Write-Debug ( "Apply-EdgeAuthorization not ok to refresh, using Basic Auth" )
+                Write-Debug ( "Not SaaS, using Basic Auth" )
                 $IRMParams.Headers.Add('Authorization', 'Basic ' + $( Get-EdgeBasicAuth ))
             }
         }
