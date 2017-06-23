@@ -55,7 +55,7 @@ This project is a work-in-progress. Here's the status:
 | :------------ | :----------------------- | :--------------------
 | org           | query | update properties 
 | apis          | list, query, inquire revisions, inquire deployment status, import, export, delete, delete revision, deploy, undeploy
-| sharedflows   | list, query, inquire revisions, inquire deployment status, deploy, undeploy  | import, export, delete, delete revision,
+| sharedflows   | list, query, inquire revisions, inquire deployment status, import, export, deploy, undeploy | delete, delete revision
 | flowhooks     | 
 | apiproducts   | list, query, create, delete, modify description, modify approvalType, modify scopes, add or remove proxy, add or remove custom attrs, modify public/private, change quota | 
 | developers    | list, query, make active or inactive, create, delete, modify custom attrs | 
@@ -509,6 +509,28 @@ type                 : Application
 ```
 
 
+### Import a SharedFlow
+
+```
+PS C:\dev\ps> Import-EdgeSharedFlow -Name log-to-splunk -Source .\sharedflows\log-to-splunk
+```
+
+### Export a SharedFlow
+
+```
+PS C:\dev\ps> Export-EdgeSharedFlow -Name log-to-splunk -Revision 1
+sharedflow-log-to-splunk-r1-20170622-184741.zip
+```
+
+
+### Deploy a SharedFlow
+
+```
+PS C:\dev\ps> Deploy-EdgeSharedFlow -Name log-to-splunk -Revision 1 -Env env1
+```
+
+
+
 
 ### List Environments
 
@@ -646,6 +668,7 @@ PS C:\dev\ps> Create-EdgeKvm -Name kvm2 -Env env1 -Source .\data.json
 ```
 
 In this case, the value associated to a key with a nested hash, will be a string, containing the JSON-stringified version of the nested hash. In the above, the key 'settings' will be associated with the string '{"one":1,"two":2,"three":true}'.
+
 
 
 ## Running Tests
