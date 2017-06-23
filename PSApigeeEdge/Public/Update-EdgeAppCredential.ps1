@@ -1,20 +1,20 @@
 Function Update-EdgeAppCredential {
     <#
     .SYNOPSIS
-        Update a credential in Apigee Edge, by adding or removing API Products. 
+        Update a credential in Apigee Edge, by adding or removing API Products.
 
     .DESCRIPTION
-        Update a credential in Apigee Edge, by adding or removing API Products. 
-        If you want to update the status of the credential see Revoke-EdgeAppCredential or 
+        Update a credential in Apigee Edge, by adding or removing API Products.
+        If you want to update the status of the credential see Revoke-EdgeAppCredential or
         Approve-EdgeAppCredential .
 
     .PARAMETER Remove
         A flag parameter to request the removal of API products from the credential.
-        Use one of -Remove or -Add, not both. 
+        Use one of -Remove or -Add, not both.
 
     .PARAMETER Add
         A flag parameter to request the aditionof API products to the credential.
-        Use one of -Remove or -Add, not both. 
+        Use one of -Remove or -Add, not both.
 
     .PARAMETER AppName
         The name of the developer app to update.
@@ -47,28 +47,28 @@ Function Update-EdgeAppCredential {
 
     [cmdletbinding()]
     PARAM(
-        [Parameter(Mandatory=$False)] 
+        [Parameter(Mandatory=$False)]
         [switch]$Remove,
 
-        [Parameter(Mandatory=$False)] 
+        [Parameter(Mandatory=$False)]
         [switch]$Add,
         [string]$AppName,
         [string]$Name,
         [Parameter(Mandatory=$True)][string]$Developer,
         [Parameter(Mandatory=$True)][string]$Key,
-        
+
         [Parameter(Mandatory=$True)][string[]]$ApiProducts,
 
         [string]$Org
     )
-    
+
     $Options = @{ }
-    
+
     if ($PSBoundParameters['Debug']) {
-        $Options['Debug'] = $Debug 
+        $Options['Debug'] = $Debug
     }
     if ($PSBoundParameters['Org']) {
-        $Options['Org'] = $Org 
+        $Options['Org'] = $Org
     }
 
     if (!$PSBoundParameters['Developer']) {
@@ -87,14 +87,14 @@ Function Update-EdgeAppCredential {
     }
 
     if ($Add) {
-        $Options['Collection'] = $(Join-Parts -Separator '/' -Parts 'developers', $Developer, 'apps', $RealAppName, keys ) 
-        $Options['Name'] = $Key 
+        $Options['Collection'] = $(Join-Parts -Separator '/' -Parts 'developers', $Developer, 'apps', $RealAppName, keys )
+        $Options['Name'] = $Key
 
         $Payload = @{
           apiProducts = $ApiProducts
         }
 
-        $Options['Payload'] = $Payload 
+        $Options['Payload'] = $Payload
 
         Write-Debug $( [string]::Format("Update-EdgeAppCredential Options {0}", $(ConvertTo-Json $Options )))
         Send-EdgeRequest @Options
@@ -104,7 +104,7 @@ Function Update-EdgeAppCredential {
         $ApiProducts | Foreach-Object {
             $Options['Collection'] = $(Join-Parts -Separator '/' -Parts 'developers', $Developer, 'apps', $RealAppName, keys, $Key, 'apiproducts' )
             $Options['Name'] = $_
-          
+
             Write-Debug $( [string]::Format("Update-EdgeAppCredential Options {0}", $(ConvertTo-Json $Options )))
             Delete-EdgeObject @Options
         }

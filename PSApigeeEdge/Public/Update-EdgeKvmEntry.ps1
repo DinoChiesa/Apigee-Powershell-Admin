@@ -8,14 +8,14 @@ Function Update-EdgeKvmEntry {
         The KVM must exist, and the entry must exist.  This works only on CPS-enabled organizations.
 
     .PARAMETER Name
-        The name of the key-value map, in which the entry exists. 
+        The name of the key-value map, in which the entry exists.
 
     .PARAMETER Entry
         Required. The name (or key) of the value to update.
 
     .PARAMETER NewValue
         Required. A string value to use for the entry.
-          
+
     .PARAMETER Env
         Optional. A string, the name of the environment in Apigee Edge with which the keyvalue
         map is associated. KVMs can be associated to an organization, an environment, or an
@@ -47,9 +47,9 @@ Function Update-EdgeKvmEntry {
         [string]$Proxy,
         [string]$Org
     )
-    
+
     $Options = @{ }
-    
+
     if ($PSBoundParameters['Debug']) {
         $DebugPreference = 'Continue'
         $Options.Add( 'Debug', $Debug )
@@ -59,9 +59,9 @@ Function Update-EdgeKvmEntry {
     }
 
     if ($PSBoundParameters.ContainsKey('Env') -and $PSBoundParameters.ContainsKey('Proxy')) {
-        throw [System.ArgumentException] "You may specify only one of -Env and -Proxy."    
+        throw [System.ArgumentException] "You may specify only one of -Env and -Proxy."
     }
-    
+
     if (!$PSBoundParameters['Name']) {
       throw [System.ArgumentNullException] "Name", "You must specify the -Name option."
     }
@@ -71,7 +71,7 @@ Function Update-EdgeKvmEntry {
     if (!$PSBoundParameters['NewValue']) {
       throw [System.ArgumentNullException] "NewValue", "You must specify the -NewValue option."
     }
-    
+
     $basepath = if ($PSBoundParameters['Env']) {
         $( Join-Parts -Separator '/' -Parts 'e', $Env, 'keyvaluemaps' )
     }
@@ -81,11 +81,35 @@ Function Update-EdgeKvmEntry {
     else {
         'keyvaluemaps'
     }
-    
-    $Options.Add( 'Collection', $( Join-Parts -Separator '/' -Parts $basepath, $Name, 'entries', $Entry ) )
-    $Options.Add( 'Payload', @{ name = $Entry; value = $NewValue } )
+
+    $PropKey = [string]::Format("OrgProps-{0}",
+                                $(if ($PSBoundParameters['Org']) { $Org } else { $MyInvocation.MyCommand.Module.PrivateData.Connection['Org'] }))
+    if( ! $MyInvocation.MyCommand.Module.PrivateData.Connection[$PropKey]) {
+        $OrgInfo = $(Get-EdgeObject @Options)
+        $PropsHt = @{}
+        $OrgInfo.properties.property | Foreach { $PropsHt[$_.name] = $_.value }
+        $MyInvocation.MyCommand.Module.PrivateData.Connection[$PropKey] = $PropsHt
+    }
+
+    $OrgProperties = $MyInvocation.MyCommand.Module.PrivateData.Connection[$PropKey]
+    if ($OrgProperties.ContainsKey("features.isCpsEnabled") -and $OrgProperties["features.isCpsEnabled"].Equals("true")) {
+        $Options.Add( 'Collection', $( Join-Parts -Separator '/' -Parts $basepath, $Name, 'entries', $Entry ) )
+        $Options.Add( 'Payload', @{ name = $Entry; value = $NewValue } )
+    }
+    else {
+        $Options.Add( 'Collection', $( Join-Parts -Separator '/' -Parts $basepath, $Name ) )
+        $Options.Add( 'Payload', @{
+                          name = $Name
+                          entry = @(
+                              @{
+                                  name = $Entry
+                                  value = $NewValue
+                              }
+                          )
+                      } )
+    }
 
     Write-Debug ([string]::Format("Options {0}`n", $( ConvertTo-Json $Options -Compress ) ) )
-    
+
     Send-EdgeRequest @Options
 }

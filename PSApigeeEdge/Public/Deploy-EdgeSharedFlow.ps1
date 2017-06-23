@@ -21,6 +21,9 @@ Function Deploy-EdgeSharedFlow {
     .EXAMPLE
         Deploy-EdgeSharedFlow -Name sf-1 -Env test -Revision 8
 
+    .LINK
+       Import-EdgeSharedFlow
+
     .FUNCTIONALITY
         ApigeeEdge
 
@@ -38,5 +41,5 @@ Function Deploy-EdgeSharedFlow {
     if ($PSBoundParameters['Debug']) {
         $DebugPreference = 'Continue'
     }
-    Deploy-EdgeAsset -AssetType 'apis' -Name $Name -Env $Env -Revision $Revision -Org $Org -Params $Params
+    Deploy-EdgeAsset -AssetType 'sharedflows' -Name $Name -Env $Env -Revision $Revision -Org $Org -Params $Params
 }

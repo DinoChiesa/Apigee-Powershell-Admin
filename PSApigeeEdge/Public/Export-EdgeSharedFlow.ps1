@@ -1,30 +1,30 @@
-Function Export-EdgeApi {
+Function Export-EdgeSharedFlow {
     <#
     .SYNOPSIS
-        Export an apiproxy from Apigee Edge, into a zip file.
+        Export a sharedflow from Apigee Edge, into a zip file.
 
     .DESCRIPTION
-        Export an apiproxy from Apigee Edge, into a zip file.
+        Export a sharedflow from Apigee Edge, into a zip file.
 
     .PARAMETER Name
-        Required. The name of the apiproxy to export.
+        Required. The name of the sharedflow to export.
 
     .PARAMETER Revision
-        Required. The revision of the apiproxy to export.
+        Required. The revision of the sharedflow to export.
 
     .PARAMETER Dest
         Optional. The name of the destination file, which will be a ZIP bundle.
-        By default the zip file gets a name derived from the proxy name, the
+        By default the zip file gets a name derived from the name of the sharedflow, the
         revision, and the time of export.
 
     .PARAMETER Org
         Optional. The Apigee Edge organization. The default is to use the value from Set-EdgeConnection.
 
     .EXAMPLE
-        Export-EdgeApi -Name oauth2-pwd-cc -Revision 4 -Dest bundle.zip
+        Export-EdgeSharedFlow -Name log-to-splunk -Revision 4 -Dest sf-bundle.zip
 
     .EXAMPLE
-        $filename = $( Export-EdgeApi -Name oauth2-pwd-cc -Revision 4 )
+        $filename = $( Export-EdgeSharedFlow -Name log-to-splunk -Revision 4 )
 
     .FUNCTIONALITY
         ApigeeEdge
@@ -49,7 +49,7 @@ Function Export-EdgeApi {
     }
     if (!$PSBoundParameters['Dest']) {
         $tstmp = [System.DateTime]::Now.ToString('yyyyMMdd-HHmmss')
-        $Dest = "apiproxy-${Name}-r${Revision}-${tstmp}.zip"
+        $Dest = "sharedflow-${Name}-r${Revision}-${tstmp}.zip"
     }
     if( ! $PSBoundParameters.ContainsKey('Org')) {
       if( ! $MyInvocation.MyCommand.Module.PrivateData.Connection['Org']) {
