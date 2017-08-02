@@ -9,7 +9,7 @@ Function UnDeploy-EdgeApi {
     .PARAMETER Name
         Required. The name of the apiproxy to undeploy.
 
-    .PARAMETER Env
+    .PARAMETER Environment
         Required. The name of the environment from which to undeploy the api proxy.
 
     .PARAMETER Revision
@@ -19,7 +19,7 @@ Function UnDeploy-EdgeApi {
         Optional. The Apigee Edge organization. The default is to use the value from Set-EdgeConnection.
 
     .EXAMPLE
-        UnDeploy-EdgeApi -Name oauth2-pwd-cc -Env test -Revision 2
+        UnDeploy-EdgeApi -Name oauth2-pwd-cc -Environment test -Revision 2
 
     .FUNCTIONALITY
         ApigeeEdge
@@ -29,7 +29,7 @@ Function UnDeploy-EdgeApi {
     [cmdletbinding()]
     param(
         [Parameter(Mandatory=$True)][string]$Name,
-        [Parameter(Mandatory=$True)][string]$Env,
+        [Parameter(Mandatory=$True)][string]$Environment,
         [Parameter(Mandatory=$True)][string]$Revision,
         [string]$Org
     )
@@ -37,5 +37,5 @@ Function UnDeploy-EdgeApi {
     if ($PSBoundParameters['Debug']) {
         $DebugPreference = 'Continue'
     }
-    UnDeploy-EdgeAsset -AssetType 'apis' -Name $Name -Env $Env -Revision $Revision -Org $Org
+    UnDeploy-EdgeAsset -AssetType 'apis' -Name $Name -Environment $Environment -Revision $Revision -Org $Org
 }

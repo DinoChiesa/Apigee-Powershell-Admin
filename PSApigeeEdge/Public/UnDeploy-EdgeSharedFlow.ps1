@@ -9,7 +9,7 @@ Function UnDeploy-EdgeSharedFlow {
     .PARAMETER Name
         Required. The name of the sharedflow to undeploy.
 
-    .PARAMETER Env
+    .PARAMETER Environment
         Required. The name of the environment from which to undeploy the sharedflow.
 
     .PARAMETER Revision
@@ -19,7 +19,7 @@ Function UnDeploy-EdgeSharedFlow {
         Optional. The Apigee Edge organization. The default is to use the value from Set-EdgeConnection.
 
     .EXAMPLE
-        UnDeploy-EdgeSharedFlow -Name sf1a -Env test -Revision 2
+        UnDeploy-EdgeSharedFlow -Name sf1a -Environment test -Revision 2
 
     .FUNCTIONALITY
         ApigeeEdge
@@ -28,7 +28,7 @@ Function UnDeploy-EdgeSharedFlow {
     [cmdletbinding()]
     param(
         [Parameter(Mandatory=$True)][string]$Name,
-        [Parameter(Mandatory=$True)][string]$Env,
+        [Parameter(Mandatory=$True)][string]$Environment,
         [Parameter(Mandatory=$True)][string]$Revision,
         [string]$Org
     )
@@ -36,5 +36,5 @@ Function UnDeploy-EdgeSharedFlow {
     if ($PSBoundParameters['Debug']) {
         $DebugPreference = 'Continue'
     }
-    UnDeploy-EdgeAsset -AssetType 'sharedflows' -Name $Name -Env $Env -Revision $Revision -Org $Org
+    UnDeploy-EdgeAsset -AssetType 'sharedflows' -Name $Name -Environment $Environment -Revision $Revision -Org $Org
 }

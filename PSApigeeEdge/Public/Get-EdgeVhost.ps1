@@ -6,7 +6,7 @@ Function Get-EdgeVhost {
     .DESCRIPTION
         Get information about one or more virtualhosts from Apigee Edge
 
-    .PARAMETER Env
+    .PARAMETER Environment
         Required. The name of the environment to search for virtualhosts.
 
     .PARAMETER Name
@@ -17,7 +17,7 @@ Function Get-EdgeVhost {
         Optional. The Apigee Edge organization. The default is to use the value from Set-EdgeConnection.
 
     .EXAMPLE
-        Get-EdgeVhost -Org cap500 -Env test
+        Get-EdgeVhost -Org cap500 -Environment test
 
     .FUNCTIONALITY
         ApigeeEdge
@@ -25,14 +25,14 @@ Function Get-EdgeVhost {
 
     [cmdletbinding()]
     PARAM(
-        [Parameter(Mandatory=$True)][string]$Env,
+        [Parameter(Mandatory=$True)][string]$Environment,
         [string]$Name,
         [string]$Org,
         [Hashtable]$Params
     )
 
-    if (!$PSBoundParameters['Env']) {
-        throw [System.ArgumentNullException] "Env", "The -Env parameter is required."
+    if (!$PSBoundParameters['Environment']) {
+        throw [System.ArgumentNullException] "Environment", "The -Environment parameter is required."
     }
     $Options = @{ }
 
@@ -44,7 +44,7 @@ Function Get-EdgeVhost {
         $Options['Org'] = $Org
     }
 
-   $Options['Collection'] = $( Join-Parts -Separator '/' -Parts 'e', $Env, 'virtualhosts' )
+   $Options['Collection'] = $( Join-Parts -Separator '/' -Parts 'e', $Environment, 'virtualhosts' )
 
     if ($PSBoundParameters['Name']) {
         $Options['Name'] = $Name

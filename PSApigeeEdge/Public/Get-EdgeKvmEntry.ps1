@@ -5,7 +5,7 @@ Function Get-EdgeKvmEntry {
 
     .DESCRIPTION
         Get (read) an entry in a Key-Value Map (KVM) in Apigee Edge.
-        The organization must be CPS-enabled. 
+        The organization must be CPS-enabled.
 
     .PARAMETER Name
         Required. The name of the specific KVM from which to retrieve.
@@ -13,23 +13,23 @@ Function Get-EdgeKvmEntry {
     .PARAMETER Entry
         Required. The name of the specific entry in the KVM to retrieve.
 
-    .PARAMETER Env
+    .PARAMETER Environment
         Optional. The environment within Apigee Edge with which the keyvalue map is
         associated. KVMs can be associated to an organization, an environment, or an API
-        Proxy. If you specify neither Env nor Proxy, the default is to resolve the name of the KVM
+        Proxy. If you specify neither Environment nor Proxy, the default is to resolve the name of the KVM
         in the list of organization-wide Key-Value Maps.
 
     .PARAMETER Proxy
         Optional. The API Proxy within Apigee Edge with which the keyvalue map is
         associated. KVMs can be associated to an organization, an environment, or an API
-        Proxy. If you specify neither Env nor Proxy, the default is to resolve the name of the KVM
+        Proxy. If you specify neither Environment nor Proxy, the default is to resolve the name of the KVM
         in the list of organization-wide Key-Value Maps.
 
     .PARAMETER Org
         Optional. The Apigee Edge organization. The default is to use the value from Set-EdgeConnection.
 
     .EXAMPLE
-        Get-EdgeKvmEntry -Env test -Name map1 -Entry key1
+        Get-EdgeKvmEntry -Environment test -Name map1 -Entry key1
 
     .LINK
         Create-EdgeKvmEntry
@@ -42,13 +42,13 @@ Function Get-EdgeKvmEntry {
     param(
         [Parameter(Mandatory=$True)][string]$Name,
         [Parameter(Mandatory=$True)][string]$Entry,
-        [string]$Env,
+        [string]$Environment,
         [string]$Proxy,
         [string]$Org
         )
-    
+
     $Options = @{ }
-    
+
     if ($PSBoundParameters['Debug']) {
         $DebugPreference = 'Continue'
         $Options.Add( 'Debug', $Debug )
@@ -57,10 +57,10 @@ Function Get-EdgeKvmEntry {
         $Options.Add( 'Org', $Org )
     }
 
-    if ($PSBoundParameters.ContainsKey('Env') -and $PSBoundParameters.ContainsKey('Proxy')) {
-        throw [System.ArgumentException] "You may specify only one of -Env and -Proxy."    
+    if ($PSBoundParameters.ContainsKey('Environment') -and $PSBoundParameters.ContainsKey('Proxy')) {
+        throw [System.ArgumentException] "You may specify only one of -Environment and -Proxy."
     }
-    
+
     if (!$PSBoundParameters['Name']) {
       throw [System.ArgumentNullException] "Name", "You must specify the -Name option."
     }
@@ -68,8 +68,8 @@ Function Get-EdgeKvmEntry {
       throw [System.ArgumentNullException] "Entry", "You must specify the -Entry option."
     }
 
-    $basepath = if ($PSBoundParameters['Env']) {
-        $(Join-Parts -Separator "/" -Parts 'e', $Env, 'keyvaluemaps' )
+    $basepath = if ($PSBoundParameters['Environment']) {
+        $(Join-Parts -Separator "/" -Parts 'e', $Environment, 'keyvaluemaps' )
     }
     elseif ($PSBoundParameters['Proxy']) {
         $(Join-Parts -Separator "/" -Parts 'apis', $Proxy, 'keyvaluemaps' )

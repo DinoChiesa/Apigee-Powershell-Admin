@@ -10,14 +10,14 @@ Function Get-EdgeKeystore {
         Optional. The name of the specific keystore to retrieve.
         The default is to list all keystores in the environment.
 
-    .PARAMETER Env
-        Required. The Apigee Edge environment. 
+    .PARAMETER Environment
+        Required. The Apigee Edge environment.
 
     .PARAMETER Org
         Optional. The Apigee Edge organization. The default is to use the value from Set-EdgeConnection.
 
     .EXAMPLE
-        Get-EdgeKeystore -Name ks1 -Env test
+        Get-EdgeKeystore -Name ks1 -Environment test
 
     .FUNCTIONALITY
         ApigeeEdge
@@ -27,27 +27,27 @@ Function Get-EdgeKeystore {
     [cmdletbinding()]
     param(
         [Parameter(Mandatory=$False)][string]$Name,
-        [Parameter(Mandatory=$True)][string]$Env,
+        [Parameter(Mandatory=$True)][string]$Environment,
         [string]$Org
         )
-    
+
     $Options = @{ }
-    
+
     if ($PSBoundParameters['Debug']) {
         $DebugPreference = 'Continue'
         $Options.Add( 'Debug', $Debug )
     }
 
-    if (!$PSBoundParameters['Env']) {
-      throw [System.ArgumentNullException] "Env", "You must specify the -Env option."
+    if (!$PSBoundParameters['Environment']) {
+      throw [System.ArgumentNullException] "Environment", "You must specify the -Environment option."
     }
-    
+
     if ($PSBoundParameters['Org']) {
         $Options.Add( 'Org', $Org )
     }
-    
-    $Options.Add( 'Collection', $(Join-Parts -Separator "/" -Parts 'e', $Env, 'keystores' ) )
-    
+
+    $Options.Add( 'Collection', $(Join-Parts -Separator "/" -Parts 'e', $Environment, 'keystores' ) )
+
     if ($PSBoundParameters['Name']) {
         $Options.Add( 'Name', $Name )
     }

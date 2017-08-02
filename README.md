@@ -379,7 +379,7 @@ revision : {@{configuration=; name=8; server=System.Object[]; state=deployed}}
 ### Deploy an API Proxy
 
 ```
-PS C:\dev\ps> Deploy-EdgeApi -Name oauth2-pwd-cc -Env test -Revision 8
+PS C:\dev\ps> Deploy-EdgeApi -Name oauth2-pwd-cc -Environment test -Revision 8
 
 aPIProxy      : oauth2-pwd-cc
 configuration : @{basePath=/; steps=System.Object[]}
@@ -396,7 +396,7 @@ state         : deployed
 ### Undeploy an API Proxy
 
 ```
-PS C:\dev\ps> UnDeploy-EdgeApi -Name oauth2-pwd-cc -Env test -Revision 8
+PS C:\dev\ps> UnDeploy-EdgeApi -Name oauth2-pwd-cc -Environment test -Revision 8
 
 
 aPIProxy      : oauth2-pwd-cc
@@ -526,7 +526,7 @@ sharedflow-log-to-splunk-r1-20170622-184741.zip
 ### Deploy a SharedFlow
 
 ```
-PS C:\dev\ps> Deploy-EdgeSharedFlow -Name log-to-splunk -Revision 1 -Env env1
+PS C:\dev\ps> Deploy-EdgeSharedFlow -Name log-to-splunk -Revision 1 -Environment env1
 ```
 
 
@@ -626,7 +626,7 @@ PS C:\dev\ps> Update-EdgeDevAppStatus  -Developer developer1@example.org -AppNam
 This method specifies the values in a Powershell Hashtable:
 
 ```
-PS C:\dev\ps> Create-EdgeKvm -Name kvm1 -Env env1 -Values @{
+PS C:\dev\ps> Create-EdgeKvm -Name kvm1 -Environment env1 -Values @{
                  key1 = 'value1'
                  key2 = 'value2'
                  key3 = 'CEBF0408-F5BF-4A6E-B841-FBF107BB3B60'
@@ -645,7 +645,7 @@ PS C:\dev\ps> type .\data.json
   "header-name" : "X-Client-ID",
   "targetUrl" : "http://192.168.78.12:9090"
 }
-PS C:\dev\ps> Create-EdgeKvm -Name kvm1 -Env env1 -Source .\data.json
+PS C:\dev\ps> Create-EdgeKvm -Name kvm1 -Environment env1 -Source .\data.json
 
 ```
 
@@ -663,7 +663,7 @@ PS C:\dev\ps> type .\data.json
      "three" : true
   }
 }
-PS C:\dev\ps> Create-EdgeKvm -Name kvm2 -Env env1 -Source .\data.json
+PS C:\dev\ps> Create-EdgeKvm -Name kvm2 -Environment env1 -Source .\data.json
 
 ```
 

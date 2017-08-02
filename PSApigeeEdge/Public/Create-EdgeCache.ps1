@@ -9,8 +9,8 @@ Function Create-EdgeCache {
     .PARAMETER Name
         The name of the cache to create. It must be unique for the environment.
 
-    .PARAMETER Env
-        A string, the name of the environment for this cache. 
+    .PARAMETER Environment
+        A string, the name of the environment for this cache.
 
     .PARAMETER Expiry
         The default expiry for items placed into the cache. This can be an integer, which
@@ -19,19 +19,19 @@ Function Create-EdgeCache {
         seconds, minutes, hours, or days. Defaults to 86400.
 
     .PARAMETER Description
-        A string, describing the purpose of the cache to be created. 
+        A string, describing the purpose of the cache to be created.
 
     .PARAMETER Distributed
         Whether the cache will be distributed. Defaults to false.
 
     .PARAMETER OtherAttributes
-        Optional. A hashtable specifying other attributes for the cache. 
+        Optional. A hashtable specifying other attributes for the cache.
 
     .PARAMETER Org
         The Apigee Edge organization. The default is to use the value from Set-EdgeConnection.
 
     .EXAMPLE
-        Create-EdgeCache -Name cache103 -Env test -Expiry 30m -Distributed 
+        Create-EdgeCache -Name cache103 -Environment test -Expiry 30m -Distributed
 
     .FUNCTIONALITY
         ApigeeEdge
@@ -41,16 +41,16 @@ Function Create-EdgeCache {
     [cmdletbinding()]
     PARAM(
         [Parameter(Mandatory=$True)][string]$Name,
-        [Parameter(Mandatory=$True)][string]$Env,
+        [Parameter(Mandatory=$True)][string]$Environment,
         [string]$Expiry = '86400',
         [string]$Description = 'a general purpose cache',
         [switch]$Distributed,
         [hashtable]$OtherAttributes,
         [string]$Org
     )
-    
+
     $Options = @{ }
-    
+
     if ($PSBoundParameters['Debug']) {
         $Options.Add( 'Debug', $Debug )
     }
@@ -61,13 +61,13 @@ Function Create-EdgeCache {
     if (!$PSBoundParameters['Name']) {
       throw [System.ArgumentNullException] "Name", "You must specify the -Name option."
     }
-    if (!$PSBoundParameters['Env']) {
-      throw [System.ArgumentNullException] "Env", "You must specify the -Env option."
+    if (!$PSBoundParameters['Environment']) {
+      throw [System.ArgumentNullException] "Environment", "You must specify the -Environment option."
     }
 
-    $Options['Collection'] = $( Join-Parts -Separator '/' -Parts 'e', $Env, 'caches' ) 
+    $Options['Collection'] = $( Join-Parts -Separator '/' -Parts 'e', $Environment, 'caches' )
     $Options['QParams'] = $( ConvertFrom-HashtableToQueryString @{ name = $Name } )
-      
+
     $Payload = @{
       description = $Description
       distributed = if ($Distributed) {'true'} else {'false'}
@@ -76,7 +76,7 @@ Function Create-EdgeCache {
         valuesNull = 'false'
       }
     }
-    
+
     $CacheAttrs= @{
         compression = @{ minimumSizeInKB = 1024 }
         persistent = 'false'

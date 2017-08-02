@@ -6,18 +6,18 @@ Function Get-EdgeCache {
     .DESCRIPTION
         Get one or more caches from Apigee Edge
 
-    .PARAMETER Env
+    .PARAMETER Environment
         Required. The name of the environment to search for caches.
 
     .PARAMETER Name
         Optional. The name of the cache to retrieve.
-        The default is to list all caches
+        The default is to list all caches.
 
     .PARAMETER Org
         Optional. The Apigee Edge organization. The default is to use the value from Set-EdgeConnection.
 
     .EXAMPLE
-        Get-EdgeCache -Org cap500 -Env test
+        Get-EdgeCache -Org cap500 -Environment test
 
     .FUNCTIONALITY
         ApigeeEdge
@@ -26,14 +26,14 @@ Function Get-EdgeCache {
 
     [cmdletbinding()]
     PARAM(
-        [Parameter(Mandatory=$True)][string]$Env,
+        [Parameter(Mandatory=$True)][string]$Environment,
         [string]$Name,
         [string]$Org,
         [Hashtable]$Params
     )
 
-    if (!$PSBoundParameters['Env']) {
-        throw [System.ArgumentNullException] "Env", "The -Env parameter is required."
+    if (!$PSBoundParameters['Environment']) {
+        throw [System.ArgumentNullException] "Environment", "The -Environment parameter is required."
     }
     $Options = @{ }
 
@@ -45,7 +45,7 @@ Function Get-EdgeCache {
         $Options['Org'] = $Org
     }
 
-    $Options['Collection'] = $( Join-Parts -Separator '/' -Parts 'e', $Env, 'caches' )
+    $Options['Collection'] = $( Join-Parts -Separator '/' -Parts 'e', $Environment, 'caches' )
 
     if ($PSBoundParameters['Name']) {
         $Options['Name'] = $Name

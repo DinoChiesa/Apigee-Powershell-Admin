@@ -3,7 +3,7 @@ Function UnDeploy-EdgeAsset {
     param(
         [Parameter(Mandatory=$True)][string]$AssetType,
         [Parameter(Mandatory=$True)][string]$Name,
-        [Parameter(Mandatory=$True)][string]$Env,
+        [Parameter(Mandatory=$True)][string]$Environment,
         [Parameter(Mandatory=$True)][string]$Revision,
         [string]$Org
     )
@@ -18,8 +18,8 @@ Function UnDeploy-EdgeAsset {
     if (!$PSBoundParameters['Name']) {
       throw [System.ArgumentNullException] "Name", "You must specify the -Name option."
     }
-    if (!$PSBoundParameters['Env']) {
-      throw [System.ArgumentNullException] "Env", "You must specify the -Env option."
+    if (!$PSBoundParameters['Environment']) {
+      throw [System.ArgumentNullException] "Environment", "You must specify the -Environment option."
     }
     if (!$PSBoundParameters['Revision']) {
       throw [System.ArgumentNullException] "Revision", "You must specify the -Revision option."
@@ -37,7 +37,7 @@ Function UnDeploy-EdgeAsset {
     }
     $MgmtUri = $MyInvocation.MyCommand.Module.PrivateData.Connection['MgmtUri']
 
-    $BaseUri = Join-Parts -Separator '/' -Parts $MgmtUri, '/v1/o', $Org, 'e', $Env, $AssetType, $Name, 'revisions', $Revision, 'deployments'
+    $BaseUri = Join-Parts -Separator '/' -Parts $MgmtUri, '/v1/o', $Org, 'e', $Environment, $AssetType, $Name, 'revisions', $Revision, 'deployments'
 
     $IRMParams = @{
         Uri = $BaseUri
