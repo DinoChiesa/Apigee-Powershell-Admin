@@ -9,7 +9,7 @@ Function Deploy-EdgeSharedFlow {
     .PARAMETER Name
         Required. The name of the sharedflow to deploy.
 
-    .PARAMETER Env
+    .PARAMETER Environment
         Required. The name of the environment to which to deploy the sharedflow.
 
     .PARAMETER Revision
@@ -19,7 +19,7 @@ Function Deploy-EdgeSharedFlow {
         Optional. The Apigee Edge organization. The default is to use the value from Set-EdgeConnection.
 
     .EXAMPLE
-        Deploy-EdgeSharedFlow -Name sf-1 -Env test -Revision 8
+        Deploy-EdgeSharedFlow -Name sf-1 -Environment test -Revision 8
 
     .LINK
        Import-EdgeSharedFlow
@@ -32,7 +32,7 @@ Function Deploy-EdgeSharedFlow {
     [cmdletbinding()]
     param(
         [Parameter(Mandatory=$True)][string]$Name,
-        [Parameter(Mandatory=$True)][string]$Env,
+        [Parameter(Mandatory=$True)][string]$Environment,
         [Parameter(Mandatory=$True)][string]$Revision,
         [string]$Org,
         [Hashtable]$Params
@@ -41,5 +41,5 @@ Function Deploy-EdgeSharedFlow {
     if ($PSBoundParameters['Debug']) {
         $DebugPreference = 'Continue'
     }
-    Deploy-EdgeAsset -AssetType 'sharedflows' -Name $Name -Env $Env -Revision $Revision -Org $Org -Params $Params
+    Deploy-EdgeAsset -AssetType 'sharedflows' -Name $Name -Environment $Environment -Revision $Revision -Org $Org -Params $Params
 }

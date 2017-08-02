@@ -28,10 +28,10 @@ function Get-EdgeStashedAdminToken
             $DebugPreference = 'Continue'
         }
         $MgmtUri = $MyInvocation.MyCommand.Module.PrivateData.Connection['MgmtUri']
-        if (! $MgmtUri.Equals("https://api.enterprise.apigee.com") ) {
-            Write-Debug ( "Get-EdgeStashedAdminToken MgmtUri not Saas" )
-            return $null
-        }
+        # if (! $MgmtUri.Equals("https://api.enterprise.apigee.com") ) {
+        #    Write-Debug ( "Get-EdgeStashedAdminToken MgmtUri not Saas" )
+        #    return $null
+        #}
 
         $TokenData = Read-EdgeTokenStash
         if (!$TokenData) {
@@ -46,13 +46,14 @@ function Get-EdgeStashedAdminToken
         if (!$User) {
             throw [System.ArgumentNullException] "There is no User set. Have you called Set-EdgeConnection ?"
         }
-        $UserToken = $TokenData.psobject.properties |?{ $_.MemberType -eq 'NoteProperty' -and $_.Name -eq $User }
+        $Key = [string]::Format("{0}##{1}", $User, $MgmtUri )
+        $UserToken = $TokenData.psobject.properties |?{ $_.MemberType -eq 'NoteProperty' -and $_.Name -eq $Key }
         # if ( ($UserToken -eq $null) -or $( Get-EdgeTokenIsExpired $UserToken )) {
         #     Write-Debug ( "Get-EdgeStashedAdminToken Token is null or Expired" )
         #     return $null
         # }
 
-        # possibly expired, caller must check
+        # possibly null, possibly expired, caller must check
         $UserToken
     }
 }

@@ -11,6 +11,11 @@ function Write-EdgeTokenStash
         }
 
         $TokenStashFile = $MyInvocation.MyCommand.Module.PrivateData.Connection['TokenStash']
+        if (! $PSBoundParameters.ContainsKey('User') ) {
+            $User = $MyInvocation.MyCommand.Module.PrivateData.Connection['User']
+        }
+        $MgmtUri = $MyInvocation.MyCommand.Module.PrivateData.Connection['MgmtUri']
+
         $TokenData = Read-EdgeTokenStash
         if (! $TokenData) {
             $TokenData = "{}" | ConvertFrom-Json
@@ -20,10 +25,11 @@ function Write-EdgeTokenStash
 
         #$Value = $NewTokenJson | ConvertFrom-Json
         $Value = $NewToken
-        $TokenData | Add-Member -MemberType NoteProperty -Name $User -Value $Value -Force
+        $Key = [string]::Format("{0}##{1}", $User, $MgmtUri )
+        $TokenData | Add-Member -MemberType NoteProperty -Name $Key -Value $Value -Force
 
         $UnexpiredTokenData = "{}" | ConvertFrom-Json
-        $TokenData.psobject.properties |?{ $_.MemberType -eq 'NoteProperty' } |% {
+        $TokenData.psobject.properties |? { $_.MemberType -eq 'NoteProperty' } |% {
             if (! $( Get-EdgeTokenIsExpired $_ ) ) {
                 $UnexpiredTokenData | Add-Member -MemberType NoteProperty -Name $_.Name -Value $_.Value -Force
                 Write-Debug ( "Write-EdgeTokenStash keep " + $_.Value )

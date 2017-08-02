@@ -19,7 +19,7 @@ Function Get-EdgeObject {
     .PARAMETER Org
         Optional. The Apigee Edge organization.
 
-    .PARAMETER Env
+    .PARAMETER Environment
         The Apigee Edge environment. This parameter does not apply to all object types.
         It applies to 'caches' and 'kvms' but not developers or apis.
 
@@ -43,7 +43,7 @@ Function Get-EdgeObject {
     PARAM(
         [string]$Collection,
         [string]$Name,
-        [string]$Env,
+        [string]$Environment,
         [string]$Org,
         [Hashtable]$Params
     )
@@ -64,8 +64,8 @@ Function Get-EdgeObject {
       $Org = $MyInvocation.MyCommand.Module.PrivateData.Connection['Org']
     }
 
-    if($PSBoundParameters['Env']) {
-         $PartialPath = Join-Parts -Separator '/' -Parts '/v1/o', $Org, 'e', $Env
+    if($PSBoundParameters['Environment']) {
+         $PartialPath = Join-Parts -Separator '/' -Parts '/v1/o', $Org, 'e', $Environment
     }
     else {
          $PartialPath = Join-Parts -Separator '/' -Parts '/v1/o', $Org

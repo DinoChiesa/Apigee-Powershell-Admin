@@ -16,23 +16,23 @@ Function Update-EdgeKvmEntry {
     .PARAMETER NewValue
         Required. A string value to use for the entry.
 
-    .PARAMETER Env
+    .PARAMETER Environment
         Optional. A string, the name of the environment in Apigee Edge with which the keyvalue
         map is associated. KVMs can be associated to an organization, an environment, or an
-        API Proxy. If you specify neither Env nor Proxy, the default is to resolve the name of
+        API Proxy. If you specify neither Environment nor Proxy, the default is to resolve the name of
         the KVM in the list of organization-wide Key-Value Maps.
 
     .PARAMETER Proxy
         Optional. The API Proxy within Apigee Edge with which the keyvalue map is
         associated. KVMs can be associated to an organization, an environment, or an API
-        Proxy. If you specify neither Env nor Proxy, the default is to resolve the name of the
+        Proxy. If you specify neither Environment nor Proxy, the default is to resolve the name of the
         KVM in the list of organization-wide Key-Value Maps.
 
     .PARAMETER Org
         Optional. The Apigee Edge organization. The default is to use the value from Set-EdgeConnection.
 
     .EXAMPLE
-        Update-EdgeKvmEntry -Name kvm101 -Env test -Entry key1 -NewValue 'updated value'
+        Update-EdgeKvmEntry -Name kvm101 -Environment test -Entry key1 -NewValue 'updated value'
 
     .FUNCTIONALITY
         ApigeeEdge
@@ -43,7 +43,7 @@ Function Update-EdgeKvmEntry {
         [Parameter(Mandatory=$True)][string]$Name,
         [Parameter(Mandatory=$True)][string]$Entry,
         [Parameter(Mandatory=$True)][string]$NewValue,
-        [string]$Env,
+        [string]$Environment,
         [string]$Proxy,
         [string]$Org
     )
@@ -58,8 +58,8 @@ Function Update-EdgeKvmEntry {
         $Options.Add( 'Org', $Org )
     }
 
-    if ($PSBoundParameters.ContainsKey('Env') -and $PSBoundParameters.ContainsKey('Proxy')) {
-        throw [System.ArgumentException] "You may specify only one of -Env and -Proxy."
+    if ($PSBoundParameters.ContainsKey('Environment') -and $PSBoundParameters.ContainsKey('Proxy')) {
+        throw [System.ArgumentException] "You may specify only one of -Environment and -Proxy."
     }
 
     if (!$PSBoundParameters['Name']) {
@@ -72,8 +72,8 @@ Function Update-EdgeKvmEntry {
       throw [System.ArgumentNullException] "NewValue", "You must specify the -NewValue option."
     }
 
-    $basepath = if ($PSBoundParameters['Env']) {
-        $( Join-Parts -Separator '/' -Parts 'e', $Env, 'keyvaluemaps' )
+    $basepath = if ($PSBoundParameters['Environment']) {
+        $( Join-Parts -Separator '/' -Parts 'e', $Environment, 'keyvaluemaps' )
     }
     elseif ($PSBoundParameters['Proxy']) {
         $(Join-Parts -Separator "/" -Parts 'apis', $Proxy, 'keyvaluemaps' )

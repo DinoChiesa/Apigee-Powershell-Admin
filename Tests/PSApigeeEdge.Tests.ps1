@@ -52,16 +52,16 @@ $Script:Props = @{
     FoundEnvironments = New-Object System.Collections.ArrayList
 }
 
-$ConnectionData = ReadJson $Connection 
+$ConnectionData = ReadJson $Connection
 
 Describe "Set-EdgeConnection" {
 
-    Context 'Strict mode' { 
+    Context 'Strict mode' {
 
         Set-StrictMode -Version latest
 
         It 'sets the connection info' {
-            $ConnectionData.user | Should Not BeNullOrEmpty 
+            $ConnectionData.user | Should Not BeNullOrEmpty
             $ConnectionData.org | Should Not BeNullOrEmpty
 
             if (! $ConnectionData.ContainsKey("User") -or ! $ConnectionData.ContainsKey('Org')) {
@@ -77,7 +77,7 @@ Describe "Set-EdgeConnection" {
 
 Describe "Get-EdgeOrganization-1" {
 
-    Context 'Strict mode' { 
+    Context 'Strict mode' {
 
         Set-StrictMode -Version latest
 
@@ -85,10 +85,10 @@ Describe "Get-EdgeOrganization-1" {
             $org = $( Get-EdgeOrganization )
             $isCps = @( $org.properties.psobject.properties.value |
               where { $_.name -eq 'features.isCpsEnabled' })
-            
+
             if ( $isCps.count -gt 0 ) {
                 # need to know CPS in order to decide whether to run KVM tests
-                $Script:Props.OrgIsCps = $isCps[0].value 
+                $Script:Props.OrgIsCps = $isCps[0].value
             }
         }
     }
@@ -96,7 +96,7 @@ Describe "Get-EdgeOrganization-1" {
 
 Describe "Get-EdgeEnvironment-1" {
 
-    Context 'Strict mode' { 
+    Context 'Strict mode' {
 
         Set-StrictMode -Version latest
 
@@ -104,7 +104,7 @@ Describe "Get-EdgeEnvironment-1" {
             $envs = @( Get-EdgeEnvironment )
             $envs.count | Should BeGreaterThan 0
         }
-        
+
         It 'queries environment <Name> by name' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
             param($Name)
 
@@ -120,7 +120,7 @@ Describe "Get-EdgeEnvironment-1" {
 
 Describe "Import-EdgeApi-1" {
 
-    Context 'Strict mode' { 
+    Context 'Strict mode' {
 
         Set-StrictMode -Version latest
         Add-Type -assembly "system.io.compression.filesystem"
@@ -134,7 +134,7 @@ Describe "Import-EdgeApi-1" {
         It 'imports proxy from ZIP file bundle <Zip>' -TestCases $zipfiles {
             param($Zip, $Index)
             $zipfile = $(Join-Path -Path $datapath -ChildPath $Zip -Resolve)
-            
+
             $apiproxyname = [string]::Format('{0}-apiproxy-{1}', $Script:Props.SpecialPrefix, $Index)
             #write-host $([string]::Format("APIProxy name: {0}", $apiproxyname))
             $api = @(Import-EdgeApi -Source $zipfile -Name $apiproxyname)
@@ -153,7 +153,7 @@ Describe "Import-EdgeApi-1" {
             $api = @(Import-EdgeApi -Source $destination -Name $apiproxyname)
             $api.revision | Should Be 1
             $api.name | Should Be $apiproxyname
-            
+
             ## remember the proxy we just imported, so we can deploy and export and delete, later
             $Script:Props.CreatedProxies.Add($apiproxyname)
             # and delete the temporary directory
@@ -164,7 +164,7 @@ Describe "Import-EdgeApi-1" {
 
 Describe "Get-EdgeApi-1" {
 
-    Context 'Strict mode' { 
+    Context 'Strict mode' {
 
         Set-StrictMode -Version latest
 
@@ -174,7 +174,7 @@ Describe "Get-EdgeApi-1" {
         }
 
         $testcases = Get-EdgeApi | Sort-Object {Get-Random} | Select-Object -first 22 | foreach { @{ Proxy = $_ } }
-          
+
         It 'gets details of apiproxy <Proxy>' -TestCases $testcases {
             param($Proxy)
             $oneproxy = Get-EdgeApi -Name $Proxy
@@ -195,45 +195,45 @@ Describe "Get-EdgeApi-1" {
 }
 
 Describe "Deploy-EdgeApi-1" {
-    Context 'Strict mode' { 
+    Context 'Strict mode' {
         Set-StrictMode -Version latest
 
-        ## produce testcases that will deploy the imported proxies to all environments. 
+        ## produce testcases that will deploy the imported proxies to all environments.
         $i=0
-        $testcases = $Script:Props.FoundEnvironments | 
-          foreach { $env= $_; $Script:Props.CreatedProxies |
-            foreach { @{ Name = $_; Env = $env; Index=$i++ } } }
-        
-        It 'deploys proxy <Name> to <Env>' -TestCases $testcases {
-            param($Name, $Env, $Index)
+        $testcases = $Script:Props.FoundEnvironments |
+          foreach { $e = $_; $Script:Props.CreatedProxies |
+            foreach { @{ Name = $_; Environment = $e; Index=$i++ } } }
+
+        It 'deploys proxy <Name> to <Environment>' -TestCases $testcases {
+            param($Name, $Environment, $Index)
             # use a unique basepath to prevent conflicts
             $basepath = [string]::Format('/{0}-{1}',  $Script:Props.SpecialPrefix, $Index);
-            $deployment = @( Deploy-EdgeApi -Name $Name -Env $Env -Revision 1 -Basepath $basepath )
+            $deployment = @( Deploy-EdgeApi -Name $Name -Environment $Environment -Revision 1 -Basepath $basepath )
             $deployment | Should Not BeNullOrEmpty
             $deployment.state | Should Be "deployed"
         }
-        
-        It 'tries again to deploy proxy <Name> to <Env>' -TestCases $testcases {
-            param($Name, $Env, $Index)
+
+        It 'tries again to deploy proxy <Name> to <Environment>' -TestCases $testcases {
+            param($Name, $Environment, $Index)
             # use the same basepath; should receive a conflict
             $basepath = [string]::Format('/{0}-{1}',  $Script:Props.SpecialPrefix, $Index);
-            { Deploy-EdgeApi -Name $Name -Env $Env -Revision 1 -Basepath $basepath } | Should Throw
+            { Deploy-EdgeApi -Name $Name -Environment $Environment -Revision 1 -Basepath $basepath } | Should Throw
         }
     }
 }
 
 Describe "Export-EdgeApi-1" {
-    Context 'Strict mode' { 
+    Context 'Strict mode' {
         Set-StrictMode -Version latest
 
         $i = 0;
         $testcases = Get-EdgeApi | Sort-Object {Get-Random} | Select-Object -first 22 | foreach { @{ Proxy = $_ ; Index = $i++ } }
-          
+
         It 'exports apiproxy <Proxy> with destination' -TestCases $testcases {
             param($Proxy, $Index)
             $filename = [string]::Format('{0}\{1}-export-{2}.zip',
                                          $env:temp, $Script:Props.SpecialPrefix, $Index )
-            
+
             $revisions = @( Get-EdgeApiRevision -Name $Proxy )
             $revisions.count | Should BeGreaterThan 0
 
@@ -241,12 +241,12 @@ Describe "Export-EdgeApi-1" {
             [System.IO.File]::Exists($filename) | Should Be $True
             [System.IO.File]::delete($filename)
         }
-        
+
         $testcases = Get-EdgeApi | Sort-Object {Get-Random} | Select-Object -first 18 | foreach { @{ Proxy = $_ } }
 
         It 'exports apiproxy <Proxy>' -TestCases $testcases {
             param($Proxy)
-            
+
             $revisions = @( Get-EdgeApiRevision -Name $Proxy )
             $revisions.count | Should BeGreaterThan 0
             $filename = $(Export-EdgeApi -Name $Proxy -Revision $revisions[-1] )
@@ -257,9 +257,9 @@ Describe "Export-EdgeApi-1" {
 }
 
 Describe "Get-ApiRevisions-1" {
-    
+
     Context 'Strict mode' {
-    
+
         Set-StrictMode -Version latest
 
         $testcases = Get-EdgeApi | Sort-Object {Get-Random} | Select-Object -first 28 | foreach { @{ Proxy = $_ } }
@@ -307,30 +307,30 @@ Describe "Get-ApiRevisions-1" {
 }
 
 Describe "Undeploy-EdgeApi-1" {
-    Context 'Strict mode' { 
+    Context 'Strict mode' {
         Set-StrictMode -Version latest
 
-        ## produce testcases that will deploy the imported proxies to all environments. 
-        $testcases = $Script:Props.FoundEnvironments | 
-          foreach { $env= $_; $Script:Props.CreatedProxies | foreach { @{ Name = $_; Env = $env; } } }
-        
-        It 'undeploys proxy <Name> from <Env>' -TestCases $testcases {
-            param($Name, $Env)
-            $undeployment = @( UnDeploy-EdgeApi -Name $Name -Env $Env -Revision 1 )
+        ## produce testcases that will deploy the imported proxies to all environments.
+        $testcases = $Script:Props.FoundEnvironments |
+          foreach { $e = $_; $Script:Props.CreatedProxies | foreach { @{ Name = $_; Environment = $e; } } }
+
+        It 'undeploys proxy <Name> from <Environment>' -TestCases $testcases {
+            param($Name, $Environment)
+            $undeployment = @( UnDeploy-EdgeApi -Name $Name -Environment $Environment -Revision 1 )
             $undeployment | Should Not BeNullOrEmpty
             $undeployment.state | Should Be "undeployed"
         }
-        
-        It 'tries again to undeploy proxy <Name> from <Env>' -TestCases $testcases {
-            param($Name, $Env)
-            { UnDeploy-EdgeApi -Name $Name -Env $Env -Revision 1 } | Should Throw
+
+        It 'tries again to undeploy proxy <Name> from <Environment>' -TestCases $testcases {
+            param($Name, $Environment)
+            { UnDeploy-EdgeApi -Name $Name -Environment $Environment -Revision 1 } | Should Throw
         }
     }
 }
 
 Describe "Create-Kvm-1" {
     Context 'Strict mode' {
-    
+
         Set-StrictMode -Version latest
 
         It 'creates a KVM in Environment <Name> specifying values' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
@@ -339,7 +339,7 @@ Describe "Create-Kvm-1" {
             $Value2 = [string]::Format('value2-{0}', $(Get-Random))
             $Params = @{
               Name = [string]::Format('{0}-kvm-A', $Script:Props.SpecialPrefix )
-              Env = $Name
+              Environment = $Name
               Values = @{
                  key1 = $Value1
                  key2 = $Value2
@@ -354,12 +354,12 @@ Describe "Create-Kvm-1" {
             $( $kvm.entry | where { $_.name -eq 'key2' } ).value | Should Be $Value2
             @( $kvm.entry | where { $_.name -eq 'non-existent-key' } ).count | Should Be 0
         }
-        
+
         It 'creates a KVM in Environment <Name> specifying no values' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
             param($Name)
             $Params = @{
               Name = [string]::Format('{0}-kvm-B', $Script:Props.SpecialPrefix )
-              Env = $Name
+              Environment = $Name
             }
             $kvm = Create-EdgeKvm @Params
             { $kvm } | Should Not Throw
@@ -376,10 +376,10 @@ Describe "Create-Kvm-1" {
                 envname = $Name
             }
             $object | ConvertTo-Json -depth 10 | Out-File $filename
-            
+
             $Params = @{
               Name = [string]::Format('{0}-kvm-C', $Script:Props.SpecialPrefix )
-              Env = $Name
+              Environment = $Name
               Source = $filename
             }
             $kvm = Create-EdgeKvm @Params
@@ -392,19 +392,19 @@ Describe "Create-Kvm-1" {
 
             Remove-Item -path $filename
         }
-        
+
         It 'creates an encrypted KVM in Environment <Name>' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
             param($Name)
             $Params = @{
                 Name = [string]::Format('{0}-kvm-encrypted', $Script:Props.SpecialPrefix )
-                Env = $Name
+                Environment = $Name
                 Encrypted = $True
             }
             $kvm = Create-EdgeKvm @Params
             { $kvm } | Should Not Throw
             @( $kvm.entry | where { $_.name -eq 'key1' } ).count | Should Be 0
         }
-        
+
         It 'creates an encrypted KVM in Environment <Name> with Values' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
             param($Name)
             $KvmName = [string]::Format('{0}-kvm-encrypted-with-values', $Script:Props.SpecialPrefix )
@@ -412,7 +412,7 @@ Describe "Create-Kvm-1" {
             $Value2 = [string]::Format('value2-{0}', $(Get-Random))
             $Params = @{
                 Name = $KvmName
-                Env = $Name
+                Environment = $Name
                 Encrypted = $True
                 Values = @{
                   key1 = $Value1
@@ -429,7 +429,7 @@ Describe "Create-Kvm-1" {
             $( $kvm.entry | where { $_.name -eq 'key2' } ).value | Should Be $Value2
             @( $kvm.entry | where { $_.name -eq 'key-not-exist' } ).count | Should Be 0
 
-            $kvm = Get-EdgeKvm -Env $Name -Name $KvmName
+            $kvm = Get-EdgeKvm -Environment $Name -Name $KvmName
             { $kvm } | Should Not Throw
             # values are not passed back in cleartext on query
             @( $kvm.entry | where { $_.name -eq 'key1' } ).count | Should Be 1
@@ -440,8 +440,8 @@ Describe "Create-Kvm-1" {
         }
 
         $i=0
-        $testcases = $Script:Props.CreatedProxies | foreach { @{ Name = $_; Index=$i++ } } 
-        
+        $testcases = $Script:Props.CreatedProxies | foreach { @{ Name = $_; Index=$i++ } }
+
         It 'creates an encrypted KVM in Proxy Scope <Name>' -TestCases $testcases {
             param($Name, $Index)
             $Params = @{
@@ -454,20 +454,20 @@ Describe "Create-Kvm-1" {
         }
 
         $i=0
-        $testcases = $Script:Props.FoundEnvironments | 
-          foreach { $env= $_; $Script:Props.CreatedProxies |
-            foreach { @{ Name = $_; Env = $env; Index=$i++ } } }
-        
-        It 'tries to create a KVM specifying both Proxy <Name> and Env <Env>' -TestCases $testcases {
-            param($Name, $Env, $Index)
+        $testcases = $Script:Props.FoundEnvironments |
+          foreach { $e = $_; $Script:Props.CreatedProxies |
+            foreach { @{ Name = $_; Environment = $e; Index=$i++ } } }
+
+        It 'tries to create a KVM specifying both Proxy <Name> and Environment <Environment>' -TestCases $testcases {
+            param($Name, $Environment, $Index)
             $Params = @{
                 Name = [string]::Format('{0}-kvm-fail-{1}', $Script:Props.SpecialPrefix, $Index )
                 Proxy = $Name
-                Env = $Env
+                Environment = $Environment
             }
             { Create-EdgeKvm @Params } | Should Throw
         }
-    
+
     }
 }
 
@@ -482,7 +482,7 @@ Describe "Crud-KvmEntry-1" {
                 $EntryName = 'entry1'
                 $EntryValue = [string]::Format('value-unencrypted-{0}', $Script:Props.guid.Substring(0,10) )
                 $Params = @{
-                    Env = $Name
+                    Environment = $Name
                     Name = $KvmName
                     Entry = $EntryName
                     Value = $EntryValue
@@ -499,7 +499,7 @@ Describe "Crud-KvmEntry-1" {
                 $EntryName = 'entry1'
                 $EntryValue = [string]::Format('updated-value-{0}', $Script:Props.guid.Substring(0,10) )
                 $Params = @{
-                    Env = $Name
+                    Environment = $Name
                     Name = $KvmName
                     Entry = $EntryName
                     NewValue = $EntryValue
@@ -508,8 +508,8 @@ Describe "Crud-KvmEntry-1" {
                 { $entry } | Should Not Throw
                 $entry.name | Should Be $EntryName
                 $entry.value | Should Be $EntryValue
-                
-                $entry = Get-EdgeKvmEntry -Env $Name -Name $KvmName -Entry $EntryName
+
+                $entry = Get-EdgeKvmEntry -Environment $Name -Name $KvmName -Entry $EntryName
                 { $entry } | Should Not Throw
                 $entry.name | Should Be $EntryName
                 $entry.value | Should Be $EntryValue
@@ -521,7 +521,7 @@ Describe "Crud-KvmEntry-1" {
                 $EntryName = 'entry1'
                 $EntryValue = [string]::Format('value-encrypted-{0}', $Script:Props.guid.Substring(0,10) )
                 $Params = @{
-                    Env = $Name
+                    Environment = $Name
                     Name = $KvmName
                     Entry = $EntryName
                     Value = $EntryValue
@@ -539,7 +539,7 @@ Describe "Crud-KvmEntry-1" {
                 $EntryName = 'entry1'
                 $EntryValue = [string]::Format('updated-value-encrypted-{0}', $Script:Props.guid.Substring(0,10) )
                 $Params = @{
-                    Env = $Name
+                    Environment = $Name
                     Name = $KvmName
                     Entry = $EntryName
                     NewValue = $EntryValue
@@ -549,41 +549,41 @@ Describe "Crud-KvmEntry-1" {
                 $entry.name | Should Be $EntryName
                 # upon update, the value is sent back in clear text
                 $entry.value | Should Be $EntryValue
-                
-                $entry = Get-EdgeKvmEntry -Env $Name -Name $KvmName -Entry $EntryName
+
+                $entry = Get-EdgeKvmEntry -Environment $Name -Name $KvmName -Entry $EntryName
                 { $entry } | Should Not Throw
                 $entry.name | Should Be $EntryName
                 $entry.value | Should Be '*****'
             }
-            
+
             It 'deletes an entry in an unencrypted KVM in Environment <Name>' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
                 param($Name)
                 $KvmName = [string]::Format('{0}-kvm-A', $Script:Props.SpecialPrefix )
                 $EntryName = 'entry1'
                 $Params = @{
-                    Env = $Name
+                    Environment = $Name
                     Name = $KvmName
                     Entry = $EntryName
                 }
                 $entry = Delete-EdgeKvmEntry @Params
                 { $entry } | Should Not Throw
-                $kvm = Get-EdgeKvm -Env $Name -Name $KvmName
+                $kvm = Get-EdgeKvm -Environment $Name -Name $KvmName
                 # the entry with this name should not be found
                 @( $kvm.entry | where { $_.name -eq $EntryName } ).count | Should Be 0
             }
-            
+
             It 'deletes an entry in an encrypted KVM in Environment <Name>' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
                 param($Name)
                 $KvmName = [string]::Format('{0}-kvm-encrypted', $Script:Props.SpecialPrefix )
                 $EntryName = 'entry1'
                 $Params = @{
-                    Env = $Name
+                    Environment = $Name
                     Name = $KvmName
                     Entry = $EntryName
                 }
                 $entry = Delete-EdgeKvmEntry @Params
                 { $entry } | Should Not Throw
-                $kvm = Get-EdgeKvm -Env $Name -Name $KvmName
+                $kvm = Get-EdgeKvm -Environment $Name -Name $KvmName
                 @( $kvm.entry | where { $_.name -eq $EntryName } ).count | Should Be 0
             }
         }
@@ -592,7 +592,7 @@ Describe "Crud-KvmEntry-1" {
 
 Describe "Create-Developer-1" {
     Context 'Strict mode' {
-    
+
         Set-StrictMode -Version latest
 
         It 'creates a developer' {
@@ -605,7 +605,7 @@ Describe "Create-Developer-1" {
             $dev = Create-EdgeDeveloper @Params
             # Start-Sleep -Milliseconds 3000
             $FiveMinsInTheFuture = FiveMinutesInTheFutureMilliseconds
-            
+
             # These time comparisons will be valid iff the server time is not skewed from the client time
             $dev.createdAt | Should BeLessthan $FiveMinsInTheFuture
             $dev.lastModifiedAt | Should BeLessthan $FiveMinsInTheFuture
@@ -619,9 +619,9 @@ Describe "Create-Developer-1" {
 }
 
 Describe "Get-Developers-1" {
-    
+
     Context 'Strict mode' {
-    
+
         Set-StrictMode -Version latest
 
         It 'gets a list of developers' {
@@ -642,11 +642,11 @@ Describe "Get-Developers-1" {
 
             $dev = @( Get-EdgeDeveloper -Name $Name )
             #Start-Sleep -Milliseconds 3000
-            
+
             # These time comparisons will be valid iff the server time is not skewed from the client time
             # $FiveMinsInTheFuture = FiveMinutesInTheFutureMilliseconds
             $dev.email | Should Be $Name
-            
+
             if ($Name.StartsWith($Script:Props.SpecialPrefix)) {
                 $dev.createdAt | Should BeGreaterThan $Script:Props.StartMilliseconds
                 $dev.lastModifiedAt | Should BeGreaterThan $Script:Props.StartMilliseconds
@@ -655,15 +655,15 @@ Describe "Get-Developers-1" {
                 $dev.createdAt | Should BeLessThan $Script:Props.StartMilliseconds
                 $dev.lastModifiedAt | Should BeLessThan $Script:Props.StartMilliseconds
             }
-            
-            $dev.organizationName | Should Be $ConnectionData.org 
+
+            $dev.organizationName | Should Be $ConnectionData.org
         }
     }
 }
 
 Describe "Create-ApiProduct-1" {
     Context 'Strict mode' {
-        
+
         Set-StrictMode -Version latest
 
         It 'creates a product' {
@@ -674,7 +674,7 @@ Describe "Create-ApiProduct-1" {
             }
             $prod = Create-EdgeApiProduct @Params
             Start-Sleep -Milliseconds 3000
-            
+
             # These time comparisons will be valid iff the server time is not skewed from the client time
             $FiveMinsInTheFuture = FiveMinutesInTheFutureMilliseconds
             $prod.createdAt | Should BeLessthan $FiveMinsInTheFuture
@@ -687,9 +687,9 @@ Describe "Create-ApiProduct-1" {
 }
 
 Describe "Get-ApiProduct-1" {
-    
+
     Context 'Strict mode' {
-    
+
         Set-StrictMode -Version latest
 
         It 'gets a list of apiproducts' {
@@ -713,10 +713,10 @@ Describe "Get-ApiProduct-1" {
             param($Product)
             $entity = @( Get-EdgeApiProduct -Name $Product )
             $NowMilliseconds = [int64](([datetime]::UtcNow)-(get-date "1/1/1970")).TotalMilliseconds
-            
+
             $entity.createdAt | Should BeLessthan $NowMilliseconds
             $entity.lastModifiedAt | Should BeLessthan $NowMilliseconds
-            
+
             if ($Product.StartsWith($Script:Props.SpecialPrefix)) {
                 $entity.createdAt | Should BeGreaterThan $Script:Props.StartMilliseconds
                 $entity.lastModifiedAt | Should BeGreaterThan $Script:Props.StartMilliseconds
@@ -725,7 +725,7 @@ Describe "Get-ApiProduct-1" {
                 $entity.createdAt | Should BeLessThan $Script:Props.StartMilliseconds
                 $entity.lastModifiedAt | Should BeLessThan $Script:Props.StartMilliseconds
             }
-            
+
             $entity.approvalType | Should Not BeNullOrEmpty
             $entity.lastModifiedBy | Should Not BeNullOrEmpty
         }
@@ -762,7 +762,7 @@ Describe "Create-App-1" {
             }
 
             $app = Create-EdgeDevApp @Params
-            
+
             # verify expiry
             if (![string]::IsNullOrEmpty($expiry)) {
                 $NowMilliseconds = [int64](([datetime]::UtcNow)-(get-date "1/1/1970")).TotalMilliseconds
@@ -793,7 +793,7 @@ Describe "CRUD-App-Credential" {
             }
             $app = $( Create-EdgeDevApp @Params )
             $app.credentials.count | Should Be 1
-            
+
             # verify expiry
             $NowMilliseconds = [int64](([datetime]::UtcNow)-(get-date "1/1/1970")).TotalMilliseconds
             $Delta = [int][Math]::Ceiling(($app.credentials[0].expiresAt - $NowMilliseconds)/1000/3600)
@@ -816,9 +816,9 @@ Describe "CRUD-App-Credential" {
 
             $UpdatedCreds = @( Get-EdgeAppCredential -AppName $NewAppName -Developer $Developers[0].Email )
             $UpdatedCreds.count | Should Be 2
-            
+
             $NowMilliseconds = [int64](([datetime]::UtcNow)-(get-date "1/1/1970")).TotalMilliseconds
-            
+
             # verify credential expiry
             $app.credentials | foreach {
                 $Delta = [int][Math]::Ceiling(($_.expiresAt - $NowMilliseconds)/1000/3600)
@@ -843,25 +843,25 @@ Describe "CRUD-App-Credential" {
             $UpdatedCreds = @( Get-EdgeAppCredential -AppName $NewAppName -Developer $Developers[0].Email )
             $UpdatedCreds.count | Should Be 1
         }
-        
+
         It 'revokes a credential on the just-created App' {
             $OriginalCreds = @( Get-EdgeAppCredential -AppName $NewAppName -Developer $Developers[0].Email )
             $OriginalCreds.count | Should Be 1
             $OriginalCreds[0].status | Should Be "approved"
-            
+
             Revoke-EdgeAppCredential -AppName $NewAppName -Developer $Developers[0].Email -key $OriginalCreds[0].consumerKey
 
             $UpdatedCreds = @( Get-EdgeAppCredential -AppName $NewAppName -Developer $Developers[0].Email )
             $UpdatedCreds.count | Should Be 1
             $UpdatedCreds[0].status | Should Be "revoked"
         }
-        
+
         It 'approves a credential on the just-created App' {
             $OriginalCreds = @( Get-EdgeAppCredential -AppName $NewAppName -Developer $Developers[0].Email )
             $OriginalCreds.count | Should Be 1
             $OriginalCreds[0].status | Should Be "revoked"
-            
-            Approve-EdgeAppCredential -AppName $NewAppName -Developer $Developers[0].Email -key $OriginalCreds[0].consumerKey 
+
+            Approve-EdgeAppCredential -AppName $NewAppName -Developer $Developers[0].Email -key $OriginalCreds[0].consumerKey
 
             $UpdatedCreds = @( Get-EdgeAppCredential -AppName $NewAppName -Developer $Developers[0].Email )
             $UpdatedCreds.count | Should Be 1
@@ -896,7 +896,7 @@ Describe "Create-App-Failures" {
             }
             { Create-EdgeDevApp @Params } | Should Throw
         }
-        
+
         It 'tries to create an App with missing Developer' {
             $expiry = '28d'
             $Params = @{
@@ -906,7 +906,7 @@ Describe "Create-App-Failures" {
             }
             { Create-EdgeDevApp @Params } | Should Throw
         }
-        
+
         It 'tries to create an App with missing ApiProducts' {
             $expiry = '120d'
             $Params = @{
@@ -916,7 +916,7 @@ Describe "Create-App-Failures" {
             }
             { Create-EdgeDevApp @Params } | Should Throw
         }
-        
+
         It 'tries to create an App with missing Name' {
             #$Params = @{
             #    ApiProducts = @( $Products[0].Name )
@@ -929,30 +929,30 @@ Describe "Create-App-Failures" {
 
 Describe "Get-Apps-1" {
     Context 'Strict mode' {
-        
+
         Set-StrictMode -Version latest
-        
+
         $appids = @( Get-EdgeDevApp | %{ @{ Id = $_ } } )
         $emails = @( Get-EdgeDeveloper | %{ @{ Email = $_ } } )
-        
+
         It 'gets a list of apps' {
             $appids.count | Should BeGreaterThan 0
         }
-        
+
         It 'gets a list of apps with expansion' {
             $getresponse = @( Get-EdgeDevApp -Params @{ expand = 'true' } )
             $getresponse.app.count | Should BeGreaterThan 0
         }
-        
+
         It 'gets a list of apps for developer <Email>'  -TestCases $emails {
             param($Email)
-            
+
             $apps = @( Get-EdgeDevApp -Developer $Email )
             $apps.count | Should Not BeNullOrEmpty
             $appsExpanded = @( ( Get-EdgeDevApp -Developer $Email -Params @{ expand = 'true' } ).app )
             $apps.count | Should Be $appsExpanded.count
         }
-        
+
         It 'gets details of app <Id>' -TestCases $appids {
             param($Id)
             $app = Get-EdgeDevApp -AppId $Id
@@ -962,14 +962,14 @@ Describe "Get-Apps-1" {
             $app.lastModifiedAt | Should BeLessthan $NowMilliseconds
             $app.status | Should Not BeNullOrEmpty
         }
-        
+
         It 'gets a list of apps by ID per developer <Email>' -TestCases $emails {
             param($Email)
-            
+
             $appsExpanded = @(( Get-EdgeDevApp -Developer $Email -Params @{ expand = 'true' } ).app)
             $excludedProps = @( 'attributes', 'apiProducts', 'credentials' )
             foreach ($app in $appsExpanded) {
-                $app2 = Get-EdgeDevApp -AppId $app.appId 
+                $app2 = Get-EdgeDevApp -AppId $app.appId
                 # $app2 | Should Be $app  # No.
 
                 # I think it might be possible to do something smart with Compare-Object
@@ -999,7 +999,7 @@ Describe "Revoke-Approve-Apps-1" {
         It 'verifies the count of apps created previously in this test run' {
             $AppList.count | Should BeGreaterThan 0
         }
-        
+
         It 'revokes app <Id> (<Name>)' -TestCases $AppList {
             param($Name, $Id, $DevId)
             $app = Get-EdgeDevApp -AppId $Id
@@ -1009,7 +1009,7 @@ Describe "Revoke-Approve-Apps-1" {
             $app = Get-EdgeDevApp -AppId $Id
             $app.status | Should Be 'revoked'
         }
-    
+
         It 'approves app <Id> (<Name>)' -TestCases $AppList {
             param($Name, $Id, $DevId)
             $app = Get-EdgeDevApp -AppId $Id
@@ -1027,37 +1027,37 @@ Describe "Get-Kvm-1" {
 
         Set-StrictMode -Version latest
 
-        It 'gets a list of kvms' { # org-scopes kvms. 
+        It 'gets a list of kvms' { # org-scopes kvms.
             $kvms = @( Get-EdgeKvm )
             { $kvms } | Should Not Throw
         }
-       
+
         It 'lists kvms for env <Name>' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
             param($Name)
-            $kvms = @( Get-EdgeKvm -Env $Name )
+            $kvms = @( Get-EdgeKvm -Environment $Name )
             $kvms.count | Should BeGreaterThan 0
             # check that we have one or more KVMs created by this script
             @( $kvms | ?{ $_.StartsWith($Script:Props.SpecialPrefix) } ).count | Should BeGreaterThan 0
         }
 
         $i=0
-        $testcases = $Script:Props.CreatedProxies | foreach { @{ Proxy = $_; Index=$i++ } } 
-        
+        $testcases = $Script:Props.CreatedProxies | foreach { @{ Proxy = $_; Index=$i++ } }
+
         It 'lists kvms for proxy <Proxy>' -TestCases $testcases {
             param($Proxy, $Index)
             $kvms = @( Get-EdgeKvm -Proxy $Proxy )
             $kvms.count | Should Be 1
         }
-        
+
         $testcases = Get-EdgeApi | where { ! $_.StartsWith($Script:Props.SpecialPrefix) } |
           Sort-Object {Get-Random} |
           Select-Object -first 10  |
           foreach { @{ Proxy =$_ } }
-        
+
         It 'lists kvms for proxy <Proxy>' -TestCases $testcases {
             param($Proxy)
             $kvms = @( Get-EdgeKvm -Proxy $Proxy )
-            # Not sure how many KVMs to expect for each proxy. Most will be zero. 
+            # Not sure how many KVMs to expect for each proxy. Most will be zero.
         }
     }
 }
@@ -1077,10 +1077,10 @@ Describe "Delete-DevApp-1" {
 
 Describe "Delete-ApiProduct-1" {
     Context 'Strict mode' {
-    
+
         Set-StrictMode -Version latest
 
-        # get apiproducts with our special name prefix 
+        # get apiproducts with our special name prefix
         $Products = @( @( Get-EdgeApiProduct -Params @{ expand = 'true'} ).apiProduct |
             ?{ $_.name.StartsWith($Script:Props.SpecialPrefix) } | % { @{ Name = $_.name } } )
 
@@ -1093,12 +1093,12 @@ Describe "Delete-ApiProduct-1" {
 
 Describe "Delete-Developer-1" {
     Context 'Strict mode' {
-    
+
         Set-StrictMode -Version latest
 
         $Developers = @( @( Get-EdgeDeveloper ) |
           ?{ $_.StartsWith($Script:Props.SpecialPrefix) } | % { @{ Email = $_ } } )
-                 
+
         It 'deletes developer <Email>' -TestCases $Developers {
             param($Email)
             Delete-EdgeDeveloper -Name $Email
@@ -1111,26 +1111,26 @@ Describe "Delete-Kvm-1" {
         Set-StrictMode -Version latest
 
         $i=0
-        $testcases = $Script:Props.CreatedProxies | foreach { @{ Proxy = $_; Index=$i++ } } 
-        
+        $testcases = $Script:Props.CreatedProxies | foreach { @{ Proxy = $_; Index=$i++ } }
+
         It 'deletes the KVM for Proxy <Proxy>' -TestCases $testcases {
             param($Proxy, $Index)
             $Name = [string]::Format('{0}-kvm-proxyscope-{1}', $Script:Props.SpecialPrefix, $Index )
             Delete-EdgeKvm -Proxy $Proxy -Name $Name
         }
-        
+
         It 'deletes test KVMs in env <Name>' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
             param($Name)
-            $kvms = @( Get-EdgeKvm -Env $Name )
+            $kvms = @( Get-EdgeKvm -Environment $Name )
             @( $kvms | ?{ $_.StartsWith($Script:Props.SpecialPrefix) } ).count | Should BeGreaterThan 0
-            @( $kvms | ?{ $_.StartsWith($Script:Props.SpecialPrefix) } ) | % { 
-                Delete-EdgeKvm -Env $Name -Name $_
+            @( $kvms | ?{ $_.StartsWith($Script:Props.SpecialPrefix) } ) | % {
+                Delete-EdgeKvm -Environment $Name -Name $_
             }
         }
 
         It 'verifies that the test KVMs for env <Name> have been deleted' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
             param($Name)
-            $kvms = @( Get-EdgeKvm -Env $Name )
+            $kvms = @( Get-EdgeKvm -Environment $Name )
             @( $kvms | ?{ $_.StartsWith($Script:Props.SpecialPrefix) } ).count | Should Be 0
         }
     }
@@ -1138,14 +1138,14 @@ Describe "Delete-Kvm-1" {
 
 Describe "Create-Keystore-1" {
     Context 'Strict mode' {
-    
+
         Set-StrictMode -Version latest
 
         It 'creates a keystore in Environment <Name>' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
             param($Name)
             $Params = @{
                 Name = [string]::Format('{0}-keystore', $Script:Props.SpecialPrefix )
-                Env = $Name
+                Environment = $Name
             }
             $keystore = Create-EdgeKeystore @Params
             { $keystore } | Should Not Throw
@@ -1160,7 +1160,7 @@ Describe "Get-Keystore-1" {
 
         It 'gets a list of keystores for Environment <Name>' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
             param($Name)
-            $keystores = @( Get-EdgeKeystore -Env $Name )
+            $keystores = @( Get-EdgeKeystore -Environment $Name )
             # check that we have one or more keystores
             $keystores.count | Should BeGreaterThan 0
             # check that we have one or more keystores created by this script
@@ -1169,9 +1169,9 @@ Describe "Get-Keystore-1" {
 
         It 'gets specific info on each keystore for Environment <Name>' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
             param($Name)
-            
-            @( Get-EdgeKeystore -Env $Name ) | % {
-                $keystore = Get-EdgeKeystore -Env $Name -Name $_
+
+            @( Get-EdgeKeystore -Environment $Name ) | % {
+                $keystore = Get-EdgeKeystore -Environment $Name -Name $_
                 $keystore | Should Not BeNullOrEmpty
                 $keystore.name | Should Not BeNullOrEmpty
             }
@@ -1185,20 +1185,20 @@ Describe "Delete-Keystore-1" {
 
         It 'deletes the test keystores in Env <Name>' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
             param($Name)
-            $keystores = @( Get-EdgeKeystore -Env $Name )            
+            $keystores = @( Get-EdgeKeystore -Environment $Name )
             @( $keystores | ?{ $_.StartsWith($Script:Props.SpecialPrefix) } ).count | Should BeGreaterThan 0
 
-            @( $keystores | ?{ $_.StartsWith($Script:Props.SpecialPrefix) } ) | % { 
-                Delete-EdgeKeystore -Env $Name -Name $_
+            @( $keystores | ?{ $_.StartsWith($Script:Props.SpecialPrefix) } ) | % {
+                Delete-EdgeKeystore -Environment $Name -Name $_
             }
-            @( $keystores | ?{ $_.StartsWith($Script:Props.SpecialPrefix) } ) | % { 
-                { Delete-EdgeKeystore -Env $Name -Name $_ } | Should Throw
+            @( $keystores | ?{ $_.StartsWith($Script:Props.SpecialPrefix) } ) | % {
+                { Delete-EdgeKeystore -Environment $Name -Name $_ } | Should Throw
             }
         }
 
         It 'verifies that the test keystores for Environment <Name> have been removed' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
             param($Name)
-            $keystores = @( Get-EdgeKeystore -Env $Name )
+            $keystores = @( Get-EdgeKeystore -Environment $Name )
             # check that we have one or more keystores
             $keystores.count | Should BeGreaterThan 0
             # check that we now have zero keystores created by this script
@@ -1228,15 +1228,15 @@ Describe "Get-Vhost-1" {
 
         It 'gets a list of Vhosts for Environment <Name>' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
           param($Name)
-          $vhosts = @( Get-EdgeVhost -Env $Name )
+          $vhosts = @( Get-EdgeVhost -Environment $Name )
           $vhosts.count | Should BeGreaterThan 0
         }
 
         It 'gets specific info on each vhost for Environment <Name>' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
             param($Name)
-            
-            @( Get-EdgeVhost -Env $Name ) | % {
-                $vhost = Get-EdgeVhost -Env $Name -Name $_
+
+            @( Get-EdgeVhost -Environment $Name ) | % {
+                $vhost = Get-EdgeVhost -Environment $Name -Name $_
                 $vhost | Should Not BeNullOrEmpty
                 $vhost.name | Should Not BeNullOrEmpty
             }
@@ -1250,4 +1250,3 @@ Describe "Get-Vhost-1" {
 # - CRUD for EdgeAppCredential - add a new credential to an app
 # - Update-EdgeAppCredential.ps1 - revoke or approve a credential, or change products list
 # - {Create,Get,Update,Delete} for KvmEntry at proxy scope (iff CPS)
-

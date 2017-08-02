@@ -183,7 +183,7 @@ To get the encrypted password, for safe storage on the machine, you can do this:
 
 By the way, this secure string and encrypted secure string stuff is just basic Powershell; it's not special to this module. Please note: The encryption of secure strings in Powershell is machine-specific. 
 
-Finally, there's an option to set the connection information from a file:
+There's an option to set the connection information from a file:
 
 ```
 Set-EdgeConnection -File .\ConnectionData-myorg.json
@@ -201,9 +201,17 @@ Set-EdgeConnection -File .\ConnectionData-myorg.json
 
 You can use any of the parameters describe above in this file. We recommend you do not store the password in cleartext, but use the encrypted password form.
 
-After setting this connection information, you can run any of the following commands without re-entering your credentials.
+And finally, you can use Single-sign-on:
+```
+Set-EdgeConnection -SsoOneTimePasscode bBE8wL -Debug -SsoUrl https://google.login.e2e.apigee.net -Org vportal -MgmtUri https://api.e2e.apigee.net -User dchiesa@google.com
+```
 
-Beginning with v0.2.14, if you are connecting to the Apigee-managed Edge SaaS, the Set-EdgeConnection command will attempt to obtain an OAuth token for the admin API, via a POST request to https://login.apigee.com/oauth/token , as documented on [this page](http://docs.apigee.com/api-services/content/using-oauth2-security-apigee-edge-management-api).
+You will need to get a passcode from the /passcode URL.
+
+
+After setting this connection information, you can run any of the commands shown below re-entering your credentials.
+
+Beginning with v0.2.14, if you are connecting to the Apigee-managed Edge SaaS, the Set-EdgeConnection command will attempt to obtain an OAuth token for the admin API, via a POST request to https://login.apigee.com/oauth/token , or the SsoUrl that you specify, as documented on [this page](http://docs.apigee.com/api-services/content/using-oauth2-security-apigee-edge-management-api).
 
 The Set-EdgeConnection will first look for a stashed token, which it stores in a file called .apigee-edge-tokens in the TEMP directory of your machine. This is the logic:
 
@@ -379,7 +387,7 @@ revision : {@{configuration=; name=8; server=System.Object[]; state=deployed}}
 ### Deploy an API Proxy
 
 ```
-PS C:\dev\ps> Deploy-EdgeApi -Name oauth2-pwd-cc -Env test -Revision 8
+PS C:\dev\ps> Deploy-EdgeApi -Name oauth2-pwd-cc -Environment test -Revision 8
 
 aPIProxy      : oauth2-pwd-cc
 configuration : @{basePath=/; steps=System.Object[]}
@@ -396,7 +404,7 @@ state         : deployed
 ### Undeploy an API Proxy
 
 ```
-PS C:\dev\ps> UnDeploy-EdgeApi -Name oauth2-pwd-cc -Env test -Revision 8
+PS C:\dev\ps> UnDeploy-EdgeApi -Name oauth2-pwd-cc -Environment test -Revision 8
 
 
 aPIProxy      : oauth2-pwd-cc
@@ -526,7 +534,7 @@ sharedflow-log-to-splunk-r1-20170622-184741.zip
 ### Deploy a SharedFlow
 
 ```
-PS C:\dev\ps> Deploy-EdgeSharedFlow -Name log-to-splunk -Revision 1 -Env env1
+PS C:\dev\ps> Deploy-EdgeSharedFlow -Name log-to-splunk -Revision 1 -Environment env1
 ```
 
 
@@ -626,7 +634,7 @@ PS C:\dev\ps> Update-EdgeDevAppStatus  -Developer developer1@example.org -AppNam
 This method specifies the values in a Powershell Hashtable:
 
 ```
-PS C:\dev\ps> Create-EdgeKvm -Name kvm1 -Env env1 -Values @{
+PS C:\dev\ps> Create-EdgeKvm -Name kvm1 -Environment env1 -Values @{
                  key1 = 'value1'
                  key2 = 'value2'
                  key3 = 'CEBF0408-F5BF-4A6E-B841-FBF107BB3B60'
@@ -645,7 +653,7 @@ PS C:\dev\ps> type .\data.json
   "header-name" : "X-Client-ID",
   "targetUrl" : "http://192.168.78.12:9090"
 }
-PS C:\dev\ps> Create-EdgeKvm -Name kvm1 -Env env1 -Source .\data.json
+PS C:\dev\ps> Create-EdgeKvm -Name kvm1 -Environment env1 -Source .\data.json
 
 ```
 
@@ -663,7 +671,7 @@ PS C:\dev\ps> type .\data.json
      "three" : true
   }
 }
-PS C:\dev\ps> Create-EdgeKvm -Name kvm2 -Env env1 -Source .\data.json
+PS C:\dev\ps> Create-EdgeKvm -Name kvm2 -Environment env1 -Source .\data.json
 
 ```
 

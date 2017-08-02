@@ -9,7 +9,7 @@ Function Deploy-EdgeApi {
     .PARAMETER Name
         Required. The name of the apiproxy to deploy.
 
-    .PARAMETER Env
+    .PARAMETER Environment
         Required. The name of the environment to which to deploy the api proxy.
 
     .PARAMETER Revision
@@ -22,7 +22,7 @@ Function Deploy-EdgeApi {
         Optional. The Apigee Edge organization. The default is to use the value from Set-EdgeConnection.
 
     .EXAMPLE
-        Deploy-EdgeApi -Name oauth2-pwd-cc -Env test -Revision 8
+        Deploy-EdgeApi -Name oauth2-pwd-cc -Environment test -Revision 8
 
     .FUNCTIONALITY
         ApigeeEdge
@@ -32,7 +32,7 @@ Function Deploy-EdgeApi {
     [cmdletbinding()]
     param(
         [Parameter(Mandatory=$True)][string]$Name,
-        [Parameter(Mandatory=$True)][string]$Env,
+        [Parameter(Mandatory=$True)][string]$Environment,
         [Parameter(Mandatory=$True)][string]$Revision,
         [string]$Org,
         [string]$Basepath,
@@ -42,5 +42,5 @@ Function Deploy-EdgeApi {
     if ($PSBoundParameters['Debug']) {
         $DebugPreference = 'Continue'
     }
-    Deploy-EdgeAsset -AssetType 'apis' -Name $Name -Env $Env -Revision $Revision -Org $Org -Basepath $Basepath -Params $Params
+    Deploy-EdgeAsset -AssetType 'apis' -Name $Name -Environment $Environment -Revision $Revision -Org $Org -Basepath $Basepath -Params $Params
 }

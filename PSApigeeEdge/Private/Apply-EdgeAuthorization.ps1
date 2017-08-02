@@ -28,7 +28,8 @@ Function Apply-EdgeAuthorization {
         }
 
         Try {
-            if ($MgmtUri.Equals("https://api.enterprise.apigee.com")) {
+            $NoToken = $MyInvocation.MyCommand.Module.PrivateData.Connection['NoToken']
+            if ($NoToken = "true") {
                 $UserToken = $( Get-EdgeStashedAdminToken )
                 Write-Debug ( "Apply-EdgeAuthorization usertoken: " + $( $UserToken | Format-List | Out-String )  )
                 If ( $UserToken -and ! $( Get-EdgeTokenIsExpired $UserToken )) {
@@ -53,7 +54,7 @@ Function Apply-EdgeAuthorization {
                 }
             }
             else {
-                Write-Debug ( "Not SaaS, using Basic Auth" )
+                Write-Debug ( "Not using token, using Basic Auth" )
                 $IRMParams.Headers.Add('Authorization', 'Basic ' + $( Get-EdgeBasicAuth ))
             }
         }
