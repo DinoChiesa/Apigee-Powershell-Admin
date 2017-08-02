@@ -28,10 +28,10 @@ function Get-EdgeStashedAdminToken
             $DebugPreference = 'Continue'
         }
         $MgmtUri = $MyInvocation.MyCommand.Module.PrivateData.Connection['MgmtUri']
-        if (! $MgmtUri.Equals("https://api.enterprise.apigee.com") ) {
-            Write-Debug ( "Get-EdgeStashedAdminToken MgmtUri not Saas" )
-            return $null
-        }
+        # if (! $MgmtUri.Equals("https://api.enterprise.apigee.com") ) {
+        #    Write-Debug ( "Get-EdgeStashedAdminToken MgmtUri not Saas" )
+        #    return $null
+        #}
 
         $TokenData = Read-EdgeTokenStash
         if (!$TokenData) {

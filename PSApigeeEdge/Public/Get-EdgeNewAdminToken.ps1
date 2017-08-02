@@ -9,7 +9,7 @@ Function Get-EdgeNewAdminToken {
         In fact this cmdlet gets called implicitly by Set-EdgeConnection as necessary.
         You probably do not need to call it directly.
 
-    .PARAMETER Passcode
+    .PARAMETER SsoOneTimePasscode
         Optional. The one-time passcode for authenticating, obtained from the https://ZONE.login.apigee.com/passcode endpoint.
         This is applicable only when using SAML-based SSO for login to Apigee Edge.
 
@@ -43,7 +43,7 @@ Function Get-EdgeNewAdminToken {
     [cmdletbinding()]
 
     param(
-        [string]$Passcode,
+        [string]$SsoOneTimePasscode,
         [string]$SsoZone,
         [string]$SsoUrl,
         [string]$MfaCode
@@ -86,10 +86,10 @@ Function Get-EdgeNewAdminToken {
                 grant_type = "password"
             }
         }
-        if ($PSBoundParameters['Passcode']) {
+        if ($PSBoundParameters['SsoOneTimePasscode']) {
             # Using passcode for SAML-SSO
             $IRMParams.Body.Add('response_type', 'token')
-            $IRMParams.Body.Add('passcode', $Passcode)
+            $IRMParams.Body.Add('passcode', $SsoOneTimePasscode)
             #  curl -i -X POST -H "Authorization: Basic ZWRnZWNsaTplZGdlY2xpc2VjcmV0" -H Accept:application/json \
             #       https://google.login.e2e.apigee.net/oauth/token -d 'grant_type=password&response_type=token&passcode=NsJQAe'
         }

@@ -28,6 +28,23 @@ Function Set-EdgeConnection {
     .PARAMETER MfaCode
         Optional. The plaintext MFA code for your user. Used for obtaining a token.
 
+    .PARAMETER SsoZone
+        Optional. The SSO Zone for your user. By default there is no zone. This value will affect the SSO Login URL.
+        If you pass in "zone1" then the login url will become https://zone1.login.apigee.com/ .  If you would like
+        to explicitly specify the SSO URL, then omit this parameter and set the SsoUrl parameter.
+        Specify at most one of SsoZone and SsoUrl.
+
+    .PARAMETER SsoUrl
+        Optional. This defaults to 'https://login.apigee.com'. If you are using SAML Sign in, then specify
+        https://YOURZONE.login.apigee.com/  for this parameter.  Specify at most one of SsoZone and SsoUrl.
+
+    .PARAMETER SsoOneTimePasscode
+        The one-time passcode returned by ${SSO_URL}/passcode .  Use this when Single-sign-on has
+        been configured for Apigee Edge. In other words, use it when a distinct IdP will authenticate the user. No password is necessary.
+
+    .PARAMETER NoToken
+        A switch, to disable obtaining a token.
+
     .PARAMETER EncryptedPassword
         Optional. The encrypted password for the Apigee Edge administrative user. Use this as an
         alternative to the Password parameter. To get the encrypted password, you can do this:
@@ -37,7 +54,6 @@ Function Set-EdgeConnection {
 
     .PARAMETER MgmtUri
         The base Uri for the Edge API Management server.
-
         Default: https://api.enterprise.apigee.com
 
     .EXAMPLE
@@ -57,9 +73,13 @@ Function Set-EdgeConnection {
         [string]$Org,
         [string]$User,
         [string]$Password,
+        [string]$SsoOneTimePasscode,
+        [string]$SsoZone,
+        [string]$SsoUrl,
         [string]$MfaCode,
         [string]$EncryptedPassword,
-        [string]$MgmtUri = 'https://api.enterprise.apigee.com'
+        [string]$MgmtUri = 'https://api.enterprise.apigee.com',
+        [switch]$NoToken
     )
 
     PROCESS {
@@ -79,7 +99,7 @@ Function Set-EdgeConnection {
                 $MyInvocation.MyCommand.Module.PrivateData.Connection['SecurePass'] = $SecurePass
             }
         }
-        
+
         if ($PSBoundParameters['Debug']) {
             $DebugPreference = 'Continue'
         }
@@ -117,13 +137,16 @@ Function Set-EdgeConnection {
             if (! $PSBoundParameters.ContainsKey('User') ) {
                 throw [System.ArgumentNullException] "User", "you must provide the -User parameter."
             }
+            if ($PSBoundParameters.ContainsKey('SsoOneTimePasscode') -and $PSBoundParameters.ContainsKey('NoToken') ) {
+                throw [System.ArgumentException] "it makes no sense to provide -SsoOneTimePasscode with the -NoToken switch."
+            }
             $MyInvocation.MyCommand.Module.PrivateData.Connection['Org'] = $Org
             $MyInvocation.MyCommand.Module.PrivateData.Connection['MgmtUri'] = $MgmtUri
             $MyInvocation.MyCommand.Module.PrivateData.Connection['User'] = $User
 
             $UserToken = $null
-            if  ( $MgmtUri.Equals("https://api.enterprise.apigee.com")) {
-                # connect to Edge SaaS, get a token
+            if (! $NoToken ) {
+                # connect to Edge, get a token
                 Try {
                     $TokenStashPath = $(Resolve-PathSafe -Path $(Join-Path -Path $env:TEMP -ChildPath '.apigee-edge-tokens') )
                     $MyInvocation.MyCommand.Module.PrivateData.Connection['TokenStash'] = $TokenStashPath
@@ -133,7 +156,7 @@ Function Set-EdgeConnection {
                             $UserToken = Get-EdgeRefreshedAdminToken -UserToken $UserToken
                         }
                         Catch {
-                            # it is possible that the refresh token is expired also 
+                            # it is possible that the refresh token is expired also
                             if ($_.GetType().ToString().Equals("System.Management.Automation.ErrorRecord")) {
                                 $ResponsePayload = $( ConvertFrom-Json $_ )
                                 if ($ResponsePayload.error -eq "invalid_token" -and ($ResponsePayload.error_description -match "\(expired\)")) {
@@ -147,8 +170,22 @@ Function Set-EdgeConnection {
                         }
                     }
                     ElseIf (! $UserToken ) {
-                        SetOrGetEdgePassword @PSBoundParameters
-                        $UserToken = Get-EdgeNewAdminToken -MfaCode $MfaCode
+                        if ($PSBoundParameters.ContainsKey('SsoOneTimePasscode')) {
+                            $TokenParams = @{
+                                SsoOneTimePasscode = $SsoOneTimePasscode
+                            }
+                            if ($PSBoundParameters.ContainsKey('SsoZone')) {
+                                $TokenParams.Add('SsoZone', $SsoZone)
+                            }
+                            if ($PSBoundParameters.ContainsKey('SsoUrl')) {
+                                $TokenParams.Add('SsoUrl', $SsoUrl)
+                            }
+                            $UserToken = Get-EdgeNewAdminToken @TokenParams
+                        }
+                        else {
+                            SetOrGetEdgePassword @PSBoundParameters
+                            $UserToken = Get-EdgeNewAdminToken -MfaCode $MfaCode
+                        }
                     }
                 }
                 Catch {
