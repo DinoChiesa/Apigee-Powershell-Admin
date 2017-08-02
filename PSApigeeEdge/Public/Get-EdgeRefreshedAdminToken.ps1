@@ -39,7 +39,7 @@ Function Get-EdgeRefreshedAdminToken {
     PARAM(
         [string]$SsoZone,
         [string]$SsoUrl,
-        [System.Management.Automation.PSNoteProperty] $UserToken,
+        [System.Management.Automation.PSNoteProperty] $UserToken
     )
 
     PROCESS {
