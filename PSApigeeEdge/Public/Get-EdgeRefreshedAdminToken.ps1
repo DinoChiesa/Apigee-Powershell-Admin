@@ -7,6 +7,19 @@ Function Get-EdgeRefreshedAdminToken {
         Gets an OAuth token for Edge Administration. This works only with Edge SaaS.
         You must have previously called Set-EdgeConnection to specify the user + password.
 
+    .PARAMETER SsoZone
+        Optional. The SSO Zone for your user. By default there is no zone. This value will affect the SSO Login URL.
+        If you pass in "zone1" then the login url will become https://zone1.login.apigee.com/ .  If you would like
+        to explicitly specify the SSO URL, then omit this parameter and set the SsoUrl parameter.
+        Specify at most one of SsoZone and SsoUrl.
+
+    .PARAMETER SsoUrl
+        Optional. This defaults to 'https://login.apigee.com'. If you are using SAML Sign in, then specify
+        https://YOURZONE.login.apigee.com/  for this parameter.  Specify at most one of SsoZone and SsoUrl.
+
+    .PARAMETER UserToken
+       Required. The user token to refresh.
+
     .LINK
         Set-EdgeConnection
 
@@ -23,7 +36,11 @@ Function Get-EdgeRefreshedAdminToken {
 
     [cmdletbinding()]
 
-    PARAM( [System.Management.Automation.PSNoteProperty] $UserToken )
+    PARAM(
+        [string]$SsoZone,
+        [string]$SsoUrl,
+        [System.Management.Automation.PSNoteProperty] $UserToken,
+    )
 
     PROCESS {
         if ($PSBoundParameters['Debug']) {
@@ -33,15 +50,26 @@ Function Get-EdgeRefreshedAdminToken {
         if (!$UserToken) {
             throw [System.ArgumentNullException] "You must pass a usertoken [PSNoteProperty]."
         }
+
+        $BaseLoginUrl = $(if ($PSBoundParameters['SsoZone']) {
+                            [string]::Format('https://{0}.login.apigee.com/', $SsoZone )
+                        }
+                        elseif ($PSBoundParameters['SsoUrl']) {
+                            $SsoUrl
+                        }
+                        else {
+                            'https://login.apigee.com'
+                        })
+
         $User = $MyInvocation.MyCommand.Module.PrivateData.Connection['User']
 
-        $MgmtUri = $MyInvocation.MyCommand.Module.PrivateData.Connection['MgmtUri']
-        if (! $MgmtUri.Equals("https://api.enterprise.apigee.com") ) {
-            throw [System.InvalidOperationException] "You can get a token only when connecting to Edge SaaS."
-        }
+        # $MgmtUri = $MyInvocation.MyCommand.Module.PrivateData.Connection['MgmtUri']
+        # if (! $MgmtUri.Equals("https://api.enterprise.apigee.com") ) {
+        #     throw [System.InvalidOperationException] "You can get a token only when connecting to Edge SaaS."
+        # }
 
         $IRMParams = @{
-            Uri = 'https://login.apigee.com/oauth/token'
+            Uri = $(Join-Parts -Separator '/' -Parts $BaseLoginUrl, 'oauth','token' )
             Method = 'POST'
             Headers = @{
                 Accept = 'application/json'
