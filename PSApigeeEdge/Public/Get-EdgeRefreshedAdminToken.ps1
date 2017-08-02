@@ -92,7 +92,6 @@ Function Get-EdgeRefreshedAdminToken {
             if ($TokenResult -and $TokenResult.psobject -and $TokenResult.psobject.properties) {
                 Add-Member -InputObject $TokenResult -MemberType NoteProperty -Name "issued_at" -Value $(Get-NowMilliseconds)
                 Write-Debug "Updated:`n$($TokenResult | Out-String)"
-
                 Write-EdgeTokenStash -User $User -NewToken $TokenResult
                 $MyInvocation.MyCommand.Module.PrivateData.Connection['MostRecentRefresh'] = $(Get-NowMilliseconds)
             }
