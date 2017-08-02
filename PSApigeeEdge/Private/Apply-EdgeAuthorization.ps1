@@ -28,6 +28,8 @@ Function Apply-EdgeAuthorization {
         }
 
         Try {
+            $NoToken = $MyInvocation.MyCommand.Module.PrivateData.Connection['NoToken']
+            if ($NoToken = "true") {
                 $UserToken = $( Get-EdgeStashedAdminToken )
                 Write-Debug ( "Apply-EdgeAuthorization usertoken: " + $( $UserToken | Format-List | Out-String )  )
                 If ( $UserToken -and ! $( Get-EdgeTokenIsExpired $UserToken )) {
@@ -50,11 +52,11 @@ Function Apply-EdgeAuthorization {
                     Write-Debug ( "Apply-EdgeAuthorization not ok to refresh, using Basic Auth" )
                     $IRMParams.Headers.Add('Authorization', 'Basic ' + $( Get-EdgeBasicAuth ))
                 }
-
-            # else {
-            #     Write-Debug ( "Not SaaS, using Basic Auth" )
-            #     $IRMParams.Headers.Add('Authorization', 'Basic ' + $( Get-EdgeBasicAuth ))
-            # }
+            }
+            else {
+                Write-Debug ( "Not using token, using Basic Auth" )
+                $IRMParams.Headers.Add('Authorization', 'Basic ' + $( Get-EdgeBasicAuth ))
+            }
         }
         Finally {
             if ($usertoken) { Remove-Variable usertoken }

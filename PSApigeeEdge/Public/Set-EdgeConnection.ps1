@@ -143,6 +143,7 @@ Function Set-EdgeConnection {
             $MyInvocation.MyCommand.Module.PrivateData.Connection['Org'] = $Org
             $MyInvocation.MyCommand.Module.PrivateData.Connection['MgmtUri'] = $MgmtUri
             $MyInvocation.MyCommand.Module.PrivateData.Connection['User'] = $User
+            $MyInvocation.MyCommand.Module.PrivateData.Connection['NoToken'] = $(if ($NoToken) { $True } else { $False })
 
             $UserToken = $null
             if (! $NoToken ) {
