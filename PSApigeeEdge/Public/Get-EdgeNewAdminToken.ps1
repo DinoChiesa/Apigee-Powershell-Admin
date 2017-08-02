@@ -59,7 +59,7 @@ Function Get-EdgeNewAdminToken {
         #    throw [System.InvalidOperationException] "You can get a token only when connecting to Edge SaaS."
         # }
 
-        if ($PSBoundParameters['SsoZone'] -a $PSBoundParameters['SsoUrl']) {
+        if ($PSBoundParameters['SsoZone'] -and $PSBoundParameters['SsoUrl']) {
             throw [System.ArgumentException] "You may specify only one of -SsoUrl and -SsoZone."
         }
 
