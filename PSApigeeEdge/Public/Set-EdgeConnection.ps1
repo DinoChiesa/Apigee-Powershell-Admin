@@ -42,6 +42,12 @@ Function Set-EdgeConnection {
         The one-time passcode returned by ${SSO_URL}/passcode .  Use this when Single-sign-on has
         been configured for Apigee Edge. In other words, use it when a distinct IdP will authenticate the user. No password is necessary.
 
+    .PARAMETER LoginClientId
+        Optional. This defaults to 'edgecli'.
+
+    .PARAMETER LoginClientSecret
+        Optional. This defaults to 'edgeclisecret'.
+
     .PARAMETER NoToken
         A switch, to disable obtaining a token.
 
@@ -76,6 +82,8 @@ Function Set-EdgeConnection {
         [string]$SsoOneTimePasscode,
         [string]$SsoZone,
         [string]$SsoUrl,
+        [string]$LoginClientId = 'edgecli',
+        [string]$LoginClientSecret = 'edgeclisecret',
         [string]$MfaCode,
         [string]$EncryptedPassword,
         [string]$MgmtUri = 'https://api.enterprise.apigee.com',
@@ -144,6 +152,8 @@ Function Set-EdgeConnection {
             $MyInvocation.MyCommand.Module.PrivateData.Connection['MgmtUri'] = $MgmtUri
             $MyInvocation.MyCommand.Module.PrivateData.Connection['User'] = $User
             $MyInvocation.MyCommand.Module.PrivateData.Connection['NoToken'] = $(if ($NoToken) { $True } else { $False })
+            $MyInvocation.MyCommand.Module.PrivateData.Connection['LoginClientId'] = $LoginClientId
+            $MyInvocation.MyCommand.Module.PrivateData.Connection['LoginClientSecret'] = $LoginClientSecret
 
             $UserToken = $null
             if (! $NoToken ) {
@@ -184,8 +194,20 @@ Function Set-EdgeConnection {
                             $UserToken = Get-EdgeNewAdminToken @TokenParams
                         }
                         else {
-                            SetOrGetEdgePassword @PSBoundParameters
-                            $UserToken = Get-EdgeNewAdminToken -MfaCode $MfaCode
+                            $TokenParams = @{ }
+                            if ($PSBoundParameters.ContainsKey('MfaCode')) {
+                                $TokenParams.Add('MfaCode', $MfaCode)
+                            }
+                            if ($PSBoundParameters.ContainsKey('SsoZone')) {
+                                $TokenParams.Add('SsoZone', $SsoZone)
+                            }
+                            elseif ($PSBoundParameters.ContainsKey('SsoUrl')) {
+                                $TokenParams.Add('SsoUrl', $SsoUrl)
+                            }
+                            else {
+                                SetOrGetEdgePassword @PSBoundParameters
+                            }
+                            $UserToken = Get-EdgeNewAdminToken @TokenParams
                         }
                     }
                 }

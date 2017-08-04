@@ -25,7 +25,7 @@ function Write-EdgeTokenStash
 
         #$Value = $NewTokenJson | ConvertFrom-Json
         $Value = $NewToken
-        $Key = [string]::Format("{0}##{1}", $User, $MgmtUri )
+        $Key = Get-EdgeTokenKey $User $MgmtUri
         $TokenData | Add-Member -MemberType NoteProperty -Name $Key -Value $Value -Force
 
         $UnexpiredTokenData = "{}" | ConvertFrom-Json
