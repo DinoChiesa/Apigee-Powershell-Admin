@@ -46,7 +46,8 @@ function Get-EdgeStashedAdminToken
         if (!$User) {
             throw [System.ArgumentNullException] "There is no User set. Have you called Set-EdgeConnection ?"
         }
-        $Key = [string]::Format("{0}##{1}", $User, $MgmtUri )
+        $Key = Get-EdgeTokenKey $User $MgmtUri
+
         $UserToken = $TokenData.psobject.properties |?{ $_.MemberType -eq 'NoteProperty' -and $_.Name -eq $Key }
         # if ( ($UserToken -eq $null) -or $( Get-EdgeTokenIsExpired $UserToken )) {
         #     Write-Debug ( "Get-EdgeStashedAdminToken Token is null or Expired" )

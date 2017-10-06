@@ -74,13 +74,17 @@ Function Get-EdgeNewAdminToken {
                         })
 
         $User = $MyInvocation.MyCommand.Module.PrivateData.Connection['User']
+        $LoginClientId = $MyInvocation.MyCommand.Module.PrivateData.Connection['LoginClientId']
+        $LoginClientSecret = $MyInvocation.MyCommand.Module.PrivateData.Connection['LoginClientSecret']
+        $Bytes = [System.Text.Encoding]::Unicode.GetBytes("$($LoginClientId):$($LoginClientSecret)")
+        $Base64Blob = [Convert]::ToBase64String($Bytes)
 
         $IRMParams = @{
             Uri = $(Join-Parts -Separator '/' -Parts $BaseLoginUrl, 'oauth','token' )
             Method = 'POST'
             Headers = @{
                 Accept = 'application/json'
-                Authorization = 'Basic ZWRnZWNsaTplZGdlY2xpc2VjcmV0'
+                Authorization = "Basic  $($Base64Blob)"
             }
             Body = @{
                 grant_type = "password"
@@ -94,7 +98,7 @@ Function Get-EdgeNewAdminToken {
             #       https://google.login.e2e.apigee.net/oauth/token -d 'grant_type=password&response_type=token&passcode=NsJQAe'
         }
         else {
-            ## Assume username / password authn
+            # Assume username / password authn
             $SecurePass = $MyInvocation.MyCommand.Module.PrivateData.Connection['SecurePass']
             $Pass = [System.Runtime.InteropServices.marshal]::PtrToStringAuto([System.Runtime.InteropServices.marshal]::SecureStringToBSTR($SecurePass))
 
