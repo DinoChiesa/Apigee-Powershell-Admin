@@ -218,6 +218,7 @@ Function Set-EdgeConnection {
                     if ($_.GetType().ToString() -eq "System.Management.Automation.ErrorRecord") {
                         write-host ([string]::Format("stacktrace: {0}", $_.ScriptStacktrace))
                     }
+                    $UserToken = "error"
                 }
             }
 
