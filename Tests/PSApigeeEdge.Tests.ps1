@@ -763,12 +763,18 @@ Describe "Create-App-1" {
 
             $app = Create-EdgeDevApp @Params
 
+            $app.credentials[0] | Should Not BeNullOrEmpty
+
             # verify expiry
             if (![string]::IsNullOrEmpty($expiry)) {
                 $NowMilliseconds = [int64](([datetime]::UtcNow)-(get-date "1/1/1970")).TotalMilliseconds
-                $Delta = [int][Math]::Ceiling(($app.credentials[0].expiresAt - $NowMilliseconds)/1000/3600)
+                $Delta = [int][Math]::Round(($app.credentials[0].expiresAt - $NowMilliseconds)/1000/3600)
                 $Delta | Should Be $Hours
             }
+            else {
+                $app.credentials[0].expiresAt | Should BeNullOrEmpty
+            }
+
         }
     }
 }
@@ -796,7 +802,7 @@ Describe "CRUD-App-Credential" {
 
             # verify expiry
             $NowMilliseconds = [int64](([datetime]::UtcNow)-(get-date "1/1/1970")).TotalMilliseconds
-            $Delta = [int][Math]::Ceiling(($app.credentials[0].expiresAt - $NowMilliseconds)/1000/3600)
+            $Delta = [int][Math]::Round(($app.credentials[0].expiresAt - $NowMilliseconds)/1000/3600)
             $Delta | Should Be 72
         }
 
@@ -821,7 +827,7 @@ Describe "CRUD-App-Credential" {
 
             # verify credential expiry
             $app.credentials | foreach {
-                $Delta = [int][Math]::Ceiling(($_.expiresAt - $NowMilliseconds)/1000/3600)
+                $Delta = [int][Math]::Round(($_.expiresAt - $NowMilliseconds)/1000/3600)
                 if ($_.consumerKey -eq $OriginalCreds[0].consumerKey) {
                     $Delta | Should Be 72
                 }
