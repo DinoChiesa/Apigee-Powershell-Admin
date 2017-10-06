@@ -29,7 +29,8 @@ Function Apply-EdgeAuthorization {
 
         Try {
             $NoToken = $MyInvocation.MyCommand.Module.PrivateData.Connection['NoToken']
-            if ($NoToken = "true") {
+            if ($NoToken -ne $null) {
+                Write-Debug ( "Apply-EdgeAuthorization NoToken: " + $NoToken)
                 $UserToken = $( Get-EdgeStashedAdminToken )
                 Write-Debug ( "Apply-EdgeAuthorization usertoken: " + $( $UserToken | Format-List | Out-String )  )
                 If ( $UserToken -and ! $( Get-EdgeTokenIsExpired $UserToken )) {
