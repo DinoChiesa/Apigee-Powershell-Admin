@@ -76,7 +76,7 @@ Function Get-EdgeNewAdminToken {
         $User = $MyInvocation.MyCommand.Module.PrivateData.Connection['User']
         $LoginClientId = $MyInvocation.MyCommand.Module.PrivateData.Connection['LoginClientId']
         $LoginClientSecret = $MyInvocation.MyCommand.Module.PrivateData.Connection['LoginClientSecret']
-        $Bytes = [System.Text.Encoding]::UTF8.GetBytes([string]::Format('{0}:{1}', $LoginClientId, $LoginClientSecret)
+        $Bytes = [System.Text.Encoding]::UTF8.GetBytes([string]::Format('{0}:{1}', $LoginClientId, $LoginClientSecret))
 
         $Base64Blob = [Convert]::ToBase64String($Bytes)
 
