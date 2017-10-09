@@ -38,6 +38,7 @@ Function CompareArraysOfNameValuePairs {
 
     $Result = @()
     if ( $( $Left.length -ne $Right.length ) ) { $Result += 'wrong length' }
+
     if ( $Result.length -eq 0 ) {
         for ($i=0; $i -lt $Left.length; $i++) {
             $LeftEntry = $Left[$i]
@@ -46,15 +47,15 @@ Function CompareArraysOfNameValuePairs {
                 $Result += [string]::Format('{0}. entry({1}) left({2}) right(null)',
                                             $i, $LeftEntry.name, $LeftEntry.value);
             }
-            else {
-                if ( $( $LeftEntry.value -eq $RightEntry.value ) ) {
-                    $Result += [string]::Format('{0}. entry({1}) left({2}) right({3})',
-                                                $i, $LeftEntry.name, $LeftEntry.value, $RightEntry.value);
-                }
+            elseif ( $( $LeftEntry.value -eq $RightEntry.value ) ) {
+                $Result += [string]::Format('{0}. entry({1}) left({2}) right({3})',
+                                            $i, $LeftEntry.name, $LeftEntry.value, $RightEntry.value);
             }
         }
         $Result
     }
+}
+
 
 Function FiveMinutesInTheFutureMilliseconds {
     $NowMilliseconds = [int64](([datetime]::UtcNow)-(get-date "1/1/1970")).TotalMilliseconds
