@@ -20,7 +20,11 @@ Function Create-EdgeKvm {
 
     .PARAMETER Source
         Optional. A file containing JSON that specifis key/value pairs.  Use in
-        lieu of the -Values option.
+        lieu of the -Values option. Example contents:
+          {
+            "key1" : "value1",
+            "key2" : "value2"
+          }
 
     .PARAMETER Environment
         Optional. A string, the name of the environment within Apigee Edge with which to associate
