@@ -109,7 +109,7 @@ Function Update-EdgeKvm {
         'keyvaluemaps'
     }
 
-    $OrgProperties = $( Get-EdgeOrgPropertiesHt -Org $(if ($PSBoundParameters['Org']) { $Org } else { $MyInvocation.MyCommand.Module.PrivateData.Connection['Org'] }) )
+    $OrgProperties = $( Get-EdgeOrgPropertiesHt -Org $(if ($PSBoundParameters['Org']) { $Org } else { $MyInvocation.MyCommand.Module.PrivateData.Connection['Org'] } ) )
     
     if ($OrgProperties.ContainsKey("features.isCpsEnabled") -and $OrgProperties["features.isCpsEnabled"].Equals("true")) {
         $Options['Collection'] = $basepath 
@@ -119,22 +119,22 @@ Function Update-EdgeKvm {
 
         # Delete existing entries
         $Options['Collection'] = $( Join-Parts -Separator '/' -Parts $basepath, $Name, 'entries' )
-        $ExistingKvm |% {
-            $Options['Name'] = $_
+        $ExistingKvm.entry |% {
+            $Options['Name'] = $_.name
             Write-Debug ([string]::Format("Options {0}`n", $(ConvertTo-Json $Options -Compress ) ) )
             Delete-EdgeObject @Options
         }
 
         # Add new entries
-        $Options.Remove('Name'])
-        $Values.keys |% {
-            $Options['Payload'] = @{ name = $_; value = $Values[$_] }
+        $Options.Remove('Name')
+        $Entries.keys |% {
+            $Options['Payload'] = @{ name = $_; value = $Entries[$_] }
             Write-Debug ([string]::Format("Options {0}`n", $( ConvertTo-Json $Options -Compress ) ) )
             Send-EdgeRequest @Options
         } 
     }
     else {
-        # Can do it in bulk. This ought to remove existing entries. 
+        # Can do it in bulk. This will remove existing entries. 
         $Options['Collection'] = $( Join-Parts -Separator '/' -Parts $basepath, $Name )
         $Options['Payload'] = @{
             name = $Name
@@ -144,9 +144,11 @@ Function Update-EdgeKvm {
         Send-EdgeRequest @Options
     }
 
-    if ( $Options['Payload'] -ne $Null ) { $Options.Remove('Payload') }
-    $Options['Collection'] = $basepath 
-    $Options['Name'] = $Name
-    # return existing KVM
-    Get-EdgeObject @Options
+    $Entries
+    
+    # if ( $Options['Payload'] -ne $Null ) { $Options.Remove('Payload') }
+    # $Options['Collection'] = $basepath 
+    # $Options['Name'] = $Name
+    # # return existing KVM
+    # Get-EdgeObject @Options
 }
