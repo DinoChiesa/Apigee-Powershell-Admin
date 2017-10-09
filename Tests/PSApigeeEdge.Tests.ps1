@@ -28,7 +28,7 @@ Function ToArrayOfHash {
 }
 
 
-Function ArraysOfNameValuePairsAreEqual {
+Function CompareArraysOfNameValuePairs {
     param (
         [Parameter(Mandatory = $true)]
         [System.Object[]] $Left,
@@ -36,23 +36,25 @@ Function ArraysOfNameValuePairsAreEqual {
         [System.Object[]] $Right
     )
 
-    $Result = $( $Left.length -eq $Right.length )
-    if ( $Result ) {
+    $Result = @()
+    if ( $( $Left.length -ne $Right.length ) ) { $Result += 'wrong length' }
+    if ( $Result.length -eq 0 ) {
         for ($i=0; $i -lt $Left.length; $i++) {
-            if ( $Result ) {
-                $LeftEntry = $Left[$i]
-                $RightEntry = $( $Right | where { $_.name -eq $LeftEntry.name } )
-                if ($RightEntry -eq $null) {
-                    $Result = $False
-                }
-                else {
-                    $Result = $( $LeftEntry.value -eq $RightEntry.value )
+            $LeftEntry = $Left[$i]
+            $RightEntry = $( $Right | where { $_.name -eq $LeftEntry.name } )
+            if ($RightEntry -eq $null) {
+                $Result += [string]::Format('{0}. entry({1}) left({2}) right(null)',
+                                            $i, $LeftEntry.name, $LeftEntry.value);
+            }
+            else {
+                if ( $( $LeftEntry.value -eq $RightEntry.value ) ) {
+                    $Result += [string]::Format('{0}. entry({1}) left({2}) right({3})',
+                                                $i, $LeftEntry.name, $LeftEntry.value, $RightEntry.value);
                 }
             }
         }
+        $Result
     }
-    $Result
-}
 
 Function FiveMinutesInTheFutureMilliseconds {
     $NowMilliseconds = [int64](([datetime]::UtcNow)-(get-date "1/1/1970")).TotalMilliseconds
@@ -660,12 +662,6 @@ Describe "Update-Kvm-1" {
         }
         $StoredEntries = $list.ToArray()
 
-        It 'deletes the KVM for Proxy <Proxy>' -TestCases $testcases {
-            param($Proxy, $Index)
-            $Name = [string]::Format('{0}-kvm-proxyscope-{1}', $Script:Props.SpecialPrefix, $Index )
-            Delete-EdgeKvm -Proxy $Proxy -Name $Name
-        }
-
         It 'updates test KVMs in env <Name>' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
             param($Name)
             $kvms = @( Get-EdgeKvm -Environment $Name )
@@ -680,7 +676,9 @@ Describe "Update-Kvm-1" {
             $kvms = @( Get-EdgeKvm -Environment $Name )
             @( $kvms | ?{ $_.StartsWith($Script:Props.SpecialPrefix) } ) | % {
                 $thisKvm = Get-EdgeKvm -Environment $Name -Name $_
-                $( ArraysOfNameValuePairsAreEqual -Left $thisKvm.entry -Right $StoredEntries ) | Should Be $True
+                $ComparisonResult = $( CompareArraysOfNameValuePairs -Left $thisKvm.entry -Right $StoredEntries )
+                $ComparisonResult -join ' ' | Should Be ''
+                #$ComparisonResult.length | Should Be 0
             }
         }
     }
