@@ -105,17 +105,19 @@ Describe "Set-EdgeConnection" {
     }
 }
 
-Describe "PreClean-EdgeApi-1" {
+Describe "PreClean-Artifacts-1" {
     Context 'Strict mode' {
         Set-StrictMode -Version latest
 
         $allproxies = @( Get-EdgeApi )
 
-        It 'preclean deletes the API <Name>' -TestCases @( ToArrayOfHash @( $allproxies -match '^pstest-([0-9]{8})-([0-9]{6})-([a-z0-9]{12})' ) ) {
-            param($Name)
-            $deleted = @( Delete-EdgeApi -Name $Name )
+        $ProxiesOfInterest = @( $allproxies -match '^pstest-([0-9]{8})-([0-9]{6})-([a-z0-9]{12})' )
+        if ($ProxiesOfInterest.count -gt 0) {
+            It 'preclean deletes the API <Name>' -TestCases @( ToArrayOfHash $ProxiesOfInterest ) {
+                param($Name)
+                $deleted = @( Delete-EdgeApi -Name $Name )
+            }
         }
-
         It 'preclean deletes test KVMs in env <Name>' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
             param($Name)
             $kvmNames = @( Get-EdgeKvm -Environment $Name )
