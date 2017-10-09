@@ -436,6 +436,15 @@ Describe "Create-Kvm-1" {
             Remove-Item -path $filename
         }
 
+        It 'tries to create an existing KVM in Environment <Name>' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
+            param($Name)
+            $Params = @{
+                Name = [string]::Format('{0}-kvm-A', $Script:Props.SpecialPrefix )
+                Environment = $Name
+            }
+            { Create-EdgeKvm @Params }| Should Throw
+        }
+
         It 'creates an encrypted KVM in Environment <Name>' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
             param($Name)
             $Params = @{
