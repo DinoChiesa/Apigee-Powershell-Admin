@@ -115,6 +115,14 @@ Describe "PreClean-EdgeApi-1" {
             param($Name)
             $deleted = @( Delete-EdgeApi -Name $Name )
         }
+
+        It 'preclean deletes test KVMs in env <Name>' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
+            param($Name)
+            $kvmNames = @( Get-EdgeKvm -Environment $Name )
+            @( $kvmNames -match '^pstest-([0-9]{8})-([0-9]{6})-([a-z0-9]{12})' ) | % {
+                Delete-EdgeKvm -Environment $Name -Name $_
+            }
+        }
     }
 }
 
