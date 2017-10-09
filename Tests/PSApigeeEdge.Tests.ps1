@@ -101,6 +101,21 @@ Describe "Set-EdgeConnection" {
     }
 }
 
+Describe "PreClean-EdgeApi-1" {
+    Context 'Strict mode' {
+        Set-StrictMode -Version latest
+
+
+        $allproxies = @( Get-EdgeApi )
+
+        It 'preclean deletes the API <Name>' -TestCases @( ToArrayOfHash @( $allproxies -match '^pstest-([a-z0-9]{12})' ) ) {
+            param($Name)
+            $deleted = @( Delete-EdgeApi -Name $Name )
+        }
+    }
+}
+
+
 Describe "Get-EdgeOrganization-1" {
 
     Context 'Strict mode' {
