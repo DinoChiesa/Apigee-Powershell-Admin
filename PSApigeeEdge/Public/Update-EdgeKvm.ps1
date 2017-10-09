@@ -109,22 +109,22 @@ Function Update-EdgeKvm {
         'keyvaluemaps'
     }
 
+    # Query existing entries
+    $Options['Collection'] = $basepath 
+    $Options['Name'] = $Name
+    $ExistingKvm = $( Get-EdgeObject @Options )
+
+    # Delete existing entries
+    $Options['Collection'] = $( Join-Parts -Separator '/' -Parts $basepath, $Name, 'entries' )
+    $ExistingKvm.entry |% {
+        $Options['Name'] = $_.name
+        Write-Debug ([string]::Format("Options {0}`n", $(ConvertTo-Json $Options -Compress ) ) )
+        Delete-EdgeObject @Options
+    }
+
     $OrgProperties = $( Get-EdgeOrgPropertiesHt -Org $(if ($PSBoundParameters['Org']) { $Org } else { $MyInvocation.MyCommand.Module.PrivateData.Connection['Org'] } ) )
     
     if ($OrgProperties.ContainsKey("features.isCpsEnabled") -and $OrgProperties["features.isCpsEnabled"].Equals("true")) {
-        $Options['Collection'] = $basepath 
-        $Options['Name'] = $Name
-        # Query existing entries
-        $ExistingKvm = $( Get-EdgeObject @Options )
-
-        # Delete existing entries
-        $Options['Collection'] = $( Join-Parts -Separator '/' -Parts $basepath, $Name, 'entries' )
-        $ExistingKvm.entry |% {
-            $Options['Name'] = $_.name
-            Write-Debug ([string]::Format("Options {0}`n", $(ConvertTo-Json $Options -Compress ) ) )
-            Delete-EdgeObject @Options
-        }
-
         # Add new entries
         $Options.Remove('Name')
         $Entries.keys |% {
@@ -134,7 +134,7 @@ Function Update-EdgeKvm {
         } 
     }
     else {
-        # Can do it in bulk. This will remove existing entries. 
+        # Add entries in bulk. 
         $Options['Collection'] = $( Join-Parts -Separator '/' -Parts $basepath, $Name )
         $Options['Payload'] = @{
             name = $Name
