@@ -625,18 +625,18 @@ Describe "Update-Kvm-1" {
         $i=0
         $testcases = $Script:Props.CreatedProxies | foreach { @{ Proxy = $_; Index=$i++ } }
 
-        $datapath = [System.IO.Path]::Combine($PSScriptRoot, "data")
-        $kvmjsonfile = @( Get-ChildItem $(Join-Path -Path $PSScriptRoot -ChildPath "data" -Resolve) ) |?
-          { $_.Name.EndsWith('.json') -and $_.Name.StartsWith('kvmvalues-') } | Get-Random
+        $datapath = $(Join-Path -Path $PSScriptRoot -ChildPath "data" -Resolve)
+        $kvmjsonfile = @( Get-ChildItem -File $datapath ) | ?{ $_.Name.EndsWith('.json') -and $_.Name.StartsWith('kvmvalues-') } | Get-Random
 
         # Read data from the JSON file
+        $Source = $(Join-Path -Path $datapath -ChildPath $kvmjsonfile.name -Resolve)
         $json = Get-Content $Source -Raw | ConvertFrom-JSON
         $list = New-Object System.Collections.Generic.List[System.Object]
         $json.psobject.properties.name |% {
             $value = ''
             # convert non-primitives to strings containing json
             if (($json.$_).GetType().Name -eq 'PSCustomObject') {
-                $value = $($json.$_ | ConvertTo-json  -Compress ).ToString()
+                $value = $($json.$_ | ConvertTo-json -Compress ).ToString()
             }
             else {
                 $value = $json.$_
@@ -655,15 +655,15 @@ Describe "Update-Kvm-1" {
             param($Name)
             $kvms = @( Get-EdgeKvm -Environment $Name )
             @( $kvms | ?{ $_.StartsWith($Script:Props.SpecialPrefix) } ).count | Should BeGreaterThan 0
-            @( $kvms | ?{ $_.StartsWith($Script:Props.SpecialPrefix) } ) |% {
-                Update-EdgeKvm -Environment $Name -Name $_ -Source $( [System.IO.Path]::Combine($datapath, $kvmjsonfile) )
+            @( $kvms | ?{ $_.StartsWith($Script:Props.SpecialPrefix) } ) | % {
+                Update-EdgeKvm -Environment $Name -Name $_ -Source $( [System.IO.Path]::Combine($datapath, $kvmjsonfile.name) )
             }
         }
 
         It 'verifies that the test KVMs for env <Name> have been updated' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
             param($Name)
             $kvms = @( Get-EdgeKvm -Environment $Name )
-            @( $kvms | ?{ $_.StartsWith($Script:Props.SpecialPrefix) } ) |% {
+            @( $kvms | ?{ $_.StartsWith($Script:Props.SpecialPrefix) } ) | % {
                 $thisKvm = Get-EdgeKvm -Environment $Name -Name $_
                 $( ArraysOfNameValuePairsAreEqual -Left $thisKvm.entry -Right $StoredEntries ) | Should Be $True
             }

@@ -90,7 +90,7 @@ Function Update-EdgeKvm {
           $value = ''
           # convert non-primitives to strings containing json
           if (($json.$_).GetType().Name -eq 'PSCustomObject') {
-            $value = $($json.$_ | ConvertTo-json  -Compress ).ToString()
+            $value = $($json.$_ | ConvertTo-json -Compress ).ToString()
           }
           else {
             $value = $json.$_
