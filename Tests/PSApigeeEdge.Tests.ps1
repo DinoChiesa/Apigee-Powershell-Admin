@@ -47,7 +47,7 @@ Function CompareArraysOfNameValuePairs {
                 $Result += [string]::Format('{0}. entry({1}) left({2}) right(null)',
                                             $i, $LeftEntry.name, $LeftEntry.value);
             }
-            elseif ( $( $LeftEntry.value -eq $RightEntry.value ) ) {
+            elseif ( $( $LeftEntry.value -ne $RightEntry.value ) ) {
                 $Result += [string]::Format('{0}. entry({1}) left({2}) right({3})',
                                             $i, $LeftEntry.name, $LeftEntry.value, $RightEntry.value);
             }
@@ -675,8 +675,10 @@ Describe "Update-Kvm-1" {
         It 'updates test KVMs in env <Name>' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
             param($Name)
             $kvms = @( Get-EdgeKvm -Environment $Name )
-            @( $kvms | ?{ $_.StartsWith($Script:Props.SpecialPrefix) } ).count | Should BeGreaterThan 0
-            @( $kvms | ?{ $_.StartsWith($Script:Props.SpecialPrefix) } ) | % {
+            $KvmsOfInterest = @( $kvms | ?{ $_.StartsWith($Script:Props.SpecialPrefix) -and -Not ($_.Contains('encrypted')) } )
+
+            $KvmsOfInterest.count | Should BeGreaterThan 0
+            $KvmsOfInterest | % {
                 Update-EdgeKvm -Environment $Name -Name $_ -Source $( [System.IO.Path]::Combine($datapath, $kvmjsonfile.name) )
             }
         }
@@ -684,7 +686,8 @@ Describe "Update-Kvm-1" {
         It 'verifies that the test KVMs for env <Name> have been updated' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
             param($Name)
             $kvms = @( Get-EdgeKvm -Environment $Name )
-            @( $kvms | ?{ $_.StartsWith($Script:Props.SpecialPrefix) } ) | % {
+            $KvmsOfInterest = @( $kvms | ?{ $_.StartsWith($Script:Props.SpecialPrefix) -and -Not ($_.Contains('encrypted')) } )
+            $KvmsOfInterest | % {
                 $thisKvm = Get-EdgeKvm -Environment $Name -Name $_
                 $ComparisonResult = $( CompareArraysOfNameValuePairs -Left $thisKvm.entry -Right $StoredEntries )
                 $ComparisonResult -join ' ' | Should Be ''
