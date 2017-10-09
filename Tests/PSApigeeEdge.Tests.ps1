@@ -72,8 +72,9 @@ $Script:Props = @{
     StartMilliseconds = [int64](([datetime]::UtcNow)-(get-date "1/1/1970")).TotalMilliseconds
     OrgIsCps = $False # until we check?
     SpecialPrefix = [string]::Format('pstest-{0}-{1}',
-                                     $([System.Guid]::NewGuid()).ToString().Replace('-','').Substring(0,12),
-                                     $(Get-Random))
+                                     $( Get-Date -format 'yyyyMMdd-HHmmss' ),
+                                     $([System.Guid]::NewGuid()).ToString().Replace('-','').Substring(0,12))
+                                     # $(Get-Random))
     CreatedProxies = New-Object System.Collections.ArrayList
     FoundEnvironments = New-Object System.Collections.ArrayList
 }
@@ -105,10 +106,9 @@ Describe "PreClean-EdgeApi-1" {
     Context 'Strict mode' {
         Set-StrictMode -Version latest
 
-
         $allproxies = @( Get-EdgeApi )
 
-        It 'preclean deletes the API <Name>' -TestCases @( ToArrayOfHash @( $allproxies -match '^pstest-([a-z0-9]{12})' ) ) {
+        It 'preclean deletes the API <Name>' -TestCases @( ToArrayOfHash @( $allproxies -match '^pstest-([0-9]{8})-([0-9]{6})-([a-z0-9]{12})' ) ) {
             param($Name)
             $deleted = @( Delete-EdgeApi -Name $Name )
         }
