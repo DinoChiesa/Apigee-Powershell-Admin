@@ -105,7 +105,7 @@ Describe "Set-EdgeConnection" {
     }
 }
 
-Describe "PreClean-Artifacts-1" {
+Describe "PreClean-Artifacts" {
     Context 'Strict mode' {
         Set-StrictMode -Version latest
 
