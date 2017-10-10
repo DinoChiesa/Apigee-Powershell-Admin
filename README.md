@@ -9,21 +9,21 @@ The goal is to allow Powershell scripts to do these things:
 | org           | query, update properties |
 | apis          | list, query, inquire revisions, inquire deployment status, import, export, delete, delete revision, deploy, undeploy
 | sharedflows   | list, query, inquire revisions, inquire deployment status, import, export, delete, delete revision, deploy, undeploy
-| flowhooks     | ?? 
+| flowhooks     | ??
 | apiproducts   | list, query, create, delete, change quota, modify public/private, modify description, modify approvalType, modify scopes, add or remove proxy, modify custom attrs
 | developers    | list, query, create, delete, make active or inactive, modify custom attrs
 | developer app | list, query, create, delete, revoke, approve, add new credential, remove credential, modify custom attrs
 | credential    | list, revoke, approve, add apiproduct, remove apiproduct, revoke apiproduct, approve apiproduct
-| kvm           | list, query, create, delete, get all entries, get entry, add entry, modify entry, remove entry
+| kvm           | list, query, create, delete, update, get all entries, get entry, add entry, modify entry, remove entry
 | cache         | list, query, create, delete, clear
 | keystore      | list, query, create, delete, import cert
-| virtualhost   | list, query, create, delete 
+| virtualhost   | list, query, create, delete
 | environment   | list, query
 
 
 Not in scope:
 
-- OAuth2.0 tokens - Listing, Querying, Approving, Revoking, Deleting, or Updating 
+- OAuth2.0 tokens - Listing, Querying, Approving, Revoking, Deleting, or Updating
 - TargetServers: list, create, edit, etc
 - data masks
 - apimodels
@@ -40,8 +40,6 @@ These items may be added later as need and demand warrants.
 [![Quick Tour](http://img.youtube.com/vi/5xwo4PAOeFM/0.jpg)](http://www.youtube.com/watch?v=5xwo4PAOeFM "Click to open the Quick Tour video")
 
 
-<iframe width="420" height="315" src="https://www.youtube.com/embed/" frameborder="0" allowfullscreen></iframe>
-
 ## Pre-Requisites to use
 
 You need Windows, and Powershell v3.0 or later. If you're running Windows 10,
@@ -53,18 +51,18 @@ This project is a work-in-progress. Here's the status:
 
 | entity type   | implemented              | not implemented yet
 | :------------ | :----------------------- | :--------------------
-| org           | query | update properties 
+| org           | query                    | update properties
 | apis          | list, query, inquire revisions, inquire deployment status, import, export, delete, delete revision, deploy, undeploy
 | sharedflows   | list, query, inquire revisions, inquire deployment status, import, export, deploy, undeploy | delete, delete revision
-| flowhooks     | 
-| apiproducts   | list, query, create, delete, modify description, modify approvalType, modify scopes, add or remove proxy, add or remove custom attrs, modify public/private, change quota | 
-| developers    | list, query, make active or inactive, create, delete, modify custom attrs | 
+| flowhooks     |
+| apiproducts   | list, query, create, delete, modify description, modify approvalType, modify scopes, add or remove proxy, add or remove custom attrs, modify public/private, change quota |
+| developers    | list, query, make active or inactive, create, delete, modify custom attrs |
 | developer app | list, query, create, delete, revoke, approve, add new credential, remove credential | modify custom attrs
 | credential    | list, revoke, approve, add apiproduct, remove apiproduct, revoke apiproduct, approve apiproduct |
-| kvm           | list, query, create, delete, get all entries, get entry, add entry, modify entry, remove entry |
-| cache         | list, query, create, delete, clear | 
+| kvm           | list, query, create, delete, update, get all entries, get entry, add entry, modify entry, remove entry |
+| cache         | list, query, create, delete, clear |
 | keystore      | list, query, create, delete | import cert
-| virtualhost   | list, query | create, delete 
+| virtualhost   | list, query | create, delete
 | environment   | list, query |
 
 Pull requests are welcomed.
@@ -72,7 +70,7 @@ Pull requests are welcomed.
 
 ## Get PSApigee Edge
 
-You have two options. You need to use only one of these options. 
+You have two options. You need to use only one of these options.
 
 
 ### Option A: install from the Powershell Gallery
@@ -93,12 +91,12 @@ InstallationPolicy value by running the Set-PSRepository cmdlet. Are you sure yo
 [Y] Yes  [A] Yes to All  [N] No  [L] No to All  [S] Suspend  [?] Help (default is "N"): Y
 ```
 
-You will need to do this just once, ever, for the machine. To upgrade, you can `remove-module PSApigeeEdge` and then run the `Install-Module` step again. 
+You will need to do this just once, ever, for the machine. To upgrade, you can `remove-module PSApigeeEdge` and then run the `Install-Module` step again.
 
 
 ### Option B: Clone from Github
 
-This will get you the latest source. Usually these are the same. 
+This will get you the latest source. Usually these are the same.
 
 1. Clone the repo:  `git clone git@github.com:DinoChiesa/Edge-Powershell-Admin.git`
 
@@ -112,13 +110,13 @@ PS> Import-Module c:\path\to\PSApigeeEdge
 
 Then, you can run the cmdlets provided by this module.
 
-You will need to run steps 2 and 3, for every powershell instance that uses PSApigeeEdge function. 
+You will need to run steps 2 and 3, for every powershell instance that uses PSApigeeEdge function.
 
 
 
 ## Usage Examples
 
-Following are some examples. This is not a complete list!  Check the contents of the Public directory for the full list of functions available in this module. Each one is documented. 
+Following are some examples. This is not a complete list!  Check the contents of the Public directory for the full list of functions available in this module. Each one is documented.
 
 ### List commands provided by the module
 
@@ -181,7 +179,7 @@ To get the encrypted password, for safe storage on the machine, you can do this:
    $encryptedPassword = ConvertFrom-SecureString $SecurePass
 ```
 
-By the way, this secure string and encrypted secure string stuff is just basic Powershell; it's not special to this module. Please note: The encryption of secure strings in Powershell is machine-specific. 
+By the way, this secure string and encrypted secure string stuff is just basic Powershell; it's not special to this module. Please note: The encryption of secure strings in Powershell is machine-specific.
 
 There's an option to set the connection information from a file:
 
@@ -219,11 +217,11 @@ The Set-EdgeConnection will first look for a stashed token, which it stores in a
 * if it finds a stashed, expired token for the user you specify, it will attempt to refresh the token.
 * if that does not work, it will fall back to requiring a password.
 
-Normally tokens live for 30 minutes. It's possible that a PS script will find an un-expired token in the stash, and then during the course of the run, the token may expire. In that case the module is designed to refresh the token automatically. 
+Normally tokens live for 30 minutes. It's possible that a PS script will find an un-expired token in the stash, and then during the course of the run, the token may expire. In that case the module is designed to refresh the token automatically.
 
 Notes:
 
-* access to the token stash in your TEMP directory will imply the ability to connect to Apigee Edge. 
+* access to the token stash in your TEMP directory will imply the ability to connect to Apigee Edge.
 * The stash can contain multiple tokens. They're indexed by user name (email address).
 
 
@@ -643,7 +641,7 @@ PS C:\dev\ps> Create-EdgeKvm -Name kvm1 -Environment env1 -Values @{
 ```
 
 Using the -Source option allows you to load the initial values from a JSON file.
-The JSON can be a simple hash with no nesting, only top-level properties, like so: 
+The JSON can be a simple hash with no nesting, only top-level properties, like so:
 
 ```
 PS C:\dev\ps> type .\data.json
@@ -678,6 +676,35 @@ PS C:\dev\ps> Create-EdgeKvm -Name kvm2 -Environment env1 -Source .\data.json
 In this case, the value associated to a key with a nested hash, will be a string, containing the JSON-stringified version of the nested hash. In the above, the key 'settings' will be associated with the string '{"one":1,"two":2,"three":true}'.
 
 
+### Update a Key Value Map (KVM)
+
+You can update an existing KVM with new values. This removes all of the old values and replaces them with a new set of values, with perhaps different names. 
+
+```
+PS C:\dev\ps> Update-EdgeKvm -Name kvm1 -Environment env1 -Values @{
+                 newkey1 = 'new value1'
+                 key2 = 'value2-now-modified'
+                 key3 = '42'
+            }
+
+```
+
+And you can use an external JSON file for the source of the properties, like this:
+
+```
+PS C:\dev\ps> type .\updated-values.json
+{
+  "threshold" : 2100,
+  "allowErrors" : false,
+  "header-name" : "not-used",
+  "targetUrl" : "http://10.56.9.31"
+}
+PS C:\dev\ps> Update-EdgeKvm -Name kvm1 -Environment env1 -Source .\updated-values.json
+
+```
+
+
+
 
 ## Running Tests
 
@@ -687,7 +714,7 @@ To run the tests:
 
 ```
   PS C:\dev\ps> cd Edge-Powershell-Admin
-  PS C:\dev\ps\Edge-Powershell-Admin> invoke-pester   
+  PS C:\dev\ps\Edge-Powershell-Admin> invoke-pester
 ```
 
 You will need a file named ConnectionData.json, which is not provided in this source repo.  It should have this structure:
@@ -727,6 +754,14 @@ You can connect to a different Edge using different Connection files:
     Path = '.\Tests\PSApigeeEdge.Tests.ps1'
     Parameters = @{Connection = 'MyCustomConnectionData.json'}
   }
+```
+
+To run a subset of the tests:
+```
+invoke-pester -Script @{
+    Path = '.\Tests\*.Tests.ps1'
+    Parameters = @{Connection = 'ConnectionData.json'}
+  } -TestName Set-EdgeConnection,Create-Kvm-1,Update-Kvm-1
 ```
 
 
