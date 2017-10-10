@@ -2,7 +2,7 @@ PARAM([string]$Connection = '.\ConnectionData.json')
 
 $Verbose = @{}
 if($env:APPVEYOR_REPO_BRANCH -and $env:APPVEYOR_REPO_BRANCH -notlike "master") {
-    $Verbose.add("Verbose",$True)
+    $Verbose.add("Verbose", $True)
 }
 
 $PSVersion = $PSVersionTable.PSVersion.Major
@@ -20,13 +20,42 @@ Function ReadJson {
 
 Function ToArrayOfHash {
     param($a)
-
     $list = New-Object System.Collections.Generic.List[System.Object]
     for ( $i = 0; $i -lt $a.Length; $i++ ) {
         $list.Add( @{ Name = $a[$i] } )
     }
     $list.ToArray()
 }
+
+
+Function CompareArraysOfNameValuePairs {
+    param (
+        [Parameter(Mandatory = $true)]
+        [System.Object[]] $Left,
+        [Parameter(Mandatory = $true)]
+        [System.Object[]] $Right
+    )
+
+    $Result = @()
+    if ( $( $Left.length -ne $Right.length ) ) { $Result += 'wrong length' }
+
+    if ( $Result.length -eq 0 ) {
+        for ($i=0; $i -lt $Left.length; $i++) {
+            $LeftEntry = $Left[$i]
+            $RightEntry = $( $Right | where { $_.name -eq $LeftEntry.name } )
+            if ($RightEntry -eq $null) {
+                $Result += [string]::Format('{0}. entry({1}) left({2}) right(null)',
+                                            $i, $LeftEntry.name, $LeftEntry.value);
+            }
+            elseif ( $( $LeftEntry.value -ne $RightEntry.value ) ) {
+                $Result += [string]::Format('{0}. entry({1}) left({2}) right({3})',
+                                            $i, $LeftEntry.name, $LeftEntry.value, $RightEntry.value);
+            }
+        }
+        $Result
+    }
+}
+
 
 Function FiveMinutesInTheFutureMilliseconds {
     $NowMilliseconds = [int64](([datetime]::UtcNow)-(get-date "1/1/1970")).TotalMilliseconds
@@ -44,10 +73,11 @@ function New-TemporaryDirectory {
 $Script:Props = @{
     guid = $([System.Guid]::NewGuid()).ToString().Replace('-','')
     StartMilliseconds = [int64](([datetime]::UtcNow)-(get-date "1/1/1970")).TotalMilliseconds
-    OrgIsCps = $False
+    OrgIsCps = $False # until we check?
     SpecialPrefix = [string]::Format('pstest-{0}-{1}',
-                                     $([System.Guid]::NewGuid()).ToString().Replace('-','').Substring(0,12),
-                                     $(Get-Random))
+                                     $( Get-Date -format 'yyyyMMdd-HHmmss' ),
+                                     $([System.Guid]::NewGuid()).ToString().Replace('-','').Substring(0,12))
+                                     # $(Get-Random))
     CreatedProxies = New-Object System.Collections.ArrayList
     FoundEnvironments = New-Object System.Collections.ArrayList
 }
@@ -74,6 +104,41 @@ Describe "Set-EdgeConnection" {
         }
     }
 }
+
+Describe "PreClean-Artifacts" {
+    Context 'Strict mode' {
+        Set-StrictMode -Version latest
+        $pattern = '^pstest-([0-9]{8})-([0-9]{6})-([a-z0-9]{12})'
+        It 'preclean deletes test KVMs in env <Name>' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
+            param($Name)
+            $kvmNames = @( Get-EdgeKvm -Environment $Name )
+            @( $kvmNames -match $pattern ) | % {
+                Delete-EdgeKvm -Environment $Name -Name $_
+            }
+        }
+
+        $DevAppsToDelete = @( @( Get-EdgeDevApp -Params @{ expand = 'true'} ).app |
+          ?{ $_.name -match $pattern } | %{ @{ Dev = $_.developerId; Name = $_.name } } )
+
+        if ($DevAppsToDelete.count -gt 0) {
+            It 'deletes devapp <Name>' -TestCases $DevAppsToDelete {
+                param($Dev, $Name)
+                Delete-EdgeDevApp -Developer $Dev -AppName $Name
+            }
+        }
+
+        $allproxies = @( Get-EdgeApi )
+        $ProxiesOfInterest = @( $allproxies -match '^pstest-([0-9]{8})-([0-9]{6})-([a-z0-9]{12})' )
+        if ($ProxiesOfInterest.count -gt 0) {
+            It 'preclean deletes the API <Name>' -TestCases @( ToArrayOfHash $ProxiesOfInterest ) {
+                param($Name)
+                $deleted = @( Delete-EdgeApi -Name $Name )
+            }
+        }
+
+    }
+}
+
 
 Describe "Get-EdgeOrganization-1" {
 
@@ -393,6 +458,15 @@ Describe "Create-Kvm-1" {
             Remove-Item -path $filename
         }
 
+        It 'tries to create an existing KVM in Environment <Name>' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
+            param($Name)
+            $Params = @{
+                Name = [string]::Format('{0}-kvm-A', $Script:Props.SpecialPrefix )
+                Environment = $Name
+            }
+            { Create-EdgeKvm @Params }| Should Throw
+        }
+
         It 'creates an encrypted KVM in Environment <Name>' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
             param($Name)
             $Params = @{
@@ -470,6 +544,7 @@ Describe "Create-Kvm-1" {
 
     }
 }
+
 
 Describe "Crud-KvmEntry-1" {
     Context 'Strict mode' {
@@ -589,6 +664,60 @@ Describe "Crud-KvmEntry-1" {
         }
     }
 }
+
+
+Describe "Update-Kvm-1" {
+    Context 'Strict mode' {
+        Set-StrictMode -Version latest
+
+        $i=0
+        $testcases = $Script:Props.CreatedProxies | foreach { @{ Proxy = $_; Index=$i++ } }
+
+        $datapath = $(Join-Path -Path $PSScriptRoot -ChildPath "data" -Resolve)
+        $kvmjsonfile = @( Get-ChildItem -File $datapath ) | ?{ $_.Name.EndsWith('.json') -and $_.Name.StartsWith('kvmvalues-') } | Get-Random
+
+        # Read data from the JSON file
+        $Source = $(Join-Path -Path $datapath -ChildPath $kvmjsonfile.name -Resolve)
+        $json = Get-Content $Source -Raw | ConvertFrom-JSON
+        $list = New-Object System.Collections.Generic.List[System.Object]
+        $json.psobject.properties.name |% {
+            $value = ''
+            # convert non-primitives to strings containing json
+            if (($json.$_).GetType().Name -eq 'PSCustomObject') {
+                $value = $($json.$_ | ConvertTo-json -Compress ).ToString()
+            }
+            else {
+                $value = $json.$_
+            }
+            $list.Add( @{ name = $_ ; value = $value } )
+        }
+        $StoredEntries = $list.ToArray()
+
+        It 'updates test KVMs in env <Name>' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
+            param($Name)
+            $kvms = @( Get-EdgeKvm -Environment $Name )
+            $KvmsOfInterest = @( $kvms | ?{ $_.StartsWith($Script:Props.SpecialPrefix) -and -Not ($_.Contains('encrypted')) } )
+
+            $KvmsOfInterest.count | Should BeGreaterThan 0
+            $KvmsOfInterest | % {
+                Update-EdgeKvm -Environment $Name -Name $_ -Source $( [System.IO.Path]::Combine($datapath, $kvmjsonfile.name) )
+            }
+        }
+
+        It 'verifies that the test KVMs for env <Name> have been updated' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
+            param($Name)
+            $kvms = @( Get-EdgeKvm -Environment $Name )
+            $KvmsOfInterest = @( $kvms | ?{ $_.StartsWith($Script:Props.SpecialPrefix) -and -Not ($_.Contains('encrypted')) } )
+            $KvmsOfInterest | % {
+                $thisKvm = Get-EdgeKvm -Environment $Name -Name $_
+                $ComparisonResult = $( CompareArraysOfNameValuePairs -Left $thisKvm.entry -Right $StoredEntries )
+                $ComparisonResult -join ' ' | Should Be ''
+                #$ComparisonResult.length | Should Be 0
+            }
+        }
+    }
+}
+
 
 Describe "Create-Developer-1" {
     Context 'Strict mode' {
@@ -1067,6 +1196,9 @@ Describe "Get-Kvm-1" {
         }
     }
 }
+
+
+
 
 Describe "Delete-DevApp-1" {
     Context 'Strict mode' {

@@ -1,11 +1,11 @@
 Function Update-EdgeKvmEntry {
     <#
     .SYNOPSIS
-        Update a named entry in a key-value map in Apigee Edge.
+        Update a specific, named entry in a key-value map in Apigee Edge.
 
     .DESCRIPTION
-        Update a named entry in a key-value map in Apigee Edge.
-        The KVM must exist, and the entry must exist.  This works only on CPS-enabled organizations.
+        Update a specific, named entry in a key-value map in Apigee Edge.
+        The KVM must exist, and the entry must exist.
 
     .PARAMETER Name
         The name of the key-value map, in which the entry exists.
@@ -82,16 +82,7 @@ Function Update-EdgeKvmEntry {
         'keyvaluemaps'
     }
 
-    $PropKey = [string]::Format("OrgProps-{0}",
-                                $(if ($PSBoundParameters['Org']) { $Org } else { $MyInvocation.MyCommand.Module.PrivateData.Connection['Org'] }))
-    if( ! $MyInvocation.MyCommand.Module.PrivateData.Connection[$PropKey]) {
-        $OrgInfo = $(Get-EdgeObject @Options)
-        $PropsHt = @{}
-        $OrgInfo.properties.property | Foreach { $PropsHt[$_.name] = $_.value }
-        $MyInvocation.MyCommand.Module.PrivateData.Connection[$PropKey] = $PropsHt
-    }
-
-    $OrgProperties = $MyInvocation.MyCommand.Module.PrivateData.Connection[$PropKey]
+    $OrgProperties = $( Get-EdgeOrgPropertiesHt -Org $(if ($PSBoundParameters['Org']) { $Org } else { $MyInvocation.MyCommand.Module.PrivateData.Connection['Org'] }) )
     if ($OrgProperties.ContainsKey("features.isCpsEnabled") -and $OrgProperties["features.isCpsEnabled"].Equals("true")) {
         $Options.Add( 'Collection', $( Join-Parts -Separator '/' -Parts $basepath, $Name, 'entries', $Entry ) )
         $Options.Add( 'Payload', @{ name = $Entry; value = $NewValue } )
