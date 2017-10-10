@@ -1,24 +1,24 @@
 #
-
+#
 # You can connect to a different Edge using different Connection files
-
+#
 # Invoke-Pester -Script @{
 #     Path = '.\Tests\PSApigeeEdge.Tests.ps1'
 #     Parameters = @{Connection = 'ConnectionData.json'}
 # }
-
+#
 # Trying to run pester non-interactively so as to suppress the prompts for
 # parameters that are marked Mandatory.
-
-powershell.exe -NonInteractive -Command "Invoke-Pester -Script @{ Path = '.\Tests\*.Tests.ps1'; Parameters = @{Connection = 'ConnectionData.json'} "}
-
+#
+powershell.exe -NonInteractive -Command "Invoke-Pester -Script @{ Path = '.\Tests\*.Tests.ps1'; Parameters = @{Connection = 'ConnectionData.json'} }"
+#
 # To run selected tests:
 #
 #  invoke-pester -Script @{ Path = '.\Tests\*.Tests.ps1'; Parameters = @{Connection = 'ConnectionData.json'} } -TestName Set-EdgeConnection
 #
 #  invoke-pester -Script @{ Path = '.\Tests\*.Tests.ps1'; Parameters = @{Connection = 'ConnectionData.json'} } -TestName Set-EdgeConnection,Create-Kvm-1,Update-Kvm-1
-
-
+#
+#
 # $MyPS = [Powershell]::Create()
 # $MyPS.Commands.AddCommand("Invoke-Pester")
 # $MyPS.Commands.AddParameter("Script", @{
@@ -26,9 +26,9 @@ powershell.exe -NonInteractive -Command "Invoke-Pester -Script @{ Path = '.\Test
 #      Parameters = @{Connection = 'ConnectionData.json'}
 # } )
 # $MyPS.Invoke()
-
-
-
+#
+#
+#
 # The connection file ought to look like this:
 # {
 #   "Org" : "orgname",
