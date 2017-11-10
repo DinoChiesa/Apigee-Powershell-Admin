@@ -277,7 +277,55 @@ lastModifiedAt   : 1469831492534
 lastModifiedBy   : dchiesa+devportal@apigee.com
 
  ...
+```
 
+## Error Handling
+
+For all cmdlets, errors get delivered to the result. Check the result to see if there was an exception. 
+
+```
+PS C:\dev\ps> $result = $( Deploy-edgeapi -Name skajkdfj -Revision 1 -Env test -ErrorAction Stop -Debug )
+
+PS C:\dev\ps> $result
+Invoke-RestMethod : {
+  "code" : "messaging.config.beans.ApplicationDoesNotExist",
+  "message" : "APIProxy named skajkdfj does not exist in organization cap500",
+  "contexts" : [ ]
+}
+At C:\dev\ps\Edge-Powershell-Admin\PSApigeeEdge\Private\Deploy-EdgeAsset.ps1:79 char:23
++         $TempResult = Invoke-RestMethod @IRMParams
++                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (System.Net.HttpWebRequest:HttpWebRequest) [Invoke-RestMethod], WebException
+    + FullyQualifiedErrorId : WebCmdletWebResponseException,Microsoft.PowerShell.Commands.InvokeRestMethodCommand
+
+PS C:\dev\ps> $result.Exception
+The remote server returned an error: (404) Not Found.
+
+PS C:\dev\ps> $result.Errordetails.message
+{
+  "code" : "messaging.config.beans.ApplicationDoesNotExist",
+  "message" : "APIProxy named skajkdfj does not exist in organization cap500",
+  "contexts" : [ ]
+}
+
+PS C:\dev\ps> $result.Exception.response
+
+IsMutuallyAuthenticated : False
+Cookies                 : {}
+Headers                 : {Connection, Content-Length, Content-Type, Date...}
+SupportsHeaders         : True
+ContentLength           : 162
+ContentEncoding         :
+ContentType             : application/json
+CharacterSet            :
+Server                  : Apigee LB
+LastModified            : 11/10/2017 1:53:55 PM
+StatusCode              : NotFound
+StatusDescription       : Not Found
+ProtocolVersion         : 1.1
+ResponseUri             : https://api.enterprise.apigee.com/v1/o/cap500/e/test/apis/skajkdfj/revisions/1/deployments
+Method                  : POST
+IsFromCache             : False
 ```
 
 

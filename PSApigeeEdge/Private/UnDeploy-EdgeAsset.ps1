@@ -55,7 +55,7 @@ Function UnDeploy-EdgeAsset {
         Write-Debug "Raw:`n$($TempResult | Out-String)"
     }
     Catch {
-        Throw $_
+        $TempResult = $_
     }
     Finally {
         Remove-Variable IRMParams

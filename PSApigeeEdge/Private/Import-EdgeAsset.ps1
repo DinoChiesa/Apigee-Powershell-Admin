@@ -74,11 +74,10 @@ Function Import-EdgeAsset {
 
     Try {
         $TempResult = Invoke-WebRequest @IRMParams -UseBasicParsing
-
         Write-Debug "Raw:`n$($TempResult | Out-String)"
     }
     Catch {
-        Throw $_
+        $TempResult = $_
     }
     Finally {
         Remove-Variable IRMParams

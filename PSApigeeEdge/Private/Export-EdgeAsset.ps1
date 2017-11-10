@@ -35,7 +35,7 @@ Function Export-EdgeAsset {
         Write-Debug "Raw:`n$($TempResult | Out-String)"
     }
     Catch {
-        Throw $_
+        $Dest = $_
     }
     Finally {
         Remove-Variable IRMParams

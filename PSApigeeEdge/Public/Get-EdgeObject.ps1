@@ -102,26 +102,23 @@ Function Get-EdgeObject {
         Write-Debug "Raw:`n$($TempResult | Out-String)"
     }
     Catch {
-      # Dig into the exception to get the Response details.
-      # Note that value__ is not a typo.
       if ($Throw) {
         Throw $_
       }
       else {
-           $Exception = @{
-              status = $_.Exception.Response.StatusCode.value__
-              description = $_.Exception.Response.StatusDescription
-           }
+        $TempResult = $_
+
+        # Dig into the exception to get the Response details.
+        # Note that value__ is not a typo.
+           # $Exception = @{
+           #    status = $_.Exception.Response.StatusCode.value__
+           #    description = $_.Exception.Response.StatusDescription
+           # }
       }
     }
     Finally {
         Remove-Variable IRMParams
     }
 
-    if ($Exception) {
-         $Exception
-    }
-    else {
-         $TempResult
-    }
+    $TempResult
 }
