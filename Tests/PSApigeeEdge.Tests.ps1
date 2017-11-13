@@ -1,15 +1,19 @@
 PARAM([string]$Connection = '.\ConnectionData.json')
 
 $Verbose = @{}
-if($env:APPVEYOR_REPO_BRANCH -and $env:APPVEYOR_REPO_BRANCH -notlike "master") {
-    $Verbose.add("Verbose", $True)
-}
+#if($env:APPVEYOR_REPO_BRANCH -and $env:APPVEYOR_REPO_BRANCH -notlike "master") {
+#    $Verbose.add("Verbose", $True)
+#}
 
 $PSVersion = $PSVersionTable.PSVersion.Major
 Import-Module $PSScriptRoot\..\PSApigeeEdge -Force
+# Avoid "Invoke-RestMethod : The underlying connection was closed: An unexpected error occurred on a send"
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
 Function ReadJson {
     param($filename)
+    $filename = $( Resolve-Path $filename )
+    #write-host $([string]::Format("connection data filename: {0}`n", $filename))
     $json = Get-Content $filename -Raw | ConvertFrom-JSON
     $ht = @{}
     foreach ($prop in $json.psobject.properties.name) {
@@ -26,7 +30,6 @@ Function ToArrayOfHash {
     }
     $list.ToArray()
 }
-
 
 Function CompareArraysOfNameValuePairs {
     param (
@@ -117,25 +120,35 @@ Describe "PreClean-Artifacts" {
             }
         }
 
-        $DevAppsToDelete = @( @( Get-EdgeDevApp -Params @{ expand = 'true'} ).app |
-          ?{ $_.name -match $pattern } | %{ @{ Dev = $_.developerId; Name = $_.name } } )
+        $response = $( Get-EdgeDevApp -Params @{ expand = 'true'} )
+        if ($response.PSobject.Properties.name -match "app") {
+            $DevAppsToDelete = @( $response.app |
+              ?{ $_.name -match $pattern } | %{ @{ Dev = $_.developerId; Name = $_.name } } )
 
-        if ($DevAppsToDelete.count -gt 0) {
-            It 'deletes devapp <Name>' -TestCases $DevAppsToDelete {
-                param($Dev, $Name)
-                Delete-EdgeDevApp -Developer $Dev -AppName $Name
+            if ($DevAppsToDelete.count -gt 0) {
+                It 'deletes devapp <Name>' -TestCases $DevAppsToDelete {
+                    param($Dev, $Name)
+                    Delete-EdgeDevApp -Developer $Dev -AppName $Name
+                }
             }
+        }
+        else {
+            write-host ("SMH, Cannot retrieve dev apps")
         }
 
         $allproxies = @( Get-EdgeApi )
         $ProxiesOfInterest = @( $allproxies -match '^pstest-([0-9]{8})-([0-9]{6})-([a-z0-9]{12})' )
         if ($ProxiesOfInterest.count -gt 0) {
-            It 'preclean deletes the API <Name>' -TestCases @( ToArrayOfHash $ProxiesOfInterest ) {
+            It 'preclean undeploys and deletes the API <Name>' -TestCases @( ToArrayOfHash $ProxiesOfInterest ) {
                 param($Name)
+
+                @( Get-EdgeEnvironment ) | % {
+                    $undeployment = Try { @( UnDeploy-EdgeApi -Name $Name -Environment $_ -Revision 1 ) } Catch { $_ }
+                }
+
                 $deleted = @( Delete-EdgeApi -Name $Name )
             }
         }
-
     }
 }
 
@@ -168,6 +181,7 @@ Describe "Get-EdgeEnvironment-1" {
         It 'gets a list of environments' {
             $envs = @( Get-EdgeEnvironment )
             $envs.count | Should BeGreaterThan 0
+            $envs[0] | Should Not BeNullOrEmpty
         }
 
         It 'queries environment <Name> by name' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
@@ -294,7 +308,7 @@ Describe "Export-EdgeApi-1" {
         $i = 0;
         $testcases = Get-EdgeApi | Sort-Object {Get-Random} | Select-Object -first 22 | foreach { @{ Proxy = $_ ; Index = $i++ } }
 
-        It 'exports apiproxy <Proxy> with destination' -TestCases $testcases {
+        It 'exports apiproxy <Proxy> with explicit destination' -TestCases $testcases {
             param($Proxy, $Index)
             $filename = [string]::Format('{0}\{1}-export-{2}.zip',
                                          $env:temp, $Script:Props.SpecialPrefix, $Index )
@@ -309,12 +323,12 @@ Describe "Export-EdgeApi-1" {
 
         $testcases = Get-EdgeApi | Sort-Object {Get-Random} | Select-Object -first 18 | foreach { @{ Proxy = $_ } }
 
-        It 'exports apiproxy <Proxy>' -TestCases $testcases {
+        It 'exports apiproxy <Proxy> with inferred destination' -TestCases $testcases {
             param($Proxy)
-
             $revisions = @( Get-EdgeApiRevision -Name $Proxy )
             $revisions.count | Should BeGreaterThan 0
             $filename = $(Export-EdgeApi -Name $Proxy -Revision $revisions[-1] )
+            #write-host $filename
             [System.IO.File]::Exists($filename) | Should Be $True
             [System.IO.File]::delete($filename)
         }
@@ -343,9 +357,12 @@ Describe "Get-ApiRevisions-1" {
             $RevisionDetails = Get-EdgeApi -Name $Proxy -Revision $revisions[-1]
             $RevisionDetails.name | Should Be $Proxy
             $RevisionDetails.revision | Should Be $revisions[-1]
-            # Because of time skew between the server and client, time comparisons may fail
-            # $NowMilliseconds = [int64](([datetime]::UtcNow)-(get-date "1/1/1970")).TotalMilliseconds
-            # $RevisionDetails.createdAt | Should BeLessthan $NowMilliseconds
+            # Because of time skew between the server and client, straight time comparisons may fail
+            # So, apply a time skew allowance.
+            $NowMilliseconds = [int64](([datetime]::UtcNow)-(get-date "1/1/1970")).TotalMilliseconds
+            $TimeSkewAllowance = 180000
+            $NowMilliseconds += $TimeSkewAllowance
+            $RevisionDetails.createdAt | Should BeLessthan $NowMilliseconds
             #
 
             if ($Proxy.StartsWith($Script:Props.SpecialPrefix)) {
@@ -467,6 +484,18 @@ Describe "Create-Kvm-1" {
             { Create-EdgeKvm @Params }| Should Throw
         }
 
+        It 'tries to create an existing KVM in Environment <Name> catching Exception' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
+            param($Name)
+            $Params = @{
+                Name = [string]::Format('{0}-kvm-A', $Script:Props.SpecialPrefix )
+                Environment = $Name
+                ErrorAction = 'Stop'
+            }
+            $result = Try { Create-EdgeKvm @Params } Catch { $_ }
+            $result.Exception | Should Not BeNullOrEmpty
+            $result.Exception.message | Should Be "The remote server returned an error: (409) Conflict."
+        }
+
         It 'creates an encrypted KVM in Environment <Name>' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
             param($Name)
             $Params = @{
@@ -514,34 +543,36 @@ Describe "Create-Kvm-1" {
         }
 
         $i=0
+        # It's possible to run this test without having previously run the test that creates proxies
         $testcases = $Script:Props.CreatedProxies | foreach { @{ Name = $_; Index=$i++ } }
-
-        It 'creates an encrypted KVM in Proxy Scope <Name>' -TestCases $testcases {
-            param($Name, $Index)
-            $Params = @{
-                Name = [string]::Format('{0}-kvm-proxyscope-{1}', $Script:Props.SpecialPrefix, $Index )
-                Proxy = $Name
-                Encrypted = $True
+        if ($testcases -and $testcases.length -gt 0) {
+            It 'creates an encrypted KVM in Proxy Scope <Name>' -TestCases $testcases {
+                param($Name, $Index)
+                $Params = @{
+                    Name = [string]::Format('{0}-kvm-proxyscope-{1}', $Script:Props.SpecialPrefix, $Index )
+                    Proxy = $Name
+                    Encrypted = $True
+                }
+                $kvm = Create-EdgeKvm @Params
+                @( $kvm.entry | where { $_.name -eq 'key1' } ).count | Should Be 0
             }
-            $kvm = Create-EdgeKvm @Params
-            @( $kvm.entry | where { $_.name -eq 'key1' } ).count | Should Be 0
-        }
 
-        $i=0
-        $testcases = $Script:Props.FoundEnvironments |
-          foreach { $e = $_; $Script:Props.CreatedProxies |
-            foreach { @{ Name = $_; Environment = $e; Index=$i++ } } }
+            $i=0
+            $testcases = $Script:Props.FoundEnvironments |
+              foreach { $e = $_; $Script:Props.CreatedProxies |
+              foreach { @{ Name = $_; Environment = $e; Index=$i++ } } }
 
-        It 'tries to create a KVM specifying both Proxy <Name> and Environment <Environment>' -TestCases $testcases {
-            param($Name, $Environment, $Index)
-            $Params = @{
-                Name = [string]::Format('{0}-kvm-fail-{1}', $Script:Props.SpecialPrefix, $Index )
-                Proxy = $Name
-                Environment = $Environment
+            It 'tries to create a KVM specifying both Proxy <Name> and Environment <Environment>' -TestCases $testcases {
+                param($Name, $Environment, $Index)
+                $Params = @{
+                    Name = [string]::Format('{0}-kvm-fail-{1}', $Script:Props.SpecialPrefix, $Index )
+                    Proxy = $Name
+                    Environment = $Environment
+                }
+                { Create-EdgeKvm @Params } | Should Throw
             }
-            { Create-EdgeKvm @Params } | Should Throw
-        }
 
+        }
     }
 }
 
@@ -842,6 +873,9 @@ Describe "Get-ApiProduct-1" {
             param($Product)
             $entity = @( Get-EdgeApiProduct -Name $Product )
             $NowMilliseconds = [int64](([datetime]::UtcNow)-(get-date "1/1/1970")).TotalMilliseconds
+            # Because of time skew between the server and client, straight time comparisons may fail
+            $TimeSkewAllowance = 180000
+            $NowMilliseconds += $TimeSkewAllowance
 
             $entity.createdAt | Should BeLessthan $NowMilliseconds
             $entity.lastModifiedAt | Should BeLessthan $NowMilliseconds

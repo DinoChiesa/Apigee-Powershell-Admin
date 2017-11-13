@@ -102,7 +102,7 @@ Function Get-EdgeNewAdminToken {
             # Assume username / password authn
             $SecurePass = $MyInvocation.MyCommand.Module.PrivateData.Connection['SecurePass']
             $Pass = [System.Runtime.InteropServices.marshal]::PtrToStringAuto([System.Runtime.InteropServices.marshal]::SecureStringToBSTR($SecurePass))
-
+            #write-debug $( [string]::Format("Get-EdgeNewAdminToken() username ({0}) password ({1})`n", $User, $Pass))
             $IRMParams.Body.Add('username', $User)
             $IRMParams.Body.Add('password', $Pass)
             if ($MfaCode) {
