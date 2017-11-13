@@ -21,20 +21,28 @@ Function Get-EdgeOrganization {
     #>
 
     [cmdletbinding()]
-    param(
+    PARAM(
         [string]$Org
     )
 
-    $Options = @{ }
+    PROCESS {
+        $Options = @{ }
 
-    if ($PSBoundParameters['Debug']) {
-        $DebugPreference = 'Continue'
-        $Options['Debug'] = $Debug
-    }
-    if ($PSBoundParameters['Org']) {
-        $Options['Org'] = $Org
-    }
+        if ($PSBoundParameters['Debug']) {
+            $DebugPreference = 'Continue'
+            $Options['Debug'] = $Debug
+        }
+        if ($PSBoundParameters['Org']) {
+            $Options['Org'] = $Org
+        }
 
-    Write-Debug $( [string]::Format("Get-EdgeOrganization Options {0}", $(ConvertTo-Json $Options )))
-    Get-EdgeObject @Options
+        Write-Debug $( [string]::Format("Get-EdgeOrganization Options {0}", $(ConvertTo-Json $Options )))
+        try {
+            $obj = $(Get-EdgeObject @Options)
+        }
+        catch {
+            $obj = $_
+        }
+        $obj
+    }
 }

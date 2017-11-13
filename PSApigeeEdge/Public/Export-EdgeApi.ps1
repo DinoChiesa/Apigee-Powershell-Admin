@@ -49,7 +49,7 @@ Function Export-EdgeApi {
     }
     if (!$PSBoundParameters['Dest']) {
         $tstmp = [System.DateTime]::Now.ToString('yyyyMMdd-HHmmss')
-        $Dest = "apiproxy-${Name}-r${Revision}-${tstmp}.zip"
+        $Dest = $( Join-Path -Path $env:temp -ChildPath $( [string]::Format('apiproxy-{0}-r{1}-{2}.zip', $Name, $Revision, $tstmp) ) )
     }
     if( ! $PSBoundParameters.ContainsKey('Org')) {
       if( ! $MyInvocation.MyCommand.Module.PrivateData.Connection['Org']) {

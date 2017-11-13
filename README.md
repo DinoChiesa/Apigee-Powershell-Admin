@@ -277,7 +277,6 @@ lastModifiedAt   : 1469831492534
 lastModifiedBy   : dchiesa+devportal@apigee.com
 
  ...
-
 ```
 
 
@@ -301,7 +300,6 @@ proxies        : {dpc_hotels, dpc_hotels_oauth, oauth2-pwd-cc}
 scopes         : {read, write, delete}
 
   ...
-
 ```
 
 
