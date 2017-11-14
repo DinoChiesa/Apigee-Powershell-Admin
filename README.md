@@ -2,11 +2,12 @@
 
 This is a Windows Powershell module for managing Apigee Edge.
 
-The goal is to allow Powershell scripts to do these things:
+With this module, Powershell scripts can do these things:
 
 | entity type   | actions             |
 | :------------ | :------------------ |
-| org           | query, update properties |
+| org           | query, update properties
+| environment   | list, query
 | apis          | list, query, inquire revisions, inquire deployment status, import, export, delete, delete revision, deploy, undeploy
 | sharedflows   | list, query, inquire revisions, inquire deployment status, import, export, delete, delete revision, deploy, undeploy
 | flowhooks     | ??
@@ -18,7 +19,6 @@ The goal is to allow Powershell scripts to do these things:
 | cache         | list, query, create, delete, clear
 | keystore      | list, query, create, delete, import cert
 | virtualhost   | list, query, create, delete
-| environment   | list, query
 
 
 Not in scope:
@@ -32,7 +32,7 @@ Not in scope:
 - anything in BaaS
 - OPDK-specific things. such as: starting or stopping services,  manipulating pods, adding servers into environments, etc.
 
-These items may be added later as need and demand warrants.
+These items may be added later as interest warrants.
 
 
 ## A Quick Tour
@@ -49,9 +49,9 @@ then you have Powershell 5.0, so you're good.
 
 This project is a work-in-progress. Here's the status:
 
-| entity type   | implemented              | not implemented yet
-| :------------ | :----------------------- | :--------------------
-| org           | query                    | update properties
+| entity type   | implemented                        | not implemented yet
+| :------------ | :--------------------------------- | :--------------------
+| org           | query                              | update properties
 | apis          | list, query, inquire revisions, inquire deployment status, import, export, delete, delete revision, deploy, undeploy
 | sharedflows   | list, query, inquire revisions, inquire deployment status, import, export, deploy, undeploy | delete, delete revision
 | flowhooks     |
@@ -61,9 +61,9 @@ This project is a work-in-progress. Here's the status:
 | credential    | list, revoke, approve, add apiproduct, remove apiproduct, revoke apiproduct, approve apiproduct |
 | kvm           | list, query, create, delete, update, get all entries, get entry, add entry, modify entry, remove entry |
 | cache         | list, query, create, delete, clear |
-| keystore      | list, query, create, delete | import cert
-| virtualhost   | list, query | create, delete
-| environment   | list, query |
+| keystore      | list, query, create, delete        | import cert
+| virtualhost   | list, query                        | create, delete
+| environment   | list, query                        |
 
 Pull requests are welcomed.
 
@@ -111,6 +111,7 @@ PS> Import-Module c:\path\to\PSApigeeEdge
 Then, you can run the cmdlets provided by this module.
 
 You will need to run steps 2 and 3, for every powershell instance that uses PSApigeeEdge function.
+
 
 
 
@@ -698,10 +699,39 @@ PS C:\dev\ps> type .\updated-values.json
   "targetUrl" : "http://10.56.9.31"
 }
 PS C:\dev\ps> Update-EdgeKvm -Name kvm1 -Environment env1 -Source .\updated-values.json
-
 ```
 
+## Regarding TLS
 
+Connecting to the management interfaces for Apigee Edge SaaS requires TLS1.2, which means your powershell sessions and scripts need to use TLS1.2.
+Powershell can sometimes default to using TLS1.0, within Invoke-RestMethod.
+This will result in an error like the following:
+```
+The underlying connection was closed: An unexpected error occurred on a send.
+```
+
+You will be able to see this by examining `$_.Errordetails.message`, for example:
+
+```
+Try {
+  Get-EdgeOrganization
+}
+Catch {
+  $ErrorMessage = $.Errordetails.Message
+  $FailedItem = $ErrorMessage | ConvertFrom-Json | Select-Object -expand cause | foreach {$.message}
+  write-host ...
+}
+```
+
+To avoid this problem, force TLS1.2, like this:
+
+```
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+```
+
+You need to do this once in your script or session, before invoking any calls in the PSApigeeEdge module that connect with the management server. 
+
+For more information, see [this stackoverflow question](https://stackoverflow.com/questions/36265534/invoke-webrequest-ssl-fails)
 
 
 ## Running Tests
@@ -756,7 +786,7 @@ You can connect to a different Edge using different Connection files:
 
 To run a subset of the tests:
 ```
-invoke-pester -Script @{
+Invoke-Pester -Script @{
     Path = '.\Tests\*.Tests.ps1'
     Parameters = @{Connection = 'ConnectionData.json'}
   } -TestName Set-EdgeConnection,Create-Kvm-1,Update-Kvm-1
@@ -776,5 +806,5 @@ and is licensed under [the Apache 2.0 source license](LICENSE).
 ## Bugs
 
 * The tests are incomplete.
-* Does not handle Encrypted KVM at this time
+
 
