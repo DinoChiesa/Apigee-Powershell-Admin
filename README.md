@@ -35,10 +35,15 @@ Not in scope:
 These items may be added later as interest warrants.
 
 
+## Disclaimer
+
+This example is not an official Google product, nor is it part of an official Google product.
+
+
 ## A Quick Tour
 
 [![Quick Tour](http://img.youtube.com/vi/5xwo4PAOeFM/0.jpg)](http://www.youtube.com/watch?v=5xwo4PAOeFM "Click to open the Quick Tour video")
-
+n
 
 ## Pre-Requisites to use
 
@@ -114,31 +119,28 @@ You will need to run steps 2 and 3, for every powershell instance that uses PSAp
 
 
 
+## First Thing
 
-## Usage Examples
+The first thing you need to do, when using the module, is set the connection
+information. Do this with the `Set-EdgeConnection` cmdlet. This allows you to specify
+the credentials to use when authenticating to the Apigee Edge administrative APIs. You
+need to do this only once during a Powershell session.
 
-Following are some examples. This is not a complete list!  Check the contents of the Public directory for the full list of functions available in this module. Each one is documented.
+If you are connecting to the Apigee-managed Edge SaaS, the Set-EdgeConnection command will attempt to obtain an OAuth token for the admin API, via a POST request to https://login.apigee.com/oauth/token , or the SsoUrl that you specify, as documented on [this page](http://docs.apigee.com/api-services/content/using-oauth2-security-apigee-edge-management-api). (This behavior was introduced in v0.2.14 of the module)
 
-### List commands provided by the module
+The `Set-EdgeConnection` will possibly look for a stashed token, which it stores in a file called .apigee-edge-tokens in the TEMP directory of your machine. This is the logic:
 
-```
-PS C:\dev\ps> Get-Command -Module PSApigeeEdge
+* if you specify the -NoToken option, it will authenticate directly with the credentials you provide; otherwise, it will try to obtain an oauth token with those credentials.
+* if it finds a stashed, un-expired token for the user you specify, it will use that.
+* if it finds a stashed, expired token for the user you specify, it will attempt to refresh the token.
+* if that does not work, it will fall back to requiring a password to obtain a new token.
 
-CommandType     Name                                               Version    Source
------------     ----                                               -------    ------
-Function        Delete-EdgeApi                                     0.0.1      PSApigeeEdge
-Function        Delete-EdgeObject                                  0.0.1      PSApigeeEdge
-Function        Deploy-EdgeApi                                     0.0.1      PSApigeeEdge
-Function        Export-EdgeApi                                     0.0.1      PSApigeeEdge
-....
-```
+Normally tokens live for 30 minutes. It's possible that a PS script will find an un-expired token in the stash, and then during the course of the run, the token may expire. In that case the module is designed to refresh the token automatically.
 
-NB: The above list is not complete.
-
-### Set Connection information
+Here's an example:
 
 ```
-PS C:\dev\ps> Set-EdgeConnection -Org cap500 -User dino@apigee.com
+PS C:\dev\ps> Set-EdgeConnection -Org cap500 -User dchiesa@google.com
 Please enter the password for dino@apigee.com: ***********
 ```
 
@@ -152,7 +154,6 @@ By default, the module will attempt to connect to the Apigee-managed cloud Edge 
 PS C:\dev\ps> Set-EdgeConnection -Org cap500 -User dino@apigee.com -MgmtUri http://192.168.10.56:8080
 Please enter the password for dino@apigee.com: ***********
 ```
-
 
 If you employ the module from a script that runs without user interaction, you will want to
 specify the encrypted password, like so:
@@ -180,9 +181,11 @@ To get the encrypted password, for safe storage on the machine, you can do this:
    $encryptedPassword = ConvertFrom-SecureString $SecurePass
 ```
 
-By the way, this secure string and encrypted secure string stuff is just basic Powershell; it's not special to this module. Please note: The encryption of secure strings in Powershell is machine-specific.
+By the way, this secure string and encrypted secure string stuff is just basic Powershell; it's not special to this module.
 
-There's an option to set the connection information from a file:
+Please note: The encryption of secure strings in Powershell is machine-specific. This means if you copy the encrypted string to another machine and try to authenticate using it, authentication will fail.
+
+There's also an option to set the connection information from a file:
 
 ```
 Set-EdgeConnection -File .\ConnectionData-myorg.json
@@ -200,31 +203,43 @@ Set-EdgeConnection -File .\ConnectionData-myorg.json
 
 You can use any of the parameters describe above in this file. We recommend you do not store the password in cleartext, but use the encrypted password form.
 
-And finally, you can use Single-sign-on:
+And finally, you can use Single-sign-on, if you have that set up on your Apigee Org:
 ```
 Set-EdgeConnection -SsoOneTimePasscode bBE8wL -Debug -SsoUrl https://google.login.e2e.apigee.net -Org vportal -MgmtUri https://api.e2e.apigee.net -User dchiesa@google.com
 ```
 
 You will need to get a passcode from the /passcode URL.
 
-
-After setting this connection information, you can run any of the commands shown below re-entering your credentials.
-
-Beginning with v0.2.14, if you are connecting to the Apigee-managed Edge SaaS, the Set-EdgeConnection command will attempt to obtain an OAuth token for the admin API, via a POST request to https://login.apigee.com/oauth/token , or the SsoUrl that you specify, as documented on [this page](http://docs.apigee.com/api-services/content/using-oauth2-security-apigee-edge-management-api).
-
-The Set-EdgeConnection will first look for a stashed token, which it stores in a file called .apigee-edge-tokens in the TEMP directory of your machine. This is the logic:
-
-* if it finds a stashed, un-expired token for the user you specify, it will use that.
-* if it finds a stashed, expired token for the user you specify, it will attempt to refresh the token.
-* if that does not work, it will fall back to requiring a password.
-
-Normally tokens live for 30 minutes. It's possible that a PS script will find an un-expired token in the stash, and then during the course of the run, the token may expire. In that case the module is designed to refresh the token automatically.
+After setting the connection information, you can run any of the commands shown below without re-entering credentials.
 
 Notes:
 
-* access to the token stash in your TEMP directory will imply the ability to connect to Apigee Edge.
 * The stash can contain multiple tokens. They're indexed by user name (email address).
+* Access to the token stash in your TEMP directory (usually C:\Users\USERNAME\AppData\Local\Temp) will imply the ability to connect to Apigee Edge. If you want to prevent storage of tokens, you can delete the `.apigee-edge-tokens` file in that directory, after your PS script completes.
 
+
+## Usage Examples
+
+After you set the connection information, you can perform the tasks you really
+want. Following are some examples. This is not a complete list!  Check the contents of
+the Public directory for the full list of functions available in this module. Each one
+is documented.
+
+### List the commands provided by the module
+
+```
+PS C:\dev\ps> Get-Command -Module PSApigeeEdge
+
+CommandType     Name                                               Version    Source
+-----------     ----                                               -------    ------
+Function        Delete-EdgeApi                                     0.0.1      PSApigeeEdge
+Function        Delete-EdgeObject                                  0.0.1      PSApigeeEdge
+Function        Deploy-EdgeApi                                     0.0.1      PSApigeeEdge
+Function        Export-EdgeApi                                     0.0.1      PSApigeeEdge
+....
+```
+
+NB: The above list is not complete.
 
 ### List Developers
 
@@ -378,7 +393,6 @@ PS C:\dev\ps> Get-EdgeApiDeployment -Name oauth2-pwd-cc | Format-List
 
 name     : test
 revision : {@{configuration=; name=8; server=System.Object[]; state=deployed}}
-
 ```
 
 ### Deploy an API Proxy
@@ -414,7 +428,6 @@ server        : {@{status=undeployed; type=System.Object[]; uUID=a4850e3b-6ce9-4
                 uUID=647de67b-1142-4c07-8b22-c5d6f85616a4}, @{status=undeployed; type=System.Object[]; uUID=6b4a729b-16e2-45c0-8560-51eb37f50ece},
                 @{status=undeployed; type=System.Object[]; uUID=589aa4f0-0a1b-492c-be1a-da3e295cf44d}...}
 state         : undeployed
-
 ```
 
 
@@ -455,7 +468,6 @@ revision             : 1
 targetEndpoints      : {}
 targetServers        : {}
 type                 : Application
-
 ```
 
 Note: I have seen situations in which an access denied error prevents this command from succeeding, if the source ZIP file is Read-only. Needs further investigation. Until that is resolved, make sure your zip file is writeable. The command does not modify the zip, but for now it appears that the zip needs to be writable.
@@ -464,14 +476,12 @@ Note: I have seen situations in which an access denied error prevents this comma
 
 ```
 PS C:\dev\ps> Import-EdgeApi -Name dino-test-6 -Source c:\my\directory
-
 ```
 
 ### Delete an API Proxy
 
 ```
 PS C:\dev\ps> Delete-EdgeApi dino-test-4
-
 
 configurationVersion : @{majorVersion=4; minorVersion=0}
 contextInfo          : Revision null of application -NA-, in organization -NA-
@@ -483,14 +493,12 @@ resources            : {}
 targetEndpoints      : {}
 targetServers        : {}
 type                 : Application
-
 ```
 
 ### Delete a revision of an API Proxy
 
 ```
 PS C:\dev\ps> Delete-EdgeApi -Name oauth2-pwd-cc -Revision 3
-
 
 configurationVersion : @{majorVersion=4; minorVersion=0}
 contextInfo          : Revision 3 of application oauth2-pwd-cc, in organization cap500
@@ -510,7 +518,6 @@ revision             : 3
 targetEndpoints      : {}
 targetServers        : {}
 type                 : Application
-
 ```
 
 
@@ -556,7 +563,6 @@ lastModifiedAt : 1464341439395
 lastModifiedBy : sanjoy@apigee.com
 name           : test
 properties     : @{property=System.Object[]}
-
 ```
 
 ### List Developer Apps for a Developer
@@ -628,7 +634,30 @@ PS C:\dev\ps> Update-EdgeDevAppStatus  -Developer developer1@example.org -AppNam
 
 ### Create a Key Value Map (KVM)
 
-This method specifies the values in a Powershell Hashtable:
+You can create a named KeyValueMap. KVMs apply to org scope, environment scope, or proxy scope. The module supports any of those.
+
+Creating a KVM in Organization scope, the command uses the organization you specified in `Set-EdgeConnection`.
+```
+PS C:\dev\ps> Create-EdgeKvm -Name kvm1
+```
+
+You can override that with the -Org parameter.
+```
+PS C:\dev\ps> Create-EdgeKvm -Name kvm1 -Org anotherorg
+```
+
+Creating a KVM in Environment scope looks like this:
+```
+PS C:\dev\ps> Create-EdgeKvm -Name kvm1 -Environment env1
+```
+
+
+Creating a KVM in Proxy scope looks like this:
+```
+PS C:\dev\ps> Create-EdgeKvm -Name kvm1 -Proxy apiproxy1
+```
+
+Regardless of the scope you use, you can also specify the initial values to place into the KVM, via a Hashtable of key/value names:
 
 ```
 PS C:\dev\ps> Create-EdgeKvm -Name kvm1 -Environment env1 -Values @{
@@ -636,7 +665,6 @@ PS C:\dev\ps> Create-EdgeKvm -Name kvm1 -Environment env1 -Values @{
                  key2 = 'value2'
                  key3 = 'CEBF0408-F5BF-4A6E-B841-FBF107BB3B60'
             }
-
 ```
 
 Using the -Source option allows you to load the initial values from a JSON file.
@@ -669,7 +697,6 @@ PS C:\dev\ps> type .\data.json
   }
 }
 PS C:\dev\ps> Create-EdgeKvm -Name kvm2 -Environment env1 -Source .\data.json
-
 ```
 
 In this case, the value associated to a key with a nested hash, will be a string, containing the JSON-stringified version of the nested hash. In the above, the key 'settings' will be associated with the string '{"one":1,"two":2,"three":true}'.
@@ -677,7 +704,7 @@ In this case, the value associated to a key with a nested hash, will be a string
 
 ### Update a Key Value Map (KVM)
 
-You can update an existing KVM with new values. This removes all of the old values and replaces them with a new set of values, with perhaps different names. 
+You can update an existing KVM with new values. This removes all of the old values and replaces them with a new set of values, with perhaps different names.
 
 ```
 PS C:\dev\ps> Update-EdgeKvm -Name kvm1 -Environment env1 -Values @{
