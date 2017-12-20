@@ -35,9 +35,10 @@ Not in scope:
 These items may be added later as interest warrants.
 
 
-## Disclaimer
+## This is not an official Google product
 
-This example is not an official Google product, nor is it part of an official Google product.
+This PS module is not an official Google product, nor is it part of an official Google product.
+Support is available on a best-effort basis via github or community.apigee.com .
 
 
 ## A Quick Tour
