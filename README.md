@@ -18,6 +18,7 @@ With this module, Powershell scripts can do these things:
 | kvm           | list, query, create, delete, update, get all entries, get entry, add entry, modify entry, remove entry
 | cache         | list, query, create, delete, clear
 | keystore      | list, query, create, delete, import cert
+| reference     | list, query, create, delete
 | virtualhost   | list, query, create, delete
 
 
@@ -68,6 +69,7 @@ This project is a work-in-progress. Here's the status:
 | kvm           | list, query, create, delete, update, get all entries, get entry, add entry, modify entry, remove entry |
 | cache         | list, query, create, delete, clear |
 | keystore      | list, query, create, delete        | import cert
+| reference     | list, query, create, delete        |
 | virtualhost   | list, query                        | create, delete
 | environment   | list, query                        |
 
