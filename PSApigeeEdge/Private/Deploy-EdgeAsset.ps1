@@ -66,9 +66,9 @@ Function Deploy-EdgeAsset {
     # These parameters go into the form body payload.
     $RequestBody = @{
           action = 'deploy'
-          override = if ($Params['override']) { $Params['override'] } else { 'true' }
+          override = if (($Params -ne $Null) -and ($Params['override'] -ne "") -and ($Params['override'] -ne $Null)) { $Params['override'] } else { 'true' }
     }
-    if ($Params['delay']) {
+    if (($Params -ne $Null) -and ($Params['delay'] -ne "") -and ($Params['delay'] -ne $Null)) {
         $RequestBody['delay'] = $Params['delay']
     }
 
