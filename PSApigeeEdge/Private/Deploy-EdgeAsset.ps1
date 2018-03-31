@@ -1,3 +1,17 @@
+# Copyright 2017 Google Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#   https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 Function Deploy-EdgeAsset {
     <#
     .SYNOPSIS
@@ -49,10 +63,13 @@ Function Deploy-EdgeAsset {
 
     $BaseUri = Join-Parts -Separator '/' -Parts $MgmtUri, '/v1/o', $Org, 'e', $Environment, $AssetType, $Name, 'revisions', $Revision, 'deployments'
 
+    # These parameters go into the form body payload.
     $RequestBody = @{
           action = 'deploy'
-          override = 'true'
-          delay = 30 # currently not parameterized
+          override = if (($Params -ne $Null) -and ($Params['override'] -ne "") -and ($Params['override'] -ne $Null)) { $Params['override'] } else { 'true' }
+    }
+    if (($Params -ne $Null) -and ($Params['delay'] -ne "") -and ($Params['delay'] -ne $Null)) {
+        $RequestBody['delay'] = $Params['delay']
     }
 
     if ($AssetType -eq "apis") {

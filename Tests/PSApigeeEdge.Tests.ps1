@@ -1,3 +1,17 @@
+# Copyright 2017 Google Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#   https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 PARAM([string]$Connection = '.\ConnectionData.json')
 
 $Verbose = @{}
@@ -1350,6 +1364,81 @@ Describe "Get-Keystore-1" {
         }
     }
 }
+
+Describe "Create-KeystoreRef-1" {
+    Context 'Strict mode' {
+
+        Set-StrictMode -Version latest
+
+        It 'creates a keystore ref in Environment <Name>' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
+            param($Name)
+            $keystores = @( Get-EdgeKeystore -Environment $Name )
+            # check that we have one or more keystores to work with
+            $keystores.count | Should BeGreaterThan 0
+            $Params = @{
+                Name = [string]::Format('{0}-ksref', $Script:Props.SpecialPrefix )
+                Environment = $Name
+                Refers = $keystores[0]
+                ResourceType = 'KeyStore'
+            }
+            $reference = Create-EdgeReference @Params
+            { $reference } | Should Not Throw
+        }
+    }
+}
+
+Describe "Get-KeystoreRef-1" {
+    Context 'Strict mode' {
+        Set-StrictMode -Version latest
+
+        It 'gets a list of keystore references for Environment <Name>' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
+            param($Name)
+            $references = @( Get-EdgeReference -Environment $Name )
+            # check that we have one or more references
+            $references.count | Should BeGreaterThan 0
+            # check that we have one or more keystores created by this script
+            @( $references | ?{ $_.StartsWith($Script:Props.SpecialPrefix) } ).count | Should BeGreaterThan 0
+        }
+
+        It 'gets specific info on each keystore ref for Environment <Name>' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
+            param($Name)
+
+            @( Get-EdgeReference -Environment $Name ) | % {
+                $reference = Get-EdgeReference -Environment $Name -Name $_
+                $reference | Should Not BeNullOrEmpty
+                $reference.name | Should Not BeNullOrEmpty
+            }
+        }
+    }
+}
+
+
+Describe "Delete-KeystoreRef-1" {
+    Context 'Strict mode' {
+        Set-StrictMode -Version latest
+
+        It 'deletes the test keystore references in Env <Name>' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
+            param($Name)
+            $references = @( Get-EdgeReference -Environment $Name )
+            @( $references | ?{ $_.StartsWith($Script:Props.SpecialPrefix) } ).count | Should BeGreaterThan 0
+
+            @( $references | ?{ $_.StartsWith($Script:Props.SpecialPrefix) } ) | % {
+                Delete-EdgeReference -Environment $Name -Name $_
+            }
+            @( $references | ?{ $_.StartsWith($Script:Props.SpecialPrefix) } ) | % {
+                { Delete-EdgeReference -Environment $Name -Name $_ } | Should Throw
+            }
+        }
+
+        It 'verifies that the test keystore references for Environment <Name> have been removed' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
+            param($Name)
+            $references = @( Get-EdgeReference -Environment $Name )
+            # check that we now have zero keystores references created by this script
+            @( $references | ?{ $_.StartsWith($Script:Props.SpecialPrefix) } ).count | Should Be 0
+        }
+    }
+}
+
 
 Describe "Delete-Keystore-1" {
     Context 'Strict mode' {
