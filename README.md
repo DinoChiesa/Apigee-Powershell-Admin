@@ -716,7 +716,6 @@ PS C:\dev\ps> Update-EdgeKvm -Name kvm1 -Environment env1 -Values @{
                  key2 = 'value2-now-modified'
                  key3 = '42'
             }
-
 ```
 
 And you can use an external JSON file for the source of the properties, like this:
@@ -730,6 +729,39 @@ PS C:\dev\ps> type .\updated-values.json
   "targetUrl" : "http://10.56.9.31"
 }
 PS C:\dev\ps> Update-EdgeKvm -Name kvm1 -Environment env1 -Source .\updated-values.json
+```
+
+### Managing Keystores and Truststores
+
+List keystores:
+```
+PS C:\dev\ps> Get-EdgeKeystore -Environment env1
+```
+
+Get information about a particular keystore:
+```
+PS C:\dev\ps> Get-EdgeKeystore -Environment env1 -Name keystore1
+```
+
+Import a Certificate and Key into a keystore:
+```
+PS C:\dev\ps> Import-EdgeKeyAndCert -Environment env1 -Keystore keystore1 -Alias alias1 -CertFile .\TLS\example.cert -KeyFile .\TLS\example.key
+```
+
+Import a Certificate and Key into a Truststore
+```
+PS C:\dev\ps> Import-EdgeCert -Environment env1 -Truststore truststore1 -Alias alias1 -CertFile .\TLS\example.cert
+```
+
+Inquire Aliases in a Keystore or Truststore
+```
+PS C:\dev\ps> Get-EdgeAlias -Environment env1 -Truststore truststore1
+PS C:\dev\ps> Get-EdgeAlias -Environment env1 -Keystore keystore1
+```
+
+Get Detail on a particular alias:
+```
+PS C:\dev\ps> Get-EdgeAlias -Environment env1 -Truststore truststore1 -Alias alias1
 ```
 
 ## Regarding TLS
