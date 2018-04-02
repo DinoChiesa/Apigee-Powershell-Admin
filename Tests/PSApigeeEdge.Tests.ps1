@@ -1378,7 +1378,7 @@ Describe "Import-KeyAndCert-1" {
             param($Name)
             @( Get-EdgeKeystore -Environment $Name ) | ?{ $_.StartsWith($Script:Props.SpecialPrefix) } |% {
                 $keystore = Get-EdgeKeystore -Environment $Name -Name $_
-                Import-EdgeKeyAndCert -Environment $Name -Keystore $_ -Alias alias1 -CertFile $certfile -KeyFile $keyfile
+                Import-EdgeKeyAndCert -Environment $Name -Keystore $_ -Alias alias1 -CertFile $(Join-Path ".\data" $certfile) -KeyFile $(Join-Path ".\data" $keyfile)
             }
         }
 
@@ -1403,7 +1403,7 @@ Describe "Import-Cert-1" {
             param($Name)
             @( Get-EdgeKeystore -Environment $Name ) | ?{ $_.StartsWith($Script:Props.SpecialPrefix) } |% {
                 $keystore = Get-EdgeKeystore -Environment $Name -Name $_
-                Import-EdgeCert -Environment $Name -Truststore $_ -Alias alias2 -CertFile $certfile
+                Import-EdgeCert -Environment $Name -Truststore $_ -Alias alias2 -CertFile $(Join-Path ".\data" $certfile)
             }
         }
 
