@@ -115,34 +115,33 @@ Function Import-EdgeKeyAndCert {
     }
     Apply-EdgeAuthorization -MgmtUri $MgmtUri -IRMParams $IRMParams
 
-    # PS v3.0 does not include "builtin" support for multipart-form
-    $certFileContent = [System.IO.File]::ReadAllText($CertFile);
-    $keyFileContent = [System.IO.File]::ReadAllText($KeyFile);
-    $LF = "`r`n"
-    $bodyLines = [System.Collections.ArrayList]@(
-        "--$boundary",
-        "Content-Disposition: form-data; name=`"certFile`"; filename=`"file.cert`"",
-        "Content-Type: application/octet-stream$LF",
-        $certFileContent,
-        "--$boundary",
-        "Content-Disposition: form-data; name=`"keyFile`"; filename=`"file.key`"",
-        "Content-Type: application/octet-stream$LF",
-        $keyFileContent
-    )
-
-    if (!$PSBoundParameters['KeyPassword']) {
-        $bodyLines.Add( "--$boundary" );
-        $bodyLines.Add( "Content-Disposition: form-data; name=`"password`"",
-        $bodyLines.Add( $KeyPassword )
-    }
-    $bodyLines.Add("--$boundary--$LF")
-
-    $IRMParams.Add('Body', $( $bodyLines -join $LF ) )
-
-    Write-Debug ( "Running $($MyInvocation.MyCommand).`n" +
-                 "Invoke-RestMethod parameters:`n$($IRMParams | Format-List | Out-String)" )
 
     Try {
+        # PS v3.0 does not include "builtin" support for multipart-form
+        $certFileContent = [System.IO.File]::ReadAllText($CertFile)
+        $keyFileContent = [System.IO.File]::ReadAllText($KeyFile)
+        $LF = "`r`n"
+        $bodyLines = [System.Collections.ArrayList]@()
+        $bodyLines.Add("--$boundary")
+        $bodyLines.Add("Content-Disposition: form-data; name=`"certFile`"; filename=`"file.cert`"")
+        $bodyLines.Add("Content-Type: application/octet-stream$LF")
+        $bodyLines.Add( $certFileContent )
+        $bodyLines.Add("--$boundary")
+        $bodyLines.Add("Content-Disposition: form-data; name=`"keyFile`"; filename=`"file.key`"")
+        $bodyLines.Add("Content-Type: application/octet-stream$LF")
+        $bodyLines.Add( $keyFileContent )
+
+        if (!$PSBoundParameters['KeyPassword']) {
+            $bodyLines.Add("--$boundary")
+            $bodyLines.Add("Content-Disposition: form-data; name=`"password`"")
+            $bodyLines.Add( $KeyPassword )
+        }
+        $bodyLines.Add("--$boundary--$LF")
+        $IRMParams.Add('Body', $( $bodyLines -join $LF ) )
+
+        Write-Debug ( "Running $($MyInvocation.MyCommand).`n" +
+                      "Invoke-RestMethod parameters:`n$($IRMParams | Format-List | Out-String)" )
+
         $IRMResult = Invoke-RestMethod @IRMParams
         Write-Debug "Raw:`n$($IRMResult | Out-String)"
     }
