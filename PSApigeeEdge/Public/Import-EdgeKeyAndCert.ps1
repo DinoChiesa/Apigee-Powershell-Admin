@@ -100,14 +100,11 @@ Function Import-EdgeKeyAndCert {
     $BaseUri = Join-Parts -Separator "/" -Parts $MgmtUri, '/v1/o', $Org, 'e', $Environment, 'keystores', $Keystore, 'aliases'
 
     $boundary = [System.Guid]::NewGuid().ToString()
-
+	$QParams = $( ConvertFrom-HashtableToQueryString @{ alias = $Alias ; format = "keycertfile" } )
+    $BaseUri = "${BaseUri}?${QParams}"
     $IRMParams = @{
         Method = 'POST'
         Uri = $BaseUri
-        Params = @{
-            alias = $Alias
-            format= "keycertfile"
-        }
         Headers = @{
             Accept = 'application/json'
         }
@@ -117,25 +114,25 @@ Function Import-EdgeKeyAndCert {
 
     Try {
         # PS v3.0 does not include "builtin" support for multipart-form
-        $certFileContent = [System.IO.File]::ReadAllText($CertFile)
-        $keyFileContent = [System.IO.File]::ReadAllText($KeyFile)
+        $certFileContent = [System.IO.File]::ReadAllText( $( Resolve-Path $CertFile ) )
+        $keyFileContent = [System.IO.File]::ReadAllText( $( Resolve-Path $KeyFile ) )
         $LF = "`r`n"
         $bodyLines = [System.Collections.ArrayList]@()
-        $bodyLines.Add("--$boundary")
-        $bodyLines.Add("Content-Disposition: form-data; name=`"certFile`"; filename=`"file.cert`"")
-        $bodyLines.Add("Content-Type: application/octet-stream$LF")
-        $bodyLines.Add( $certFileContent )
-        $bodyLines.Add("--$boundary")
-        $bodyLines.Add("Content-Disposition: form-data; name=`"keyFile`"; filename=`"file.key`"")
-        $bodyLines.Add("Content-Type: application/octet-stream$LF")
-        $bodyLines.Add( $keyFileContent )
+        [void]$bodyLines.Add("--$boundary")
+        [void]$bodyLines.Add("Content-Disposition: form-data; name=`"certFile`"; filename=`"file.cert`"")
+        [void]$bodyLines.Add("Content-Type: application/octet-stream$LF")
+        [void]$bodyLines.Add( $certFileContent )
+        [void]$bodyLines.Add("--$boundary")
+        [void]$bodyLines.Add("Content-Disposition: form-data; name=`"keyFile`"; filename=`"file.key`"")
+        [void]$bodyLines.Add("Content-Type: application/octet-stream$LF")
+        [void]$bodyLines.Add( $keyFileContent )
 
-        if (!$PSBoundParameters['KeyPassword']) {
-            $bodyLines.Add("--$boundary")
-            $bodyLines.Add("Content-Disposition: form-data; name=`"password`"")
-            $bodyLines.Add( $KeyPassword )
+        if ($PSBoundParameters['KeyPassword']) {
+            [void]$bodyLines.Add("--$boundary")
+            [void]$bodyLines.Add("Content-Disposition: form-data; name=`"password`"")
+            [void]$bodyLines.Add( $KeyPassword )
         }
-        $bodyLines.Add("--$boundary--$LF")
+        [void]$bodyLines.Add("--$boundary--$LF")
         $IRMParams.Add('Body', $( $bodyLines -join $LF ) )
 
         Write-Debug ( "Running $($MyInvocation.MyCommand).`n" +
