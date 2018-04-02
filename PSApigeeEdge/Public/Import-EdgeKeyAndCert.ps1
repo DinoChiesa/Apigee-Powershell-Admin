@@ -132,7 +132,7 @@ Function Import-EdgeKeyAndCert {
 
     if (!$PSBoundParameters['KeyPassword']) {
         $bodyLines.Add( "--$boundary" );
-        $bodyLines.Add( "Content-Disposition: form-data; name=`"password`"",
+        $bodyLines.Add( "Content-Disposition: form-data; name=`"password`"" )
         $bodyLines.Add( $KeyPassword )
     }
     $bodyLines.Add("--$boundary--$LF")
