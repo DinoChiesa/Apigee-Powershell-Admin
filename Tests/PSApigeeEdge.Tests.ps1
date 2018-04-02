@@ -163,6 +163,15 @@ Describe "PreClean-Artifacts" {
                 $deleted = @( Delete-EdgeApi -Name $Name )
             }
         }
+
+        It 'preclean deletes test keystores in env <Name>' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
+            param($Name)
+            $keystores = @( Get-EdgeKeystore -Environment $Name )
+            @( $keystores -match $pattern ) | % {
+                Delete-EdgeKeystore -Environment $Name -Name $_
+            }
+        }
+
     }
 }
 
@@ -1364,6 +1373,60 @@ Describe "Get-Keystore-1" {
         }
     }
 }
+
+
+Describe "Import-KeyAndCert-1" {
+    Context 'Strict mode' {
+        Set-StrictMode -Version latest
+
+        $datapath = $(Join-Path -Path $PSScriptRoot -ChildPath "data" -Resolve)
+        $certfile = @( Get-ChildItem -File $datapath ) | ?{ $_.Name.EndsWith('.cert') } | Get-Random
+        $keyfile = $certfile -replace "cert$", "key"
+
+        It 'imports key and cert into keystore for Environment <Name>' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
+            param($Name)
+            @( Get-EdgeKeystore -Environment $Name ) | ?{ $_.StartsWith($Script:Props.SpecialPrefix) } |% {
+                $keystore = Get-EdgeKeystore -Environment $Name -Name $_
+                Import-EdgeKeyAndCert -Environment $Name -Keystore $_ -Alias alias1 -CertFile $(Join-Path $datapath $certfile) -KeyFile $(Join-Path $datapath $keyfile)
+            }
+        }
+
+        It 'gets specific info on alias1 in each keystore for Environment <Name>' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
+            param($Name)
+
+            @( Get-EdgeKeystore -Environment $Name ) | ?{ $_.StartsWith($Script:Props.SpecialPrefix) } |% {
+                $alias = Get-EdgeAlias -Environment $Name -Keystore $_ -Alias alias1
+                $alias.certsInfo | Should Not BeNullOrEmpty
+            }
+        }
+    }
+}
+Describe "Import-Cert-1" {
+    Context 'Strict mode' {
+        Set-StrictMode -Version latest
+
+        $datapath = $(Join-Path -Path $PSScriptRoot -ChildPath "data" -Resolve)
+        $certfile = @( Get-ChildItem -File $datapath ) | ?{ $_.Name.EndsWith('.cert') } | Get-Random
+
+        It 'imports a cert into a truststore for Environment <Name>' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
+            param($Name)
+            @( Get-EdgeKeystore -Environment $Name ) | ?{ $_.StartsWith($Script:Props.SpecialPrefix) } |% {
+                $keystore = Get-EdgeKeystore -Environment $Name -Name $_
+                Import-EdgeCert -Environment $Name -Truststore $_ -Alias alias2 -CertFile $(Join-Path $datapath $certfile)
+            }
+        }
+
+        It 'gets specific info on alias2 in each truststore for Environment <Name>' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
+            param($Name)
+
+            @( Get-EdgeKeystore -Environment $Name ) | ?{ $_.StartsWith($Script:Props.SpecialPrefix) } |% {
+                $alias = Get-EdgeAlias -Environment $Name -Keystore $_ -Alias alias2
+                $alias.certsInfo | Should Not BeNullOrEmpty
+            }
+        }
+    }
+}
+
 
 Describe "Create-KeystoreRef-1" {
     Context 'Strict mode' {
