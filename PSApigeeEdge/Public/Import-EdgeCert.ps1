@@ -104,7 +104,6 @@ Function Import-EdgeCert {
     Try {
         # PS v3.0 does not include "builtin" support for multipart-form
         $certFileContent = [System.IO.File]::ReadAllText( $( Resolve-Path $CertFile ) )
-        $keyFileContent = [System.IO.File]::ReadAllText( $( Resolve-Path $KeyFile ) )
         $LF = "`r`n"
         $bodyLines = [System.Collections.ArrayList]@()
         [void]$bodyLines.Add("--$boundary")
