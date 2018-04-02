@@ -115,7 +115,6 @@ Function Import-EdgeKeyAndCert {
     }
     Apply-EdgeAuthorization -MgmtUri $MgmtUri -IRMParams $IRMParams
 
-
     Try {
         # PS v3.0 does not include "builtin" support for multipart-form
         $certFileContent = [System.IO.File]::ReadAllText($CertFile)
