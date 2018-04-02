@@ -100,7 +100,7 @@ Function Import-EdgeKeyAndCert {
     $BaseUri = Join-Parts -Separator "/" -Parts $MgmtUri, '/v1/o', $Org, 'e', $Environment, 'keystores', $Keystore, 'aliases'
 
     $boundary = [System.Guid]::NewGuid().ToString()
-	$QParams = $( ConvertFrom-HashtableToQueryString @{ alias = $Alias ; format = "keycertfile" } )
+    $QParams = $( ConvertFrom-HashtableToQueryString @{ alias = $Alias ; format = "keycertfile" } )
     $BaseUri = "${BaseUri}?${QParams}"
     $IRMParams = @{
         Method = 'POST'
@@ -146,6 +146,7 @@ Function Import-EdgeKeyAndCert {
     }
     Finally {
         Remove-Variable IRMParams
+        Remove-Variable bodyLines
     }
 
     $IRMResult

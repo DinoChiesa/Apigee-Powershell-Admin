@@ -89,14 +89,11 @@ Function Import-EdgeCert {
     $BaseUri = Join-Parts -Separator "/" -Parts $MgmtUri, '/v1/o', $Org, 'e', $Environment, 'keystores', $Truststore, 'aliases'
 
     $boundary = [System.Guid]::NewGuid().ToString()
-
+    $QParams = $( ConvertFrom-HashtableToQueryString @{ alias = $Alias ; format = "keycertfile" } )
+    $BaseUri = "${BaseUri}?${QParams}"
     $IRMParams = @{
         Method = 'POST'
         Uri = $BaseUri
-        Params = @{
-            alias = $Alias
-            format= "keycertfile"
-        }
         Headers = @{
             Accept = 'application/json'
         }
@@ -104,23 +101,23 @@ Function Import-EdgeCert {
     }
     Apply-EdgeAuthorization -MgmtUri $MgmtUri -IRMParams $IRMParams
 
-    # PS v3.0 does not include "builtin" support for multipart-form
-    $certFileContent = [System.IO.File]::ReadAllText($CertFile);
-    $keyFileContent = [System.IO.File]::ReadAllText($KeyFile);
-    $LF = "`r`n"
-    $bodyLines = [System.Collections.ArrayList]@(
-        "--$boundary",
-        "Content-Disposition: form-data; name=`"certFile`"; filename=`"file.cert`"",
-        "Content-Type: application/octet-stream$LF",
-        $certFileContent,
-        "--$boundary--$LF"    
-    )
-    $IRMParams.Add('Body', $( $bodyLines -join $LF ) )
-
-    Write-Debug ( "Running $($MyInvocation.MyCommand).`n" +
-                 "Invoke-RestMethod parameters:`n$($IRMParams | Format-List | Out-String)" )
-
     Try {
+        # PS v3.0 does not include "builtin" support for multipart-form
+        $certFileContent = [System.IO.File]::ReadAllText( $( Resolve-Path $CertFile ) )
+        $keyFileContent = [System.IO.File]::ReadAllText( $( Resolve-Path $KeyFile ) )
+        $LF = "`r`n"
+        $bodyLines = [System.Collections.ArrayList]@()
+        [void]$bodyLines.Add("--$boundary")
+        [void]$bodyLines.Add("Content-Disposition: form-data; name=`"certFile`"; filename=`"file.cert`"")
+        [void]$bodyLines.Add("Content-Type: application/octet-stream$LF")
+        [void]$bodyLines.Add( $certFileContent )
+        [void]$bodyLines.Add("--$boundary--$LF")
+
+        $IRMParams.Add('Body', $( $bodyLines -join $LF ) )
+
+        Write-Debug ( "Running $($MyInvocation.MyCommand).`n" +
+                      "Invoke-RestMethod parameters:`n$($IRMParams | Format-List | Out-String)" )
+        
         $IRMResult = Invoke-RestMethod @IRMParams
         Write-Debug "Raw:`n$($IRMResult | Out-String)"
     }
