@@ -163,6 +163,15 @@ Describe "PreClean-Artifacts" {
                 $deleted = @( Delete-EdgeApi -Name $Name )
             }
         }
+
+        It 'preclean deletes test keystores in env <Name>' -TestCases @( ToArrayOfHash @( Get-EdgeEnvironment ) ) {
+            param($Name)
+            $keystores = @( Get-EdgeKeystore -Environment $Name )
+            @( $keystores -match $pattern ) | % {
+                Delete-EdgeKeystore -Environment $Name -Name $_
+            }
+        }
+
     }
 }
 
