@@ -12,24 +12,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-Function Get-EdgeApiPolicy {
+Function Get-EdgeSharedFlowPolicy {
     <#
     .SYNOPSIS
-        Get the list of policies for an apiproxy revision from Apigee Edge,
+        Get the list of policies for a sharedflow revision from Apigee Edge,
         or a specific policy.
 
     .DESCRIPTION
-        Get the list of policies for an apiproxy revision from Apigee Edge,
+        Get the list of policies for a sharedflow revision from Apigee Edge,
         or a specific policy.
 
     .PARAMETER Name
-        Required. The name of the apiproxy.
+        Required. The name of the sharedflow
 
     .PARAMETER Revision
-        Required. The revision of the apiproxy.
+        Required. The revision of the sharedflow.
 
     .PARAMETER Policy
-        Optional. The name of the policy within the apiproxy.
+        Optional. The name of the policy within the sharedflow.
 
     .PARAMETER Org
         Optional. The Apigee Edge organization. The default is to use the value from Set-EdgeConnection.
@@ -38,7 +38,7 @@ Function Get-EdgeApiPolicy {
         Get-EdgeApiPolicy -Name myapiproxy -Revision 3
 
     .EXAMPLE
-        Get-EdgeApiPolicy -Name myapiproxy -Revision 3 -Policy VerifyJWT-1
+        Get-EdgeApiPolicy -Name myapiproxy -Revision 3 -Policy FC-1
 
     .FUNCTIONALITY
         ApigeeEdge
