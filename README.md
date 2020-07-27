@@ -1,6 +1,6 @@
-# Edge Powershell Admin module
+# Apigee Powershell Admin module
 
-This is a Windows Powershell module for managing Apigee Edge.
+This is a Windows Powershell module for managing Apigee.
 
 With this module, Powershell scripts can do these things:
 
@@ -862,12 +862,17 @@ This module is available [on the Powershell Gallery](https://www.powershellgalle
 
 ## License and Copyright
 
-This material is [Copyright (c) 2016-2018 Google LLC](NOTICE),
+This material is [Copyright (c) 2016-2019 Google LLC](NOTICE),
 and is licensed under [the Apache 2.0 source license](LICENSE).
 
 
 ## Bugs
 
 * The tests are incomplete.
+
+
+## Related
+
+See also, [this Nodejs module](https://github.com/DinoChiesa/apigee-edge-js)
 
 
